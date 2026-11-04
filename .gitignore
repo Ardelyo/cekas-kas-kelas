@@ -1,0 +1,26 @@
+# Python bytecode & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Environment variables & secrets
+.env
+
+# Local SQLite database & WAL files
+*.db
+*.db-shm
+*.db-wal
+
+# Generated exports
+*.xlsx
+*.png
+!cekas_app/static/*.png
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

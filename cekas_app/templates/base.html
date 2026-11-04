@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}CEKAS · Kas Kelas {{ class_id }}{% endblock %}</title>
+  <meta name="description" content="Kas kelas {{ class_id }}: semua bisa lihat, semua bisa percaya.">
+  <meta name="theme-color" content="#176a5b">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" href="/static/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="preload" href="/static/fonts/bricolage-800.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/cekas.css?v=3">
+</head>
+<body>
+  <header class="appbar">
+    <div class="wrap">
+      <a class="logo" href="/" aria-label="CEKAS, ke beranda"><i>C</i>CEKAS <small class="hide-sm">· {{ class_id }}</small></a>
+      <span class="sp"></span>
+      <a class="chip-link" href="/laporan">🧾 Laporan</a>
+      {% if is_admin %}
+        <form action="/logout" method="post" style="display:inline"><button class="btn text sm" type="submit">Keluar</button></form>
+      {% elif admin_enabled %}
+        <a class="btn tonal sm" href="/login">🔐 Bendahara</a>
+      {% endif %}
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer class="foot wrap">
+    {% block footer %}{% endblock %}
+  </footer>
+
+  {% block bottom %}{% endblock %}
+  <script src="/static/app.js?v=3" defer></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPJ Kas {{ class_id }} · {{ school_year }}</title>
+<style>
+  /* Dokumen resmi: serif sistem, hitam-putih, siap cetak A4. Tidak memuat sumber daya eksternal. */
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9ecea; color: #111; font: 11pt/1.45 "Times New Roman", Times, Georgia, serif; }
+  .sheet { background: #fff; max-width: 210mm; margin: 16px auto; padding: 18mm 16mm; box-shadow: 0 1px 8px #0002; }
+  .bar { max-width: 210mm; margin: 16px auto 0; display: flex; justify-content: space-between; align-items: center; font: 13px system-ui, sans-serif; color: #333; padding: 0 4px; }
+  .bar button { font: 600 13px system-ui, sans-serif; padding: 8px 14px; border: 1px solid #0a6c4e; background: #0a6c4e; color: #fff; border-radius: 3px; cursor: pointer; }
+  .kop { text-align: center; border-bottom: 3px double #111; padding-bottom: 8px; margin-bottom: 14px; }
+  .kop .s { font-size: 15pt; font-weight: bold; letter-spacing: .04em; text-transform: uppercase; }
+  .kop .c { font-size: 10pt; }
+  h1 { font-size: 13pt; text-align: center; margin: 0 0 2px; text-transform: uppercase; }
+  .sub { text-align: center; margin: 0 0 14px; font-size: 10.5pt; }
+  h2 { font-size: 11pt; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: .03em; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th, td { border: 1px solid #555; padding: 3px 6px; vertical-align: top; }
+  th { background: #efefef; text-align: center; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.c { text-align: center; }
+  tr.void td { color: #777; text-decoration: line-through; }
+  tfoot td { font-weight: bold; background: #f6f6f6; }
+  .sum td:first-child { width: 50%; }
+  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 26px; text-align: center; break-inside: avoid; }
+  .sign .box { height: 22mm; }
+  .sign .name { font-weight: bold; text-decoration: underline; }
+  .verify { display: grid; grid-template-columns: 26mm 1fr; gap: 12px; align-items: center; margin-top: 22px; border-top: 1px solid #555; padding-top: 10px; font-size: 9pt; break-inside: avoid; }
+  .verify svg { width: 26mm; height: 26mm; }
+  .verify code { font: 8.5pt ui-monospace, Consolas, monospace; word-break: break-all; }
+  .note { font-size: 9pt; color: #333; margin-top: 8px; }
+  thead { display: table-header-group; } tr { break-inside: avoid; }
+  @media print { body { background: #fff; } .sheet { margin: 0; padding: 0; box-shadow: none; max-width: none; } .bar { display: none; } }
+</style>
+</head>
+<body>
+<div class="bar"><span>Pratinjau laporan. Gunakan <b>Cetak → Simpan sebagai PDF</b>.</span><button type="button" onclick="window.print()">Cetak</button></div>
+<main class="sheet">
+  <div class="kop">
+    <div class="s">{{ school }}</div>
+    <div class="c">Laporan Kas Kelas</div>
+  </div>
+  <h1>Laporan Pertanggungjawaban Kas Kelas {{ class_id }}</h1>
+  <p class="sub">Tahun Ajaran {{ school_year }} · dicetak {{ printed }}</p>
+
+  <h2>A. Ringkasan Saldo</h2>
+  <table class="sum">
+    <thead><tr><th>Pos Anggaran</th><th>Saldo</th></tr></thead>
+    <tbody>{% for p in pockets %}<tr><td>{{ p.label }}</td><td class="n">{{ format_rupiah(p.value) }}</td></tr>{% endfor %}</tbody>
+    <tfoot><tr><td>Total saldo kas</td><td class="n">{{ format_rupiah(saldo) }}</td></tr></tfoot>
+  </table>
+  <p class="note">Total pemasukan {{ format_rupiah(total_in) }}; total pengeluaran {{ format_rupiah(total_out) }}; selisih {{ format_rupiah(total_in - total_out) }}.</p>
+
+  <h2>B. Rincian Mutasi Kas</h2>
+  <table>
+    <thead><tr><th>No</th><th>Tanggal</th><th>Uraian</th><th>Pos</th><th>Masuk</th><th>Keluar</th><th>Saldo</th></tr></thead>
+    <tbody>
+      {% for t in rows %}
+      <tr class="{{ 'void' if t.voided }}">
+        <td class="c">{{ t.id }}</td><td>{{ t.when }}</td><td>{{ t.desc }} <i>({{ t.who }})</i></td><td>{{ t.cat_label }}</td>
+        <td class="n">{{ format_rupiah(t.masuk) if t.masuk else '' }}</td><td class="n">{{ format_rupiah(t.keluar) if t.keluar else '' }}</td>
+        <td class="n">{{ format_rupiah(t.saldo) }}</td>
+      </tr>
+      {% else %}<tr><td colspan="7" class="c">Belum ada transaksi.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <p class="note">Baris bercoret adalah transaksi yang telah dikoreksi; koreksinya tercatat sebagai baris tersendiri. Data tidak pernah dihapus.</p>
+
+  <h2>C. Rekap Iuran Mingguan</h2>
+  <table>
+    <thead><tr><th>Minggu</th><th>Lunas</th><th>Belum</th><th>Terkumpul</th></tr></thead>
+    <tbody>{% for w in dues %}<tr><td class="c">{{ w.week }}</td><td class="c">{{ w.paid }}</td><td class="c">{{ w.unpaid }}</td><td class="n">{{ format_rupiah(w.paid * nominal) }}</td></tr>
+    {% else %}<tr><td colspan="4" class="c">Belum ada iuran tercatat.</td></tr>{% endfor %}</tbody>
+  </table>
+
+  <div class="sign">
+    <div>Mengetahui,<br>Wali Kelas {{ class_id }}<div class="box"></div><span class="name">(.................................)</span></div>
+    <div>Bandung, {{ printed_date }}<br>Bendahara Kelas<div class="box"></div><span class="name">(.................................)</span></div>
+  </div>
+
+  <div class="verify">
+    <div>{{ qr|safe }}</div>
+    <div>
+      <b>Verifikasi keaslian.</b> Buku kas ini memakai rantai hash SHA-256: mengubah atau menghapus satu transaksi akan mengubah sidik di bawah.
+      Status saat dicetak: <b>{{ 'TERVERIFIKASI' if ledger_ok else 'PERLU DIPERIKSA' }}</b> ({{ tx_count }} transaksi).<br>
+      Sidik: <code>{{ head or '-' }}</code>{% if public_url %}<br>Periksa daring: {{ public_url }}{% endif %}
+    </div>
+  </div>
+</main>
+</body>
+</html>

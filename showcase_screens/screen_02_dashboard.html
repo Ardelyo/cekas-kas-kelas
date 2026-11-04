@@ -1,0 +1,141 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #EEF2F6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .phone-container {
+      width: 380px;
+      height: 780px;
+      background: white;
+      border-radius: 46px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.25), 0 0 0 10px #0F172A, 0 0 0 12px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background: #0F172A;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+  </style>
+</head><body>
+  <div class="phone-container justify-between bg-slate-900 text-white">
+    <div class="phone-notch"></div>
+    
+    <!-- White Header Card -->
+    <div class="bg-white text-slate-900 p-6 pt-10 rounded-b-4xl shadow-md">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-full bg-violet-200 border border-violet-300 flex items-center justify-center font-fredoka font-bold text-violet-950 text-base shadow-xs">
+            AS
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400 font-medium block">Selamat datang,</span>
+            <h3 class="font-fredoka font-bold text-slate-900 text-sm leading-tight">Ardellio Satria</h3>
+          </div>
+        </div>
+        <span class="text-[11px] text-slate-400 font-medium">11 Sep 2026</span>
+      </div>
+
+      <h2 class="text-base font-fredoka font-bold text-slate-900 mt-4 leading-snug">
+        Halo Ardellio! Bagaimana kondisi kas kelas hari ini?
+      </h2>
+
+      <!-- Mood Kas Selector Bar -->
+      <div class="grid grid-cols-4 gap-2 mt-4 pt-3 border-t border-slate-100">
+        <div class="p-2 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+          <span class="text-lg block">😊</span>
+          <span class="text-[10px] font-bold text-emerald-900 mt-0.5 block">Aman</span>
+        </div>
+        <div class="p-2 rounded-2xl bg-orange-50 border border-orange-200 text-center">
+          <span class="text-lg block">😴</span>
+          <span class="text-[10px] font-bold text-orange-950 mt-0.5 block">Tagihan</span>
+        </div>
+        <div class="p-2 rounded-2xl bg-violet-50 border border-violet-200 text-center">
+          <span class="text-lg block">😡</span>
+          <span class="text-[10px] font-bold text-violet-950 mt-0.5 block">Nunggak</span>
+        </div>
+        <div class="p-2 rounded-2xl bg-amber-50 border border-amber-200 text-center">
+          <span class="text-lg block">🚀</span>
+          <span class="text-[10px] font-bold text-amber-950 mt-0.5 block">Surplus</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Navy Body Content -->
+    <div class="p-5 flex-1 flex flex-col justify-around">
+      
+      <!-- Mini Widgets Row -->
+      <div class="grid grid-cols-2 gap-3.5">
+        
+        <!-- Peach Sleep / Saldo Card -->
+        <div class="bg-[#FED7AA] text-slate-900 p-4 rounded-3xl shadow-sm">
+          <span class="text-xs font-bold text-orange-950 flex items-center gap-1.5">⏱️ Kas Masuk</span>
+          <div class="my-2.5 flex items-end gap-1.5 h-10">
+            <div class="w-2 bg-orange-400 rounded-full h-5"></div>
+            <div class="w-2 bg-orange-500 rounded-full h-8"></div>
+            <div class="w-2 bg-orange-400 rounded-full h-4"></div>
+            <div class="w-2 bg-orange-600 rounded-full h-10"></div>
+            <div class="w-2 bg-orange-500 rounded-full h-7"></div>
+          </div>
+          <div>
+            <div class="text-lg font-fredoka font-bold text-slate-900">+Rp 100k</div>
+            <span class="text-[10px] text-orange-900 font-medium">Minggu ke-1</span>
+          </div>
+        </div>
+
+        <!-- Lilac Stress / Disiplin Card -->
+        <div class="bg-[#DDD6FE] text-slate-900 p-4 rounded-3xl shadow-sm">
+          <span class="text-xs font-bold text-violet-950 flex items-center gap-1.5">📊 Kedisiplinan</span>
+          <div class="my-2.5 flex items-end gap-1.5 h-10">
+            <div class="w-2.5 bg-violet-300 rounded-md h-3"></div>
+            <div class="w-2.5 bg-violet-400 rounded-md h-5"></div>
+            <div class="w-2.5 bg-violet-500 rounded-md h-7"></div>
+            <div class="w-2.5 bg-violet-600 rounded-md h-10"></div>
+          </div>
+          <div>
+            <div class="text-lg font-fredoka font-bold text-violet-950">Tinggi</div>
+            <span class="text-[10px] text-violet-800 font-medium">83.3% Lunas</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Mint Green Interactive Voting Card -->
+      <div class="bg-[#BBF7D0] text-slate-900 p-4 rounded-3xl shadow-sm border border-emerald-300">
+        <div class="flex items-center justify-between text-[11px] font-bold text-emerald-950 mb-1.5">
+          <span class="flex items-center gap-1">📝 Diskusi Kas</span>
+          <span class="bg-white/80 px-2 py-0.5 rounded-full text-[10px]">1/3</span>
+        </div>
+        <p class="font-fredoka font-bold text-xs text-slate-900 leading-snug">
+          "Apakah saldo kas operasional (Rp 110.000) cukup untuk beli spidol & alat pel?"
+        </p>
+        <div class="flex gap-2 mt-3">
+          <button class="flex-1 bg-slate-900 text-white font-bold py-2 rounded-xl text-xs">Cukup (Ya)</button>
+          <button class="flex-1 bg-white text-slate-900 font-bold py-2 rounded-xl text-xs border border-emerald-300">Perlu Iuran</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="bg-slate-950 px-8 py-3.5 border-t border-slate-800 flex items-center justify-around text-slate-400 text-base">
+      <span class="text-white">🏠</span>
+      <span>📊</span>
+      <span>📅</span>
+      <span>👤</span>
+    </div>
+
+  </div></body></html>

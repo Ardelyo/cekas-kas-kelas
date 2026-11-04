@@ -1,0 +1,107 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #EEF2F6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .phone-container {
+      width: 380px;
+      height: 780px;
+      background: white;
+      border-radius: 46px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.25), 0 0 0 10px #0F172A, 0 0 0 12px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background: #0F172A;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+  </style>
+</head><body>
+  <div class="phone-container justify-between bg-white text-slate-900">
+    <div class="phone-notch"></div>
+
+    <div class="p-6 pt-10">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">‹</span>
+        <div class="text-center">
+          <h2 class="font-fredoka font-bold text-base text-slate-900">Kalender Kas</h2>
+          <span class="text-[11px] text-slate-400 font-medium">September 2026</span>
+        </div>
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">🔍</span>
+      </div>
+
+      <!-- Calendar Days Header -->
+      <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mt-4 mb-1">
+        <div>S</div><div>S</div><div>R</div><div>K</div><div>J</div><div>S</div><div>M</div>
+      </div>
+
+      <!-- Calendar Grid of Days -->
+      <div class="grid grid-cols-7 gap-1 text-center text-xs">
+        <div class="p-2 rounded-xl bg-slate-50 text-slate-300">31</div>
+        <div class="p-2 rounded-xl bg-[#BBF7D0] text-emerald-950 font-bold">1</div>
+        <div class="p-2 rounded-xl bg-slate-50">2</div>
+        <div class="p-2 rounded-xl bg-[#FED7AA] text-orange-950 font-bold">3</div>
+        <div class="p-2 rounded-xl bg-[#BBF7D0] text-emerald-950 font-bold">4</div>
+        <div class="p-2 rounded-xl bg-slate-50">5</div>
+        <div class="p-2 rounded-xl bg-slate-50">6</div>
+        <div class="p-2 rounded-xl bg-[#DDD6FE] text-violet-950 font-bold">7</div>
+        <div class="p-2 rounded-xl bg-[#BBF7D0] text-emerald-950 font-bold">8</div>
+        <div class="p-2 rounded-xl bg-slate-50">9</div>
+        <div class="p-2 rounded-xl bg-slate-50">10</div>
+        <div class="p-2 rounded-xl bg-[#FEF08A] text-amber-950 font-bold ring-2 ring-amber-400">11</div>
+        <div class="p-2 rounded-xl bg-slate-50">12</div>
+        <div class="p-2 rounded-xl bg-slate-50">13</div>
+      </div>
+
+      <!-- Monthly Kas Summary Card (Light Mint Card like Right Screen) -->
+      <div class="mt-5 bg-[#BBF7D0] border border-emerald-200 p-4 rounded-3xl flex items-center gap-3">
+        <span class="text-3xl">😌</span>
+        <div>
+          <span class="text-[10px] font-bold text-emerald-800 uppercase block tracking-wider">Status Bulanan</span>
+          <h4 class="font-fredoka font-bold text-emerald-950 text-sm">Kas Sehat & Transparan</h4>
+          <p class="text-[11px] text-emerald-800 leading-tight mt-0.5">Semua pemasukan & pengeluaran tercatat rapi tanpa selisih.</p>
+        </div>
+      </div>
+
+      <!-- Activity Metrics Pills -->
+      <div class="grid grid-cols-3 gap-2 mt-4">
+        <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center">
+          <span class="text-[9px] text-slate-400 block font-medium">Terkumpul</span>
+          <span class="font-fredoka font-bold text-xs text-slate-900">Rp 300k</span>
+        </div>
+        <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center">
+          <span class="text-[9px] text-slate-400 block font-medium">Pengeluaran</span>
+          <span class="font-fredoka font-bold text-xs text-slate-900">Rp 140k</span>
+        </div>
+        <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-center">
+          <span class="text-[9px] text-slate-400 block font-medium">Lunas</span>
+          <span class="font-fredoka font-bold text-xs text-emerald-600">83.3%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bg-slate-950 px-8 py-3.5 border-t border-slate-800 flex items-center justify-around text-slate-400 text-base">
+      <span>🏠</span>
+      <span>📊</span>
+      <span class="text-white">📅</span>
+      <span>👤</span>
+    </div>
+
+  </div></body></html>

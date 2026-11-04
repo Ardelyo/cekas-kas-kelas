@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Flowchart Sistem CEKAS (White Canvas Raw Flowchart)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 50px 30px;
+      background-color: #FFFFFF;
+      color: #0F172A;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .header-box {
+      text-align: center;
+      margin-bottom: 30px;
+      max-width: 850px;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 9999px;
+      background: #F1F5F9;
+      color: #334155;
+      border: 1px solid #CBD5E1;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+    p {
+      margin: 8px 0 0 0;
+      font-size: 13px;
+      color: #64748B;
+      line-height: 1.5;
+    }
+    #diagram-container {
+      background: #FFFFFF;
+      border: 2px solid #E2E8F0;
+      border-radius: 24px;
+      padding: 40px 25px;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06);
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .mermaid {
+      width: 100%;
+    }
+    .legend-box {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      max-width: 850px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 14px 24px;
+      border-radius: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+    }
+    .legend-shape {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid #0F172A;
+      background: #FFFFFF;
+    }
+    .legend-oval { border-radius: 9999px; background: #ECFDF5; border-color: #059669; }
+    .legend-rect { background: #F8FAFC; border-color: #0284C7; }
+    .legend-rhombus { transform: rotate(45deg); width: 12px; height: 12px; background: #FFFBEB; border-color: #D97706; margin: 0 2px; }
+    .legend-para { transform: skewX(-15deg); background: #FAF5FF; border-color: #9333EA; }
+    .legend-cyl { border-radius: 3px; background: #FFF7ED; border-color: #EA580C; }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="badge">DIAGRAM ALIR SISTEM (ANSI / ISO STANDARD FLOWCHART)</div>
+    <h1>Alur Logika & Bisnis Sistem CEKAS</h1>
+    <p>Kelas XI-F2 SMA Kartika XIX-1 Bandung • Validasi Whitelist NIS, RBAC, Transaksi Atomik Firestore, & Solo Direct Notifications</p>
+  </div>
+
+  <div id="diagram-container">
+    <pre class="mermaid">
+
+flowchart TD
+    %% TERMINATOR
+    Start([MULAI]) --> Inisialisasi[/"Input: Pengguna Akses Bot Telegram @kacekasbot / Web"/]
+
+    %% KEPUTUSAN 1: STATUS AKUN
+    Inisialisasi --> CekReg{"Apakah ID Telegram Terdaftar?"}
+
+    %% JALUR REGISTRASI
+    CekReg -- Tidak --> InputDaftar[/"Input: /daftar NIS Nama_Lengkap"/]
+    InputDaftar --> QueryWhitelist[("Query: classes/XI-F2/whitelist_students")]
+    QueryWhitelist --> ValidNis{"Apakah NIS Valid & Belum Diklaim?"}
+    
+    ValidNis -- Tidak Sah --> TolakDaftar[/"Output: Registrasi Ditolak (NIS Tidak Terdaftar)"/] --> Start
+    ValidNis -- Sah --> SimpanMember[("Insert: classes/XI-F2/members")]
+    SimpanMember --> AktifNotif["Proses: Aktifkan Push Notifikasi Personal Solo DM"]
+    AktifNotif --> MenuUtama
+
+    %% JALUR TERDAFTAR
+    CekReg -- Ya --> MenuUtama["Proses: Tampilkan Menu Utama & Status Pengguna"]
+
+    %% KEPUTUSAN 2: PERAN PENGGUNA
+    MenuUtama --> CekRole{"Apakah Pengguna Adalah Bendahara?"}
+
+    %% PERAN SISWA (READ-ONLY)
+    CekRole -- Siswa / Read-Only --> MenuSiswa[/"Pilihan: /saldo, /alokasi, /tagihan, /riwayat, /profil"/]
+    MenuSiswa --> AksiSiswa{"Pilih Jenis Informasi"}
+    
+    AksiSiswa -- /saldo --> ReadSaldo[("Query: classes/XI-F2.saldo")] --> TampilSaldo[/"Output: Total Saldo & Ringkasan 4 Pos"/] --> Selesai([SELESAI])
+    AksiSiswa -- /alokasi --> ReadAlokasi[("Query: classes/XI-F2.alokasi")] --> TampilAlokasi[/"Output: Neraca Pos (Ops, Sosial, Event, Cadangan)"/] --> Selesai
+    AksiSiswa -- /tagihan --> ReadTagihan[("Query: dues & whitelist_students")] --> TampilTagihan[/"Output: Rekap Siswa Lunas vs Belum Bayar"/] --> Selesai
+    AksiSiswa -- /riwayat --> ReadRiwayat[("Query: transactions limit 10")] --> TampilRiwayat[/"Output: 10 Transaksi Kas Terakhir"/] --> Selesai
+    AksiSiswa -- /notif --> SetNotif["Proses: Update status notifAktif (on/off)"] --> Selesai
+
+    %% PERAN BENDAHARA (WRITE-ACCESS)
+    CekRole -- Belum Aktivasi --> KlaimBendahara[/"Input: /klaimbendahara PIN_RAHASIA"/]
+    KlaimBendahara --> ValidPin{"Apakah PIN Sesuai?"}
+    ValidPin -- Salah --> TolakPin[/"Output: Akses Ditolak (PIN Salah)"/] --> Selesai
+    ValidPin -- Benar --> UpgradeRole[("Update: role = 'bendahara'")] --> MenuBendahara
+
+    CekRole -- Bendahara / Write-Access --> MenuBendahara[/"Pilihan: /tambah, /kurang, /bayar, /koreksi"/]
+    MenuBendahara --> AksiBendahara{"Pilih Jenis Transaksi"}
+
+    AksiBendahara -- Kas Masuk --> InKas[/"Input: /tambah nominal pos keterangan"/]
+    AksiBendahara -- Kas Keluar --> OutKas[/"Input: /kurang nominal pos keterangan"/]
+    AksiBendahara -- Iuran Siswa --> PayKas[/"Input: /bayar NIS minggu nominal"/]
+    AksiBendahara -- Koreksi Reversal --> RevKas[/"Input: /koreksi id_transaksi alasan"/]
+
+    %% IDEMPOTENCY CHECK
+    InKas --> Idempotency{"Apakah Perintah Duplikat dalam 5 Detik?"}
+    OutKas --> Idempotency
+    PayKas --> Idempotency
+    RevKas --> Idempotency
+
+    Idempotency -- Ya --> TolakDobel[/"Output: Perintah Ganda Diabaikan Aman"/] --> Selesai
+    Idempotency -- Tidak --> AtomicTx["Proses: Inisialisasi db.runTransaction Firestore"]
+
+    %% DATABASE TRANSACTION EXECUTION
+    AtomicTx --> LockSaldo["Proses: Kunci Data & Baca Saldo Berjalan"]
+    LockSaldo --> HitungSaldo["Proses: Hitung Running Balance Tanpa Selisih"]
+    HitungSaldo --> CommitFirestore[("Update Saldo Total, Alokasi Pos & Insert Transaksi")]
+
+    %% NOTIFIKASI SOLO DM
+    CommitFirestore --> BroadcastNotif["Proses: Filter Penerima (notifAktif == true)"]
+    BroadcastNotif --> SendDm[/"Output: Kirim Pesan Pribadi Solo DM ke Seluruh Siswa"/]
+
+    %% WEB REAL-TIME SYNC
+    SendDm --> WebSync["Proses: Sinkronisasi Data Real-Time ke Web Dashboard"]
+    WebSync --> ResponBendahara[/"Output: Kirim Tanda Terima Transaksi ke Bendahara"/]
+    ResponBendahara --> Selesai
+
+    </pre>
+  </div>
+
+  <div class="legend-box">
+    <div class="legend-item"><div class="legend-shape legend-oval"></div> Terminator (Mulai / Selesai)</div>
+    <div class="legend-item"><div class="legend-shape legend-para"></div> Data Input / Output (I/O)</div>
+    <div class="legend-item"><div class="legend-shape legend-rhombus"></div> Decision / Keputusan Percabangan</div>
+    <div class="legend-item"><div class="legend-shape legend-rect"></div> Process / Operasi Sistem</div>
+    <div class="legend-item"><div class="legend-shape legend-cyl"></div> Database Storage (Firestore)</div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      flowchart: {
+        curve: 'linear',
+        useMaxWidth: true,
+        htmlLabels: true
+      },
+      themeVariables: {
+        darkMode: false,
+        background: '#FFFFFF',
+        fontFamily: 'Plus Jakarta Sans',
+        fontSize: '12px',
+        primaryColor: '#F8FAFC',
+        primaryTextColor: '#0F172A',
+        primaryBorderColor: '#334155',
+        lineColor: '#475569',
+        secondaryColor: '#F1F5F9',
+        tertiaryColor: '#FFFFFF'
+      }
+    });
+  </script>
+
+</body>
+</html>

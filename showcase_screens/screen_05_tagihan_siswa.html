@@ -1,0 +1,130 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #EEF2F6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .phone-container {
+      width: 380px;
+      height: 780px;
+      background: white;
+      border-radius: 46px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.25), 0 0 0 10px #0F172A, 0 0 0 12px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background: #0F172A;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+  </style>
+</head><body>
+  <div class="phone-container justify-between bg-white text-slate-900">
+    <div class="phone-notch"></div>
+
+    <div class="p-6 pt-10">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-3">
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">‹</span>
+        <div class="text-center">
+          <h2 class="font-fredoka font-bold text-base text-slate-900">Tagihan Kas Siswa</h2>
+          <span class="text-[11px] text-slate-400 font-medium">Minggu ke-1 (Rp 10.000)</span>
+        </div>
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">📋</span>
+      </div>
+
+      <!-- Status Progress Bar -->
+      <div class="bg-[#BBF7D0] p-4 rounded-3xl border border-emerald-300 my-3">
+        <div class="flex items-center justify-between text-xs font-bold text-emerald-950">
+          <span>Progres Iuran Kelas</span>
+          <span>83.3% Lunas</span>
+        </div>
+        <div class="w-full bg-emerald-200 rounded-full h-2.5 mt-2 overflow-hidden">
+          <div class="bg-emerald-600 h-2.5 rounded-full w-[83.3%]"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-emerald-900 mt-2 font-medium">
+          <span>30 Siswa Lunas</span>
+          <span>6 Belum Bayar</span>
+        </div>
+      </div>
+
+      <!-- Student Checklist List -->
+      <div class="space-y-2 mt-4">
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-[#BBF7D0] text-emerald-950 flex items-center justify-center text-[10px] font-bold">✓</span>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Ardellio Satria Anindito</div>
+              <div class="text-[10px] text-slate-400">NIS: 23241001</div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-emerald-600">Lunas</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-[#BBF7D0] text-emerald-950 flex items-center justify-center text-[10px] font-bold">✓</span>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Tarina</div>
+              <div class="text-[10px] text-slate-400">NIS: 23241015 (Bendahara)</div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-emerald-600">Lunas</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-[#BBF7D0] text-emerald-950 flex items-center justify-center text-[10px] font-bold">✓</span>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Nabila</div>
+              <div class="text-[10px] text-slate-400">NIS: 23241020</div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-emerald-600">Lunas</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-rose-200 text-rose-950 flex items-center justify-center text-[10px] font-bold">!</span>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Dwi Cahyo</div>
+              <div class="text-[10px] text-slate-400">NIS: 23241008</div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-rose-600">Belum Bayar</span>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full bg-rose-200 text-rose-950 flex items-center justify-center text-[10px] font-bold">!</span>
+            <div>
+              <div class="font-bold text-xs text-slate-900">Gita Pratiwi</div>
+              <div class="text-[10px] text-slate-400">NIS: 23241018</div>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-rose-600">Belum Bayar</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bg-slate-950 px-8 py-3.5 border-t border-slate-800 flex items-center justify-around text-slate-400 text-base">
+      <span>🏠</span>
+      <span>📊</span>
+      <span>📅</span>
+      <span class="text-white">👤</span>
+    </div>
+
+  </div></body></html>

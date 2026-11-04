@@ -1,0 +1,115 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #EEF2F6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .phone-container {
+      width: 380px;
+      height: 780px;
+      background: white;
+      border-radius: 46px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.25), 0 0 0 10px #0F172A, 0 0 0 12px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background: #0F172A;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+  </style>
+</head><body>
+  <div class="phone-container justify-between bg-white text-slate-900">
+    <div class="phone-notch"></div>
+
+    <div class="p-6 pt-10">
+      <!-- Top Bar -->
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">‹</span>
+        <div class="text-center">
+          <h2 class="font-fredoka font-bold text-base text-slate-900">Alokasi Kas Kelas</h2>
+          <span class="text-[11px] text-slate-400 font-medium">Kelas XI-F2</span>
+        </div>
+        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs">⚙️</span>
+      </div>
+
+      <!-- Main Balance Pill Card -->
+      <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-md my-4">
+        <span class="text-[11px] text-slate-400 block font-medium">Total Kas Terkumpul</span>
+        <div class="text-3xl font-fredoka font-bold text-white mt-1">Rp 160.000</div>
+        <div class="flex items-center gap-1.5 mt-3 text-xs text-emerald-400 font-semibold">
+          <span>●</span>
+          <span>Surplus 100% Real-Time Firestore</span>
+        </div>
+      </div>
+
+      <!-- Bento Pockets Grid -->
+      <div class="space-y-3 mt-4">
+        <!-- Pocket 1: Operasional -->
+        <div class="bg-[#BBF7D0] p-4 rounded-3xl border border-emerald-300 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-white/80 flex items-center justify-center text-lg">🧹</span>
+            <div>
+              <h4 class="font-fredoka font-bold text-sm text-emerald-950">Operasional & KBM</h4>
+              <span class="text-[11px] text-emerald-800">Spidol, penghapus, alat kebersihan</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-fredoka font-bold text-sm text-emerald-950">Rp 110.000</div>
+            <span class="text-[10px] font-bold text-emerald-800">68.8%</span>
+          </div>
+        </div>
+
+        <!-- Pocket 2: Sosial -->
+        <div class="bg-[#DDD6FE] p-4 rounded-3xl border border-violet-300 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-white/80 flex items-center justify-center text-lg">🤝</span>
+            <div>
+              <h4 class="font-fredoka font-bold text-sm text-violet-950">Sosial & Peduli</h4>
+              <span class="text-[11px] text-violet-800">Menjenguk siswa sakit, santunan</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-fredoka font-bold text-sm text-violet-950">Rp 50.000</div>
+            <span class="text-[10px] font-bold text-violet-800">31.2%</span>
+          </div>
+        </div>
+
+        <!-- Pocket 3: Acara -->
+        <div class="bg-[#FED7AA] p-4 rounded-3xl border border-orange-300 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-white/80 flex items-center justify-center text-lg">🎪</span>
+            <div>
+              <h4 class="font-fredoka font-bold text-sm text-orange-950">Acara & Event</h4>
+              <span class="text-[11px] text-orange-800">Tabungan bukber & perpisahan</span>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-fredoka font-bold text-sm text-orange-950">Rp 0</div>
+            <span class="text-[10px] font-bold text-orange-800">0.0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bg-slate-950 px-8 py-3.5 border-t border-slate-800 flex items-center justify-around text-slate-400 text-base">
+      <span>🏠</span>
+      <span class="text-white">📊</span>
+      <span>📅</span>
+      <span>👤</span>
+    </div>
+
+  </div></body></html>

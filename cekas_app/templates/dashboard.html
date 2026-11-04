@@ -1,0 +1,220 @@
+﻿{% extends "base.html" %}
+{% block content %}
+<main class="wrap">
+  {% if flash %}<div class="flash {{ 'err' if flash_err else '' }}" role="status">{{ flash }}</div>{% endif %}
+
+  <div class="page">
+    <!-- ================= kiri: ringkasan ================= -->
+    <div class="col-l">
+      <section id="ringkasan" aria-labelledby="h-saldo">
+        <div class="hero">
+          <div class="hi" id="h-saldo">Saldo kas kelas {{ class_id }} 💰</div>
+          <div class="amount {{ 'neg' if class_info.saldo < 0 }}"><span class="rp">Rp</span>{{ class_info.saldo|idr }}</div>
+          <div class="when">per {{ now_label }}</div>
+          <details>
+            <summary class="safe-badge {{ 'bad' if not ledger_info.ok }}">
+              <span class="ok" aria-hidden="true">{{ '✓' if ledger_info.ok else '!' }}</span>
+              {{ 'Buku kas aman, tidak ada yang diubah' if ledger_info.ok else 'Ada yang perlu dicek di buku kas' }}
+            </summary>
+            <div class="safe-detail">
+              {% if ledger_info.ok %}
+                Terverifikasi: {{ ledger_info.tx_count }} catatan saling terkunci dengan kode rahasia (hash). Kalau ada yang mengubah atau menghapus satu catatan saja, tanda ini langsung berubah.
+              {% else %}
+                {{ ledger_info.errors|join(' ') }}
+              {% endif %}
+              <br>Sidik: <code title="{{ head or '-' }}">{{ (head or '-')[:20] }}</code>
+            </div>
+          </details>
+          {% if spark %}<div title="Saldo akhir tiap minggu">{{ spark|safe }}</div>{% endif %}
+        </div>
+      </section>
+
+      <section aria-labelledby="h-pos">
+        <h2 class="sec-h" id="h-pos">Uangnya dipakai buat apa?</h2>
+        <div class="pos-grid">
+          {% for p in pocket.rows %}
+          <div class="pos {{ p.cls }}">
+            <span class="e" aria-hidden="true">{{ p.icon }}</span>
+            <div class="n">{{ p.short }}</div>
+            <div class="v {{ 'neg' if p.value < 0 }}">{{ format_rupiah(p.value) }}</div>
+            <div class="d">{{ p.note }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if insights %}
+      <section aria-labelledby="h-tips">
+        <h2 class="sec-h" id="h-tips">Tahu nggak?</h2>
+        <div class="tips">
+          {% for i in insights %}
+          <div class="tip {{ i.level }}"><span class="e" aria-hidden="true">{{ {'info': '💡', 'warn': '👀', 'crit': '🚨'}[i.level] }}</span><span>{{ i.text }}</span></div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </div>
+
+    <!-- ================= kanan: kegiatan ================= -->
+    <div class="col-r">
+      <section aria-labelledby="h-usul">
+        <h2 class="sec-h" id="h-usul">Usulan belanja <span class="note">{{ approval_note }}</span></h2>
+        {% if proposals %}
+        <div class="props">
+          {% for p in proposals %}
+          <div class="prop">
+            <div class="top"><span class="t">{{ p.description }}</span><span class="a">{{ format_rupiah(p.amount) }}</span></div>
+            <div style="opacity:.8; font-size:14px">#{{ p.id }} · {{ p.category_label }} · diajukan {{ p.proposed_by }}</div>
+            <div class="pips" aria-label="{{ p.yes }} dari {{ p.needed }} teman setuju">
+              {% for i in range(p.needed) %}<i class="{{ 'on' if i < p.yes }}">{{ '✓' if i < p.yes else '' }}</i>{% endfor %}
+              <span style="margin-left:6px">{{ p.yes }} dari {{ p.needed }} teman setuju</span>
+            </div>
+            <div style="font-size:13px; opacity:.8">Mau ikut menentukan? Beri suara lewat bot Telegram.</div>
+            {% if is_admin %}<form method="post" action="/api/proposal/cancel" data-confirm="Batalkan usulan #{{ p.id }}?"><input type="hidden" name="pid" value="{{ p.id }}"><button class="btn text sm" type="submit" style="color:inherit">Batalkan usulan</button></form>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty"><b>Belum ada usulan 🎈</b>Belanja besar akan muncul di sini supaya bisa disetujui bareng-bareng.</div>
+        {% endif %}
+      </section>
+
+      <section id="iuran" aria-labelledby="h-iuran">
+        <h2 class="sec-h" id="h-iuran">Iuran kas <small>{{ format_rupiah(class_info.nominal_iuran) }} / minggu</small></h2>
+        <nav class="weeks" aria-label="Pilih minggu">
+          {% for w in weeks %}
+          <a class="wk {{ 'on' if w == week }}" href="/?week={{ w }}#iuran" {% if w == week %}aria-current="true"{% endif %}><b>{{ w }}</b><small>{{ col_totals[w] }}/{{ stu.total }}</small></a>
+          {% endfor %}
+        </nav>
+        <div class="card">
+          <div class="dues-top">
+            <div class="ring" style="--p: {{ stu.pct }}" role="img" aria-label="{{ stu.pct }} persen lunas"><b>{{ stu.pct }}%</b></div>
+            <div>
+              <div class="t">Minggu ke-{{ week }}{% if week == active_week %} · minggu ini{% endif %}</div>
+              <p>{{ stu.paid_n }} dari {{ stu.total }} teman sudah bayar.{% if stu.unpaid %} Tinggal {{ stu.unpaid|length }} lagi!{% endif %}</p>
+            </div>
+          </div>
+
+          <form method="post" action="/api/dues/pay">
+            {% if not stu.unpaid %}
+              <div class="done">🎉 Semua sudah lunas!<small>Keren banget, {{ class_id }}. Terima kasih ya semuanya.</small></div>
+            {% else %}
+              <div class="sub-h">Belum bayar {% if is_admin %}· ketuk nama untuk menandai lunas{% endif %}</div>
+              <div class="who">
+                {% for s in stu.unpaid %}
+                  {% if is_admin %}
+                  <button class="stu todo" name="cell" value="{{ s.nis }}|{{ week }}" type="submit" title="Tandai {{ s.nama }} lunas minggu {{ week }}"><span class="av av{{ s.av }}">{{ s.ini }}</span><span class="nm">{{ s.first }}</span><span class="st" aria-hidden="true">＋</span></button>
+                  {% else %}
+                  <div class="stu todo"><span class="av av{{ s.av }}">{{ s.ini }}</span><span class="nm">{{ s.first }}</span></div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if stu.paid %}
+              <div class="sub-h">Sudah lunas ✅</div>
+              <div class="who">
+                {% for s in stu.paid %}<div class="stu paid"><span class="av av{{ s.av }}">{{ s.ini }}</span><span class="nm">{{ s.first }}</span><span class="st" aria-hidden="true">✓</span></div>{% endfor %}
+              </div>
+            {% endif %}
+          </form>
+        </div>
+      </section>
+
+      <section id="riwayat" aria-labelledby="h-kas">
+        <h2 class="sec-h" id="h-kas">Riwayat kas <small>{{ ledger|length }} terakhir</small></h2>
+        {% set ns = namespace(day='') %}
+        {% for t in ledger %}
+          {% if t.day != ns.day %}<div class="day">{{ t.day }}</div>{% set ns.day = t.day %}{% endif %}
+          <div class="tx {{ t.cls }} {{ 'void' if t.voided }}">
+            <span class="ic {{ 'in' if t.masuk else 'out' }}" aria-hidden="true">{{ '↩️' if t.corr else t.icon }}</span>
+            <div>
+              <div class="ds">{{ t.desc }}</div>
+              <div class="mt">{{ t.cat_label }} · {{ t.who }} · {{ t.time }}{% if t.voided %} · dibatalkan{% endif %}</div>
+            </div>
+            <div class="am {{ 'in' if t.masuk else 'out' }}">{% if t.masuk %}+{{ format_rupiah(t.masuk) }}{% else %}−{{ format_rupiah(t.keluar) }}{% endif %}<small>saldo {{ t.saldo|idr }}</small></div>
+            {% if is_admin and not t.voided and not t.corr %}
+            <form class="act" method="post" action="/api/transaction/reverse" data-confirm="Koreksi catatan #{{ t.id }}? Dibuat catatan koreksi baru; yang lama tidak dihapus.">
+              <input type="hidden" name="tx_id" value="{{ t.id }}"><button class="btn text sm" type="submit">↩ Koreksi #{{ t.id }}</button></form>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="empty"><b>Belum ada catatan ✨</b>Begitu ada uang masuk atau keluar, langsung muncul di sini.</div>
+        {% endfor %}
+        <div class="more">
+          <a class="btn tonal sm" href="/api/export/excel">📊 Unduh Excel</a>
+          <a class="btn tonal sm" href="/api/export/chart" target="_blank" rel="noopener">🍩 Grafik</a>
+          <a class="btn tonal sm" href="/laporan">🧾 Laporan SPJ</a>
+        </div>
+      </section>
+
+      <section id="bagikan" aria-labelledby="h-share">
+        <h2 class="sec-h" id="h-share">Ajak teman-teman</h2>
+        <div class="share">
+          <div class="qr" role="img" aria-label="Kode QR menuju halaman ini">{{ qr|safe }}</div>
+          <div>
+            <h3>Pindai, langsung lihat kas</h3>
+            <p>Tempel QR ini di dinding kelas. Semua orang melihat catatan yang sama.</p>
+            <div class="row">
+              <button class="btn sm" type="button" data-copy-url="/api/recap/wa">💬 Salin rekap WA</button>
+              <button class="btn sm" type="button" data-copy-url="/api/recap/reminder">🔔 Salin pengingat</button>
+            </div>
+            <div class="url">{{ public_url }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+{% if is_admin %}
+<dialog id="txDialog" aria-labelledby="txTitle">
+  <form method="post" action="/api/transaction/create">
+    <h3 id="txTitle">Catat kas ✍️</h3>
+    <div class="seg" role="radiogroup" aria-label="Jenis">
+      <label><input type="radio" name="type" value="in" checked>📥 Uang masuk</label>
+      <label><input type="radio" name="type" value="out">📤 Uang keluar</label>
+    </div>
+    <label class="f" for="f-nominal">Berapa?
+      <input class="field num" id="f-nominal" name="nominal" inputmode="numeric" autocomplete="off" placeholder="25.000 atau 25k" required>
+    </label>
+    <label class="f" for="f-pos">Masuk ke pos mana?
+      <select class="field" id="f-pos" name="category">
+        {% for p in pocket.rows %}<option value="{{ p.key }}">{{ p.icon }} {{ p.label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="f" for="f-desc">Buat apa?
+      <input class="field" id="f-desc" name="description" maxlength="200" placeholder="Beli spidol whiteboard" required>
+    </label>
+    <p class="hint">{{ approval_note }}</p>
+    <div class="row-end">
+      <button class="btn text" type="button" data-close>Batal</button>
+      <button class="btn fill" type="submit">Simpan</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="confirmDialog" aria-labelledby="cTitle">
+  <form method="dialog">
+    <h3 id="cTitle">Yakin?</h3>
+    <p id="cText" style="margin:0"></p>
+    <div class="row-end"><button class="btn text" value="no">Tidak jadi</button><button class="btn fill" value="yes">Ya, lanjut</button></div>
+  </form>
+</dialog>
+{% endif %}
+<div id="toast" class="toast" role="status" hidden></div>
+{% endblock %}
+
+{% block footer %}
+Dibuat dengan ❤️ oleh kelas {{ class_id }} · <a href="/api/ledger/verify">Periksa keaslian buku kas</a>
+{% endblock %}
+
+{% block bottom %}
+{% if is_admin %}<button class="fab" type="button" data-open-tx="in"><b aria-hidden="true">+</b> Catat</button>{% endif %}
+<nav class="navbar" aria-label="Navigasi bagian">
+  <ul>
+    <li><a href="#ringkasan" class="on"><span class="i">🏠</span>Ringkasan</a></li>
+    <li><a href="#iuran"><span class="i">🙋</span>Iuran</a></li>
+    <li><a href="#riwayat"><span class="i">🧾</span>Riwayat</a></li>
+    <li><a href="#bagikan"><span class="i">📲</span>Bagikan</a></li>
+  </ul>
+</nav>
+{% endblock %}

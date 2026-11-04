@@ -1,0 +1,21 @@
+﻿{% extends "base.html" %}
+{% block title %}Masuk Bendahara · CEKAS{% endblock %}
+{% block content %}
+<main class="login">
+  <div class="blob" aria-hidden="true">🔐</div>
+  <h1>Halo, Bendahara!</h1>
+  <p class="muted" style="margin:0 0 22px">Masuk dulu untuk mencatat kas. Teman-teman tetap bisa melihat semuanya tanpa masuk.</p>
+  {% if error %}<div class="flash err" role="alert">{{ error }}</div>{% endif %}
+  {% if not enabled %}
+    <div class="flash err">Login belum diatur. Isi <code>WEB_ADMIN_PASSWORD</code> di .env lalu jalankan ulang.</div>
+  {% else %}
+  <form method="post" action="/login" style="display:grid; gap:16px">
+    <label class="f" for="pw">Kata sandi
+      <input class="field" id="pw" type="password" name="password" autocomplete="current-password" autofocus required>
+    </label>
+    <button class="btn fill" type="submit" style="min-height:54px">Masuk</button>
+  </form>
+  {% endif %}
+  <p style="margin-top:22px"><a href="/">← Kembali ke kas kelas</a></p>
+</main>
+{% endblock %}

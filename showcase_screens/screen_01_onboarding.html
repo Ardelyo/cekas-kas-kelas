@@ -1,0 +1,85 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #EEF2F6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .phone-container {
+      width: 380px;
+      height: 780px;
+      background: white;
+      border-radius: 46px;
+      overflow: hidden;
+      box-shadow: 0 30px 70px -15px rgba(15, 23, 42, 0.25), 0 0 0 10px #0F172A, 0 0 0 12px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .phone-notch {
+      width: 130px;
+      height: 24px;
+      background: #0F172A;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+      z-index: 50;
+    }
+  </style>
+</head><body>
+  <div class="phone-container justify-between p-6 pt-10">
+    <div class="phone-notch"></div>
+    <div class="mt-8 text-center">
+      <h1 class="text-3xl font-fredoka font-bold text-slate-900 leading-tight">
+        Bingung Soal Kas Kelas Kamu?
+      </h1>
+      <div class="mt-6 flex justify-center">
+        <div class="bg-slate-100 border border-slate-200/90 rounded-full p-2 pl-6 flex items-center justify-between gap-5 text-xs font-bold text-slate-800 shadow-sm">
+          <span>Biar CEKAS Bantu!</span>
+          <span class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs">→</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Geometric Mascot Cluster -->
+    <div class="my-auto flex justify-center">
+      <svg width="300" height="240" viewBox="0 0 300 240" fill="none">
+        <!-- Green Serene Circle -->
+        <circle cx="80" cy="130" r="46" fill="#BBF7D0" stroke="#86EFAC" stroke-width="3"/>
+        <path d="M62 124 C68 116 76 116 82 124" stroke="#166534" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M88 124 C94 116 102 116 108 124" stroke="#166534" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M78 144 C82 148 90 148 94 144" stroke="#166534" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Purple Spiral / Dizzy Receipt -->
+        <circle cx="165" cy="100" r="44" fill="#DDD6FE" stroke="#C4B5FD" stroke-width="3"/>
+        <circle cx="152" cy="94" r="5" fill="#5B21B6"/>
+        <circle cx="178" cy="92" r="5.5" fill="#5B21B6"/>
+        <path d="M156 114 Q165 106 174 114" stroke="#5B21B6" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+        <!-- Peach Rounded Square -->
+        <rect x="205" y="80" width="70" height="70" rx="24" fill="#FED7AA" stroke="#FDBA74" stroke-width="3"/>
+        <line x1="220" y1="102" x2="232" y2="106" stroke="#9A3412" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="260" y1="102" x2="248" y2="106" stroke="#9A3412" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="240" cy="122" r="6.5" fill="#9A3412"/>
+
+        <!-- Coral Frustrated Triangle -->
+        <polygon points="120,200 80,230 160,230" fill="#FECDD3" stroke="#FDA4AF" stroke-width="2"/>
+        <path d="M110 218 L116 222 M116 218 L110 222" stroke="#9F1239" stroke-width="2" stroke-linecap="round"/>
+        <path d="M124 218 L130 222 M130 218 L124 222" stroke="#9F1239" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- Yellow Sparkle Star -->
+        <path d="M260 30 L264 48 L282 52 L264 56 L260 74 L256 56 L238 52 L256 48 Z" fill="#FEF08A" stroke="#FDE047" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="text-center pb-4">
+      <span class="inline-block px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
+        XI-F2 SMA Kartika XIX-1 Bandung
+      </span>
+      <p class="text-xs text-slate-400 mt-2">Geser untuk masuk ke dashboard kas →</p>
+    </div>
+  </div></body></html>

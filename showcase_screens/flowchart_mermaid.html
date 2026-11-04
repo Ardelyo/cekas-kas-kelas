@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Diagram Alir Resmi CEKAS (Mermaid Live)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background-color: #0B1120;
+      color: #E2E8F0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header-box {
+      text-align: center;
+      margin-bottom: 25px;
+      max-width: 900px;
+      border-bottom: 1px solid #1E293B;
+      padding-bottom: 20px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: #F59E0B;
+      color: #0F172A;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-family: 'Fredoka', cursive;
+      color: #F8FAFC;
+    }
+    p {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      color: #94A3B8;
+    }
+    #diagram-container {
+      background: #0F172A;
+      border: 1.5px solid #1E293B;
+      border-radius: 28px;
+      padding: 30px;
+      box-shadow: 0 25px 60px -15px rgba(0,0,0,0.5);
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .mermaid {
+      width: 100%;
+    }
+    .legend-box {
+      margin-top: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      max-width: 900px;
+      background: #1E293B;
+      padding: 12px 20px;
+      border-radius: 16px;
+      border: 1px solid #334155;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="badge">STANDAR DIAGRAM ALIR SISTEM (ANSI/ISO FLOWCHART)</div>
+    <h1>Diagram Alir Lengkap Sistem CEKAS (Mulai s.d. Selesai)</h1>
+    <p>Kelas XI-F2 SMA Kartika XIX-1 Bandung • Validasi Whitelist NIS, Otorisasi RBAC, Transaksi Atomik & Push Notifikasi Solo</p>
+  </div>
+
+  <div id="diagram-container">
+    <pre class="mermaid">
+
+flowchart TD
+    %% TERMINATOR
+    Start([▶️ MULAI]) --> Inisialisasi[/"1. Pengguna Buka Bot Telegram @kacekasbot atau Web Dashboard"/]
+
+    %% DECISION 1: WHITELIST
+    Inisialisasi --> CekReg{"2. Apakah ID Telegram Sudah Terdaftar di Whitelist?"}
+
+    %% REGISTRATION BRANCH
+    CekReg -- Tidak / Belum --> InputDaftar[/"3a. Input: /daftar NIS Nama_Lengkap"/]
+    InputDaftar --> QueryWhitelist[("4. Cek Firestore: classes/XI-F2/whitelist_students")]
+    QueryWhitelist --> ValidNis{"5. Apakah NIS Cocok & Belum Diklaim?"}
+    ValidNis -- Tidak / Fiktif --> TolakDaftar[/"6a. Tampilkan: ⛔ Registrasi Ditolak NIS Tidak Sah"/] --> Start
+    ValidNis -- Ya / Sah --> SimpanMember[("6b. Simpan ke classes/XI-F2/members")]
+    SimpanMember --> AktifNotif["7. Aktifkan Push Notifikasi Personal Solo DM"]
+    AktifNotif --> MenuUtama
+
+    %% VERIFIED BRANCH
+    CekReg -- Ya / Sah --> MenuUtama["8. Masuk Menu Utama & Verifikasi Identitas"]
+
+    %% DECISION 2: ROLE CHECK
+    MenuUtama --> CekRole{"9. Pemeriksaan Peran: Apakah Memiliki Akses Bendahara?"}
+
+    %% SISWA FLOW (READ-ONLY)
+    CekRole -- Siswa / Read-Only --> MenuSiswa[/"10a. Menu Semua Siswa: /saldo, /alokasi, /tagihan, /riwayat, /profil"/]
+    MenuSiswa --> AksiSiswa{"11a. Jenis Informasi Kas?"}
+    AksiSiswa -- /saldo --> ReadSaldo[("Baca Dokumen classes/XI-F2")] --> TampilSaldo[/"Tampilkan Saldo Total & Ringkasan 4 Pos"/] --> EndTerm([⏹️ SELESAI])
+    AksiSiswa -- /alokasi --> ReadAlokasi[("Baca Rincian Pos Anggaran")] --> TampilAlokasi[/"Tampilkan Neraca: Ops, Sosial, Event, Cadangan"/] --> EndTerm
+    AksiSiswa -- /tagihan --> ReadTagihan[("Baca dues & whitelist_students")] --> TampilTagihan[/"Tampilkan Rekap: Lunas vs Belum Bayar"/] --> EndTerm
+    AksiSiswa -- /riwayat --> ReadRiwayat[("Baca Subkoleksi transactions")] --> TampilRiwayat[/"Tampilkan 10 Mutasi Transaksi Terakhir"/] --> EndTerm
+    AksiSiswa -- /notif --> SetNotif["Update Preferensi: notifAktif on / off"] --> EndTerm
+
+    %% BENDAHARA FLOW (WRITE-ACCESS)
+    CekRole -- Belum Aktif --> KlaimBendahara[/"10b. Input: /klaimbendahara PIN_RAHASIA"/]
+    KlaimBendahara --> ValidPin{"11b. Apakah PIN Cocok dengan Dokumen Kelas?"}
+    ValidPin -- Salah --> TolakPin[/"Tampilkan: ⛔ PIN Salah"/] --> EndTerm
+    ValidPin -- Benar --> UpgradeRole[("Update Role = bendahara di Firestore")] --> MenuBendahara
+
+    CekRole -- Bendahara / Write-Access --> MenuBendahara[/"12. Menu Khusus Bendahara: /tambah, /kurang, /bayar, /koreksi"/]
+
+    MenuBendahara --> AksiBendahara{"13. Jenis Transaksi Finansial?"}
+
+    AksiBendahara -- Kas Masuk --> InKas[/"Input: /tambah nominal pos keterangan"/]
+    AksiBendahara -- Kas Keluar --> OutKas[/"Input: /kurang nominal pos keterangan"/]
+    AksiBendahara -- Iuran Siswa --> PayKas[/"Input: /bayar NIS minggu nominal"/]
+    AksiBendahara -- Koreksi Reversal --> RevKas[/"Input: /koreksi id_transaksi alasan"/]
+
+    %% IDEMPOTENCY GUARD
+    InKas --> Idempotency{"14. Anti-Double-Submit: Apakah Duplikat dalam 5s?"}
+    OutKas --> Idempotency
+    PayKas --> Idempotency
+    RevKas --> Idempotency
+
+    Idempotency -- Ya / Duplikat --> TolakDobel[/"Tampilkan: ⚠️ Perintah Ganda Terdeteksi Diabaikan Aman"/] --> EndTerm
+    Idempotency -- Tidak / Unik --> AtomicTx["15. Inisialisasi db.runTransaction di Firestore"]
+
+    %% ATOMIC TRANSACTION EXECUTION
+    AtomicTx --> LockSaldo["16. Kunci & Baca Saldo Total serta Saldo Pos Terkait"]
+    LockSaldo --> HitungSaldo["17. Hitung Saldo Lari Running Balance Tanpa Selisih"]
+    HitungSaldo --> CommitFirestore[("18. Atomic Commit: Update Saldo Total, Pos Alokasi & Insert Transaction")]
+
+    %% NOTIFIKASI SOLO DM
+    CommitFirestore --> BroadcastNotif["19. Query Siswa Terdaftar: notifAktif == true"]
+    BroadcastNotif --> SendDm[/"20. Bot Kirim Pesan Pribadi Solo DM ke HP Seluruh Siswa"/]
+
+    %% WEB REAL-TIME SYNC
+    SendDm --> WebSync["21. Dashboard Web Sinkron Otomatis Real-Time"]
+    WebSync --> ResponBendahara[/"22. Kirim Tanda Terima & Saldo Baru ke Bendahara"/]
+    ResponBendahara --> EndTerm
+
+    %% STYLING / CLASSES
+    classDef startEnd fill:#10B981,stroke:#059669,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef process fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#fff;
+    classDef decision fill:#1E293B,stroke:#F59E0B,stroke-width:2px,color:#fff;
+    classDef io fill:#1E293B,stroke:#C084FC,stroke-width:2px,color:#fff;
+    classDef db fill:#0F172A,stroke:#FB923C,stroke-width:2.5px,color:#fff;
+    classDef reject fill:#7F1D1D,stroke:#EF4444,stroke-width:2px,color:#fff;
+
+    class Start,EndTerm startEnd;
+    class Inisialisasi,InputDaftar,TolakDaftar,MenuSiswa,TampilSaldo,TampilAlokasi,TampilTagihan,TampilRiwayat,KlaimBendahara,TolakPin,MenuBendahara,InKas,OutKas,PayKas,RevKas,TolakDobel,SendDm,ResponBendahara io;
+    class CekReg,ValidNis,CekRole,AksiSiswa,ValidPin,AksiBendahara,Idempotency decision;
+    class AktifNotif,MenuUtama,SetNotif,AtomicTx,LockSaldo,HitungSaldo,BroadcastNotif,WebSync process;
+    class QueryWhitelist,SimpanMember,ReadSaldo,ReadAlokasi,ReadTagihan,ReadRiwayat,UpgradeRole,CommitFirestore db;
+    class TolakDaftar,TolakPin,TolakDobel reject;
+
+    </pre>
+  </div>
+
+  <div class="legend-box">
+    <div class="legend-item"><div class="legend-color" style="background:#10B981;"></div> Terminator (Mulai / Selesai)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#C084FC;"></div> Data / Input / Output (I/O)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#F59E0B;"></div> Decision / Keputusan</div>
+    <div class="legend-item"><div class="legend-color" style="background:#38BDF8;"></div> Process / Pemrosesan</div>
+    <div class="legend-item"><div class="legend-color" style="background:#FB923C;"></div> Database Storage (Firestore)</div>
+    <div class="legend-item"><div class="legend-color" style="background:#EF4444;"></div> Penolakan / Error State</div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: {
+        curve: 'basis',
+        useMaxWidth: true,
+        htmlLabels: true
+      },
+      themeVariables: {
+        darkmode: true,
+        background: '#0F172A',
+        primaryColor: '#1E293B',
+        primaryTextColor: '#F8FAFC',
+        primaryBorderColor: '#38BDF8',
+        lineColor: '#64748B',
+        secondaryColor: '#FB923C',
+        tertiaryColor: '#1E293B'
+      }
+    });
+  </script>
+
+</body>
+</html>

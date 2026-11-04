@@ -1,0 +1,200 @@
+<!DOCTYPE html><html><head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0F172A; color: white; margin: 0; padding: 50px; display: flex; justify-content: center; }
+    .font-fredoka { font-family: 'Fredoka', cursive; }
+    .node-box {
+      border-radius: 20px;
+      padding: 16px 22px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      position: relative;
+    }
+    .node-start { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; }
+    .node-decision { background: #1E293B; border-color: #F59E0B; }
+    .node-process { background: #1E293B; border-color: #38BDF8; }
+    .node-bendahara { background: #1E293B; border-color: #A855F7; }
+    .node-siswa { background: #1E293B; border-color: #10B981; }
+    .node-db { background: linear-gradient(135deg, #1E293B, #0F172A); border-color: #FB923C; }
+    .node-end { background: linear-gradient(135deg, #EF4444, #DC2626); color: white; border: none; }
+    .flow-line { width: 3px; height: 32px; background: #64748B; margin: 0 auto; position: relative; }
+    .flow-line::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: -4px;
+      width: 11px;
+      height: 11px;
+      border-bottom: 3px solid #64748B;
+      border-right: 3px solid #64748B;
+      transform: rotate(45deg);
+    }
+  </style>
+</head><body>
+
+  <div class="max-w-4xl w-full">
+    
+    <!-- Title Card -->
+    <div class="text-center mb-10 pb-6 border-b border-slate-800">
+      <div class="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950 mb-3">
+        DIAGRAM ALIR SISTEM INFORMASI (FLOWCHART)
+      </div>
+      <h1 class="text-3xl font-fredoka font-bold text-white tracking-tight">
+        Alur Logika & Transparansi Aplikasi CEKAS
+      </h1>
+      <p class="text-sm text-slate-400 mt-2">
+        Kelas XI-F2 SMA Kartika XIX-1 Bandung • Ekosistem Bot Telegram + Cloud Firestore + Web Dashboard
+      </p>
+    </div>
+
+    <!-- Flow Steps -->
+    <div class="flex flex-col items-center space-y-4">
+
+      <!-- Step 1: MULAI -->
+      <div class="node-box node-start font-fredoka font-bold text-lg px-8 py-3 rounded-full flex items-center gap-2">
+        <span>▶️</span> MULAI
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 2: AKSES PLATFORM -->
+      <div class="node-box node-process text-center w-96">
+        <div class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-1">Pintu Masuk Pengguna</div>
+        <div class="font-bold text-sm text-white">Siswa / Bendahara Membuka Bot Telegram (@kacekasbot) atau Web</div>
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 3: CEK STATUS PENDAFTARAN -->
+      <div class="node-box node-decision text-center w-[460px]">
+        <div class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-1">Keputusan 1</div>
+        <div class="font-bold text-base text-white">Apakah ID Telegram Sudah Terdaftar di Whitelist NIS?</div>
+      </div>
+
+      <!-- Branching: Tidak vs Ya -->
+      <div class="w-full flex justify-between gap-8 pt-2">
+        
+        <!-- Sisi Kiri: BELUM TERDAFTAR -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="text-xs font-bold text-rose-400 mb-2">❌ TIDAK / BELUM</div>
+          <div class="flow-line"></div>
+          
+          <div class="node-box bg-slate-900 border-rose-500 text-center w-full mt-2">
+            <div class="text-xs text-rose-400 font-bold">Kirim Command:</div>
+            <div class="text-sm font-bold text-white mt-1">/daftar [NIS] [Nama Lengkap]</div>
+            <p class="text-[11px] text-slate-400 mt-1">Sistem memvalidasi NIS ke koleksi whitelist_students XI-F2</p>
+          </div>
+
+          <div class="flow-line"></div>
+
+          <div class="node-box bg-slate-900 border-amber-500 text-center w-full">
+            <div class="text-xs text-amber-400 font-bold">Validasi Whitelist:</div>
+            <div class="text-xs text-white mt-1">Jika NIS Cocok & Belum Diklaim: Tautkan Akun ✅</div>
+            <div class="text-xs text-rose-300 mt-0.5">Jika NIS Tidak Dikenal: Tolak ⛔</div>
+          </div>
+        </div>
+
+        <!-- Sisi Kanan: SUDAH TERDAFTAR -->
+        <div class="flex-1 flex flex-col items-center">
+          <div class="text-xs font-bold text-emerald-400 mb-2">✅ YA / TERDAFTAR RESMI</div>
+          <div class="flow-line"></div>
+
+          <div class="node-box bg-slate-900 border-emerald-500 text-center w-full mt-2">
+            <div class="text-xs text-emerald-400 font-bold">Otentikasi Berhasil:</div>
+            <div class="text-sm font-bold text-white mt-1">Akun Terhubung Sebagai Siswa / Bendahara</div>
+            <p class="text-[11px] text-slate-400 mt-1">Preferensi push notifikasi solo aktif</p>
+          </div>
+
+          <div class="flow-line"></div>
+
+          <div class="node-box node-decision text-center w-full">
+            <div class="text-xs text-purple-400 font-bold">Pemeriksaan Peran (RBAC):</div>
+            <div class="text-xs text-white mt-1">Apakah Pengguna Memiliki Role Bendahara?</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Merge Point: Menu Peran -->
+      <div class="w-full pt-6 border-t border-slate-800">
+        <div class="grid grid-cols-2 gap-6">
+          
+          <!-- Menu Siswa -->
+          <div class="node-box node-siswa">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-emerald-800/60">
+              <span class="font-fredoka font-bold text-emerald-400 text-sm">👤 MENU SEMUA SISWA</span>
+              <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded-full font-bold">Read-Only</span>
+            </div>
+            <ul class="text-xs space-y-1.5 text-slate-300">
+              <li>• <code class="text-emerald-300 font-bold">/saldo</code>: Saldo total & ringkasan pos</li>
+              <li>• <code class="text-emerald-300 font-bold">/alokasi</code>: Rincian pos Operasional, Sosial, Event</li>
+              <li>• <code class="text-emerald-300 font-bold">/tagihan</code>: Rekap siapa sudah bayar vs nunggak</li>
+              <li>• <code class="text-emerald-300 font-bold">/riwayat</code>: 10 transaksi kas terakhir</li>
+              <li>• <code class="text-emerald-300 font-bold">/notif [on/off]</code>: Atur notifikasi personal</li>
+            </ul>
+          </div>
+
+          <!-- Menu Bendahara -->
+          <div class="node-box node-bendahara">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-purple-800/60">
+              <span class="font-fredoka font-bold text-purple-400 text-sm">🔑 MENU KHUSUS BENDAHARA</span>
+              <span class="text-[10px] bg-purple-950 text-purple-300 px-2 py-0.5 rounded-full font-bold">Write Access</span>
+            </div>
+            <ul class="text-xs space-y-1.5 text-slate-300">
+              <li>• <code class="text-purple-300 font-bold">/tambah [nom] [pos] [ket]</code>: Input kas masuk</li>
+              <li>• <code class="text-purple-300 font-bold">/kurang [nom] [pos] [ket]</code>: Input kas keluar</li>
+              <li>• <code class="text-purple-300 font-bold">/bayar [NIS] [m?]</code>: Tandai iuran lunas</li>
+              <li>• <code class="text-purple-300 font-bold">/koreksi [id] [alasan]</code>: Append-only reversal</li>
+              <li>• <code class="text-purple-300 font-bold">/klaimbendahara [PIN]</code>: Aktivasi role bendahara</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 4: IDEMPOTENCY & TRANSAKSI ATOMIK -->
+      <div class="node-box node-db text-center w-[500px]">
+        <div class="text-xs font-bold text-orange-400 uppercase tracking-wider mb-1">Backend & Database Engine</div>
+        <div class="font-bold text-base text-white">Eksekusi Transaksi Atomik di Google Cloud Firestore</div>
+        <div class="text-xs text-slate-300 mt-2 space-y-0.5">
+          <div>1. Validasi Idempotency (cegah klik ganda dalam 5 detik)</div>
+          <div>2. Update Saldo Total + Saldo Pos Alokasi (Atomic Lock)</div>
+          <div>3. Simpan Dokumen Riwayat Mutasi ke <code>classes/XI-F2/transactions</code></div>
+        </div>
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 5: BROADCAST SOLO DIRECT NOTIFICATION -->
+      <div class="node-box bg-slate-900 border-sky-400 text-center w-[460px]">
+        <div class="text-xs font-bold text-sky-400 uppercase tracking-wider mb-1">Otomasi Notifikasi Solo</div>
+        <div class="font-bold text-sm text-white">Bot Mengirim Push Notification (DM) ke Seluruh Siswa Terdaftar</div>
+        <p class="text-[11px] text-slate-400 mt-1">Setiap siswa menerima rincian uang masuk/keluar langsung di HP tanpa perlu grup</p>
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 6: WEB DASHBOARD VISUALISASI -->
+      <div class="node-box bg-slate-900 border-slate-700 text-center w-96">
+        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Visualisasi & Laporan</div>
+        <div class="font-bold text-sm text-white">Dashboard Web Terupdate Real-Time</div>
+        <p class="text-[11px] text-slate-400 mt-1">Bento Grid, Kalender Kas, & Matriks Siswa sinkron otomatis</p>
+      </div>
+
+      <div class="flow-line"></div>
+
+      <!-- Step 7: SELESAI -->
+      <div class="node-box node-end font-fredoka font-bold text-lg px-8 py-3 rounded-full flex items-center gap-2">
+        <span>⏹️</span> SELESAI
+      </div>
+
+    </div>
+
+  </div>
+
+</body></html>
