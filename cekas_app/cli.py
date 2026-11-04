@@ -69,6 +69,15 @@ def cmd_set_pin(new_pin: str):
     print("✅ PIN Bendahara diperbarui (disimpan sebagai hash).")
 
 
+def cmd_set_wali_pin(new_pin: str):
+    try:
+        get_db().set_wali_pin(CLASS_ID, new_pin)
+    except ValueError as e:
+        print(f"❌ {e}")
+        sys.exit(1)
+    print("✅ PIN Wali Kelas diperbarui (disimpan sebagai hash). Wali Kelas masuk lewat /klaimwali <PIN> di bot.")
+
+
 def cmd_seed(with_sample_tx: bool = True):
     db = get_db()
     db.seed_initial_students(CLASS_ID)
@@ -153,6 +162,8 @@ def main():
     subparsers.add_parser("backup", help="Buat backup database ke folder backups/")
     pin_p = subparsers.add_parser("set-pin", help="Ganti PIN Bendahara (min. 6 karakter)")
     pin_p.add_argument("pin")
+    wpin_p = subparsers.add_parser("set-wali-pin", help="Atur PIN Wali Kelas untuk verifikasi (min. 6 karakter)")
+    wpin_p.add_argument("pin")
 
     in_p = subparsers.add_parser("tambah", help="Catat pemasukan kas melalui CLI")
     in_p.add_argument("nominal", help="Nominal rupiah (contoh: 20000 atau 20k)")
@@ -194,6 +205,8 @@ def main():
         cmd_backup()
     elif args.subcommand == "set-pin":
         cmd_set_pin(args.pin)
+    elif args.subcommand == "set-wali-pin":
+        cmd_set_wali_pin(args.pin)
     elif args.subcommand in ("tambah", "kurang"):
         from .formatters import parse_nominal, normalize_category
         db = get_db()
@@ -204,12 +217,15 @@ def main():
         cat = normalize_category(args.alokasi) or "operasional"
         tx_type = "in" if args.subcommand == "tambah" else "out"
         try:
-            res = db.record_transaction(CLASS_ID, tx_type, amt, cat, args.keterangan, args.nama, 0)
+            res = db.submit_transaction(CLASS_ID, tx_type, amt, cat, args.keterangan, args.nama, 0)
         except ValueError as e:
             print(f"❌ {e}")
             sys.exit(1)
-        sign = "+" if tx_type == "in" else "-"
-        print(f"✅ Transaksi #{res['tx_id']} berhasil dicatat: {sign}{format_rupiah(res['amount'])} [{cat.upper()}] — Saldo Total: {format_rupiah(res['saldo_total'])}")
+        if res["pending"]:
+            print(f"⏳ Diajukan #{res['pending_id']}: {format_rupiah(amt)} [{cat.upper()}] — menunggu verifikasi Wali Kelas (saldo belum berubah).")
+        else:
+            sign = "+" if tx_type == "in" else "-"
+            print(f"✅ Transaksi #{res['tx_id']} berhasil dicatat: {sign}{format_rupiah(res['amount'])} [{cat.upper()}] — Saldo Total: {format_rupiah(res['saldo_total'])}")
     elif args.subcommand == "export-excel":
         cmd_export_excel(args.output)
     elif args.subcommand == "export-chart":

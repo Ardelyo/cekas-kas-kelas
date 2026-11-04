@@ -1,4 +1,4 @@
-﻿"""
+"""
 Sistem tampilan Telegram CEKAS. Murni (tanpa import telegram) agar mudah diuji.
 
 Bahasa visual yang dipakai di SEMUA layar:
@@ -74,6 +74,9 @@ def screen_menu(db, member: Optional[Dict[str, Any]]) -> Screen:
     dues = db.get_dues_status(CLASS_ID, wk)
     is_b = bool(member and member["role"] == "bendahara")
     n_open = len(db.list_proposals(CLASS_ID, "open"))
+    gate = db.require_teacher
+    n_pend = len(db.list_pending(CLASS_ID)) if gate else 0
+    is_w = bool(member and member["role"] == "wali_kelas")
 
     if member:
         who = f"Halo, <b>{E(member['nama'])}</b> 👋 · {ROLE_LABEL.get(member['role'], member['role'])}"
@@ -84,7 +87,7 @@ def screen_menu(db, member: Optional[Dict[str, Any]]) -> Screen:
         head("CEKAS", "🧾"), f"<i>{E(SCHOOL_NAME)}</i>", "", who, "",
         pre([("Saldo kas", format_rupiah(cls["saldo"])),
              (f"Iuran mg-{wk}", f"{dues['paid_count']}/{dues['total_students']} lunas"),
-             ("Usulan", f"{n_open} terbuka")]),
+             ("Usulan", f"{n_open} terbuka")] + ([("Menunggu guru", f"{n_pend} ajuan")] if gate else [])),
         ("🎉 Iuran minggu ini lunas semua. Keren!" if dues["unpaid_count"] == 0
          else f"⏳ Tinggal {dues['unpaid_count']} teman lagi yang belum bayar."),
         foot(),
@@ -97,6 +100,10 @@ def screen_menu(db, member: Optional[Dict[str, Any]]) -> Screen:
     ]
     if is_b:
         kb.insert(0, [("➕ Catat Kas", "c"), ("🧾 Laporan SPJ", "spj")])
+    if is_w:
+        kb.insert(0, [(f"✅ Verifikasi{f' ({n_pend})' if n_pend else ''}", "w")])
+    elif gate and n_pend:
+        kb.append([(f"⏳ Menunggu guru ({n_pend})", "w")])
     return text, kb
 
 
@@ -156,12 +163,16 @@ def screen_tagihan(db, week: int, page: int, can_pay: bool, member: Optional[Dic
     if member and member.get("nis") and member["role"] != "wali_kelas":
         mine = member["nis"] in {s["nis"] for s in st["paid_students"]}
         lines += [f"Anda: {'✅ lunas' if mine else '⏳ belum bayar'}", ""]
-    unpaid = st["unpaid_students"]
+    waiting_nis = db.pending_dues_nis(CLASS_ID, week) if db.require_teacher else set()
+    waiting = [s for s in st["unpaid_students"] if s["nis"] in waiting_nis]
+    unpaid = [s for s in st["unpaid_students"] if s["nis"] not in waiting_nis]
     if unpaid:
         lines.append("<b>Belum bayar</b> · yuk disusul ya 🙏")
         lines += [f"⏳ {E(s['nama_resmi'])}" for s in unpaid]
-    else:
+    elif not waiting:
         lines += ["🎉 <b>Semua sudah lunas!</b>", f"Keren banget, {E(CLASS_ID)}. Terima kasih ya semuanya 🙏"]
+    if waiting:
+        lines += ["", "<b>Menunggu verifikasi guru</b> 🕒", *[f"🕒 {E(s['nama_resmi'])}" for s in waiting]]
     if st["paid_students"]:
         lines += ["", f"<i>Lunas: {E(', '.join(s['nama_resmi'].split()[0] for s in st['paid_students']))}</i>"]
 
@@ -341,3 +352,92 @@ def draft_card(d: Dict[str, Any], needs_approval: bool = False) -> Screen:
     kb: Keyboard = [[("🗳 Ajukan usulan" if needs_approval else "✅ Simpan", "c:ok"), ("✖ Batal", "c:no")]]
     kb.append([(("● " if d["category"] == k else "") + m["icon"], f"c:pos:{k}") for k, m in POCKET_CONFIG.items()])
     return "\n".join(lines), kb
+
+
+# ------------------------------------------------------------ verifikasi Wali Kelas
+def _pending_line(p: Dict[str, Any]) -> List[str]:
+    meta = POCKET_CONFIG.get(p.get("category") or "", {})
+    if p["kind"] == "reverse":
+        head_ = f"↩️ <b>#{p['id']}</b> Koreksi mutasi <code>#{p['target_tx_id']}</code> · <code>{E(format_rupiah(p['amount']))}</code>"
+    else:
+        sign = "+" if p["tx_type"] == "in" else "−"
+        head_ = (f"{tx_icon(p['tx_type'])} <b>#{p['id']}</b> <code>{sign}{E(format_rupiah(p['amount']))}</code> "
+                 f"· {E(meta.get('short', ''))}")
+    return [head_, f"      {E(p['description'])}", f"      <i>diajukan {E(p['input_by'])} · {utc_to_wib(p['created_at'])}</i>"]
+
+
+def screen_verifikasi(db, can_act: bool) -> Screen:
+    items = db.list_pending(CLASS_ID)
+    dues = [p for p in items if p["kind"] == "dues"]
+    others = [p for p in items if p["kind"] != "dues"]
+    lines = [head("VERIFIKASI GURU", "✅"), ""]
+    kb: Keyboard = []
+    if not items:
+        lines.append("🎉 Tidak ada yang menunggu. Semua sudah diverifikasi.")
+    for p in others[:6]:
+        lines += _pending_line(p)
+        if can_act:
+            kb.append([(f"✅ Setujui #{p['id']}", f"wv:{p['id']}"), (f"❌ Tolak #{p['id']}", f"wr:{p['id']}")])
+    if len(others) > 6:
+        lines.append(f"<i>+{len(others) - 6} pengajuan lain…</i>")
+    weeks: Dict[int, List[Dict[str, Any]]] = {}
+    for p in dues:
+        weeks.setdefault(p["week_num"], []).append(p)
+    for wk in sorted(weeks):
+        group = weeks[wk]
+        names = ", ".join(E(g["description"].split("(")[-1].rstrip(")").split()[0]) for g in group[:12])
+        lines += ["", f"🙋 <b>Iuran minggu {wk}</b> · {len(group)} siswa · "
+                      f"<code>{E(format_rupiah(sum(g['amount'] for g in group)))}</code>", f"      <i>{names}</i>"]
+        if can_act:
+            kb.append([(f"✅ Verifikasi iuran mg-{wk} ({len(group)})", f"wd:{wk}")])
+    if items and not can_act:
+        lines += ["", "<i>Hanya Wali Kelas yang dapat menyetujui. Aktifkan dengan /klaimwali PIN.</i>"]
+    kb.append(nav(("🔄", "w")))
+    return "\n".join(lines), kb
+
+
+def pending_card(res: Dict[str, Any], kind: str = "tx") -> str:
+    """Kartu untuk Bendahara setelah mengajukan: saldo BELUM berubah."""
+    if kind == "dues":
+        rows = [("Siswa", res["nama"][:22]), ("Minggu", f"ke-{res['week_num']}"), ("Nominal", f"+{format_rupiah(res['nominal'])}")]
+        body = ["Iuran akan tercatat setelah Wali Kelas memverifikasi."]
+        vw = 22
+    elif kind == "reverse":
+        rows = [("Membatalkan", f"#{res['tx_id']}"), ("Nominal", format_rupiah(res["amount"]))]
+        body = [f"📝 {E(res['orig_description'])}", "Koreksi berlaku setelah Wali Kelas memverifikasi."]
+        vw = 14
+    else:
+        sign = "+" if res["type"] == "in" else "−"
+        rows = [("Jenis", "Pemasukan" if res["type"] == "in" else "Pengeluaran"),
+                ("Nominal", f"{sign}{format_rupiah(res['amount'])}"), ("Pos", POCKET_CONFIG[res["category"]]["short"])]
+        body = [f"📝 {E(res['description'])}", "Saldo belum berubah sampai Wali Kelas memverifikasi."]
+        vw = 14
+    return "\n".join([head("MENUNGGU GURU", "⏳") + f" · <code>#{res['pending_id']}</code>", "",
+                      pre(rows, vw=vw), *body, "<i>Wali Kelas sudah diberi tahu 🔔</i>"])
+
+
+def verify_buttons(pid: int) -> Keyboard:
+    return [[(f"✅ Setujui #{pid}", f"wv:{pid}"), (f"❌ Tolak #{pid}", f"wr:{pid}")], nav(("📋 Semua ajuan", "w"))]
+
+
+def pending_for_wali(p: Dict[str, Any]) -> str:
+    """Pemberitahuan ke Wali Kelas saat ada pengajuan baru."""
+    return "\n".join([head("PENGAJUAN BARU", "🔔"), ""] + _pending_line(p) + ["", "Mohon diverifikasi 🙏"])
+
+
+def decision_card(p: Dict[str, Any], res: Optional[Dict[str, Any]] = None) -> str:
+    """Hasil keputusan guru (untuk Bendahara dan layar guru)."""
+    if p["status"] == "verified":
+        extra = []
+        if res and res.get("saldo_total") is not None:
+            extra = [f"Total kas sekarang <code>{E(format_rupiah(res['saldo_total']))}</code>"]
+        return "\n".join([head("DIVERIFIKASI GURU", "✅") + f" · <code>#{p['id']}</code>", "",
+                          f"Disetujui <b>{E(p['decided_by'] or '')}</b> ✓", f"📝 {E(p['description'])}", *extra])
+    if p["status"] == "rejected":
+        return "\n".join([head("DITOLAK GURU", "❌") + f" · <code>#{p['id']}</code>", "",
+                          f"📝 {E(p['description'])}", f"Alasan: {E(p.get('note') or 'tidak disebutkan')}",
+                          f"<i>oleh {E(p['decided_by'] or '')}</i>"])
+    if p["status"] == "failed":
+        return "\n".join([head("GAGAL DICATAT", "⚠️") + f" · <code>#{p['id']}</code>", "",
+                          f"📝 {E(p['description'])}", f"<i>{E(p.get('note') or '')}</i>"])
+    return "\n".join([head("PENGAJUAN DIBATALKAN", "⚪") + f" · <code>#{p['id']}</code>", "", f"📝 {E(p['description'])}"])

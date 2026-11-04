@@ -1,4 +1,4 @@
-﻿"""Laporan SPJ (HTML mandiri, siap cetak/PDF dari browser)."""
+"""Laporan SPJ (HTML mandiri, siap cetak/PDF dari browser)."""
 
 from datetime import datetime
 from pathlib import Path

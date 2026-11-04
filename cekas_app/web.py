@@ -143,6 +143,13 @@ async def dashboard_view(request: Request, week: int = Query(0, ge=0, le=52),
     ledger = db.verify_ledger(CLASS_ID)
     head = db.ledger_head(CLASS_ID)
     props = db.list_proposals(CLASS_ID, "open")
+    pend_all = db.list_pending(CLASS_ID) if db.require_teacher else []
+    pend_tx = [dict(p, cat_label=POCKET_CONFIG.get(p["category"] or "", {}).get("short", "")) for p in pend_all if p["kind"] != "dues"]
+    dues_weeks = {}
+    for p in pend_all:
+        if p["kind"] == "dues":
+            w = dues_weeks.setdefault(p["week_num"], {"week": p["week_num"], "n": 0, "total": 0})
+            w["n"] += 1; w["total"] += p["amount"]
     for p in props:
         p["category_label"] = POCKET_CONFIG.get(p["category"], {}).get("short", p["category"])
     url = _public_url(request)
@@ -152,7 +159,8 @@ async def dashboard_view(request: Request, week: int = Query(0, ge=0, le=52),
         "week": week, "weeks": weeks, "col_totals": col_totals, "stu": students_view(db, CLASS_ID, week),
         "active_week": active, "insights": insights.build_insights(db, CLASS_ID),
         "spark": spark_svg(insights.weekly_flow(db, CLASS_ID, 8)),
-        "head": head, "proposals": props,
+        "head": head, "proposals": props, "gate": db.require_teacher, "pend_tx": pend_tx,
+        "pend_dues": sorted(dues_weeks.values(), key=lambda w: w["week"]),
         "approval_note": _approval_note(), "qr": qr_svg(url), "public_url": url,
         "now_label": datetime.now(WIB).strftime("%d/%m/%Y %H.%M WIB"),
         "is_admin": is_admin(request), "admin_enabled": bool(WEB_ADMIN_PASSWORD),
@@ -286,6 +294,21 @@ async def _push_proposal(p: dict):
     return sent
 
 
+async def _push_wali(pending_id: int):
+    """Beri tahu Wali Kelas lewat bot bila bot aktif di proses ini."""
+    p = db.get_pending(pending_id)
+    if not tg_app or not p:
+        return
+    for chat_id in db.get_wali_ids(CLASS_ID):
+        try:
+            await tg_app.bot.send_message(
+                chat_id, tg_ui.pending_for_wali(p), parse_mode="HTML",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(l, callback_data=d) for l, d in row]
+                                                   for row in tg_ui.verify_buttons(p["id"])]))
+        except Exception:
+            pass
+
+
 @app.post("/api/transaction/create", dependencies=[Depends(require_admin)])
 async def create_transaction(type: str = Form(...), nominal: str = Form(...),
                              category: str = Form(...), description: str = Form(...)):
@@ -300,18 +323,24 @@ async def create_transaction(type: str = Form(...), nominal: str = Form(...),
             sent = await _push_proposal(p)
             return _back(f"Diajukan sebagai usulan #{p['id']}; menunggu {p['needed']} suara siswa"
                          f"{f' (dikirim ke {sent} siswa)' if sent else ' lewat bot Telegram'}.")
-        db.record_transaction(CLASS_ID, type, amount, category, description, WEB_ADMIN_NAME, WEB_TELEGRAM_ID)
+        res = db.submit_transaction(CLASS_ID, type, amount, category, description, WEB_ADMIN_NAME, WEB_TELEGRAM_ID)
     except ValueError as e:
         return _back(str(e), err=True)
+    if res["pending"]:
+        await _push_wali(res["pending_id"])
+        return _back(f"Dikirim ke Wali Kelas untuk diverifikasi (#{res['pending_id']}). Saldo berubah setelah disetujui. ⏳")
     return _back(f"Tercatat: {format_rupiah(amount)}.")
 
 
 @app.post("/api/transaction/reverse", dependencies=[Depends(require_admin)])
 async def reverse_transaction(tx_id: int = Form(...), reason: str = Form("Koreksi via web")):
     try:
-        db.reverse_transaction(CLASS_ID, tx_id, reason, WEB_ADMIN_NAME, WEB_TELEGRAM_ID)
+        res = db.submit_reverse(CLASS_ID, tx_id, reason, WEB_ADMIN_NAME, WEB_TELEGRAM_ID)
     except ValueError as e:
         return _back(str(e), err=True)
+    if res["pending"]:
+        await _push_wali(res["pending_id"])
+        return _back(f"Koreksi #{tx_id} dikirim ke Wali Kelas untuk diverifikasi. ⏳")
     return _back(f"Mutasi #{tx_id} dikoreksi.")
 
 
@@ -326,10 +355,24 @@ async def pay_dues(nis: str = Form(None), week_num: int = Form(None), cell: str 
     if not nis or not week_num:
         return _back("Data tidak valid.", err=True)
     try:
-        res = db.mark_dues_paid(CLASS_ID, nis, week_num, WEB_ADMIN_NAME, WEB_TELEGRAM_ID, auto_tx=True)
+        first = not db.pending_dues_nis(CLASS_ID, week_num)
+        res = db.submit_dues(CLASS_ID, nis, week_num, WEB_ADMIN_NAME, WEB_TELEGRAM_ID)
     except ValueError as e:
         return _back(str(e), err=True)
+    if res["pending"]:
+        if first:
+            await _push_wali(res["pending_id"])
+        return _back(f"{res['nama'].split()[0]}: iuran minggu {week_num} menunggu verifikasi guru ⏳", to=f"/?week={week_num}", frag="iuran")
     return _back(f"{res['nama'].split()[0]} lunas minggu {week_num} ✅", to=f"/?week={week_num}", frag="iuran")
+
+
+@app.post("/api/pending/cancel", dependencies=[Depends(require_admin)])
+async def cancel_pending(pid: int = Form(...)):
+    try:
+        db.cancel_pending(pid, WEB_TELEGRAM_ID, as_admin=True)
+    except ValueError as e:
+        return _back(str(e), err=True)
+    return _back(f"Pengajuan #{pid} dibatalkan.")
 
 
 @app.post("/api/proposal/cancel", dependencies=[Depends(require_admin)])

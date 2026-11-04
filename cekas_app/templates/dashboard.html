@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block content %}
 <main class="wrap">
   {% if flash %}<div class="flash {{ 'err' if flash_err else '' }}" role="status">{{ flash }}</div>{% endif %}
@@ -57,6 +57,32 @@
 
     <!-- ================= kanan: kegiatan ================= -->
     <div class="col-r">
+      {% if gate %}
+      <section id="guru" aria-labelledby="h-guru">
+        <h2 class="sec-h" id="h-guru">Menunggu guru <span class="note">Setiap catatan kas baru berlaku setelah Wali Kelas memverifikasi di bot Telegram.</span></h2>
+        {% if pend_tx or pend_dues %}
+        <div class="props">
+          {% for p in pend_tx %}
+          <div class="prop wait">
+            <div class="top"><span class="t">{{ '↩️ Koreksi #' ~ p.target_tx_id if p.kind == 'reverse' else p.description }}</span>
+              <span class="a">{{ '−' if p.tx_type == 'out' }}{{ format_rupiah(p.amount) }}</span></div>
+            <div style="opacity:.8; font-size:14px">#{{ p.id }} · {{ p.cat_label }} · diajukan {{ p.input_by }}{% if p.kind == 'reverse' %} · {{ p.description }}{% endif %}</div>
+            {% if is_admin %}<form method="post" action="/api/pending/cancel" data-confirm="Batalkan pengajuan #{{ p.id }}?"><input type="hidden" name="pid" value="{{ p.id }}"><button class="btn text sm" type="submit" style="color:inherit">Batalkan pengajuan</button></form>{% endif %}
+          </div>
+          {% endfor %}
+          {% for w in pend_dues %}
+          <div class="prop wait">
+            <div class="top"><span class="t">🙋 Iuran minggu {{ w.week }}</span><span class="a">{{ format_rupiah(w.total) }}</span></div>
+            <div style="opacity:.8; font-size:14px">{{ w.n }} siswa menunggu diverifikasi sekaligus</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty"><b>Semua sudah diverifikasi ✅</b>Tidak ada catatan yang menunggu guru.</div>
+        {% endif %}
+      </section>
+      {% endif %}
+
       <section aria-labelledby="h-usul">
         <h2 class="sec-h" id="h-usul">Usulan belanja <span class="note">{{ approval_note }}</span></h2>
         {% if proposals %}
@@ -96,9 +122,9 @@
           </div>
 
           <form method="post" action="/api/dues/pay">
-            {% if not stu.unpaid %}
+            {% if not stu.unpaid and not stu.wait %}
               <div class="done">🎉 Semua sudah lunas!<small>Keren banget, {{ class_id }}. Terima kasih ya semuanya.</small></div>
-            {% else %}
+            {% elif stu.unpaid %}
               <div class="sub-h">Belum bayar {% if is_admin %}· ketuk nama untuk menandai lunas{% endif %}</div>
               <div class="who">
                 {% for s in stu.unpaid %}
@@ -108,6 +134,12 @@
                   <div class="stu todo"><span class="av av{{ s.av }}">{{ s.ini }}</span><span class="nm">{{ s.first }}</span></div>
                   {% endif %}
                 {% endfor %}
+              </div>
+            {% endif %}
+            {% if stu.wait %}
+              <div class="sub-h">Menunggu verifikasi guru 🕒</div>
+              <div class="who">
+                {% for s in stu.wait %}<div class="stu wait"><span class="av av{{ s.av }}">{{ s.ini }}</span><span class="nm">{{ s.first }}</span><span class="st" aria-hidden="true">🕒</span></div>{% endfor %}
               </div>
             {% endif %}
             {% if stu.paid %}
@@ -185,7 +217,7 @@
     <label class="f" for="f-desc">Buat apa?
       <input class="field" id="f-desc" name="description" maxlength="200" placeholder="Beli spidol whiteboard" required>
     </label>
-    <p class="hint">{{ approval_note }}</p>
+    <p class="hint">{{ approval_note }}{% if gate %} Semua catatan menunggu verifikasi Wali Kelas dulu.{% endif %}</p>
     <div class="row-end">
       <button class="btn text" type="button" data-close>Batal</button>
       <button class="btn fill" type="submit">Simpan</button>

@@ -34,6 +34,8 @@ from .config import (
     POCKET_CONFIG,
     APPROVAL_THRESHOLD,
     APPROVALS_NEEDED,
+    TEACHER_VERIFICATION,
+    PIN_WALI,
 )
 from .formatters import format_rupiah
 
@@ -96,6 +98,7 @@ class CekasDB:
         self.conn.row_factory = sqlite3.Row
         self._lock = threading.RLock()
         self.on_change = None  # callable tanpa argumen; dipanggil setelah setiap penulisan
+        self.require_teacher = TEACHER_VERIFICATION  # True = transaksi ditahan sampai Wali Kelas menyetujui
         self._init_schema()
 
     def _notify(self):
@@ -211,6 +214,28 @@ class CekasDB:
                 );
             """)
             self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS pending_tx (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    class_id TEXT NOT NULL,
+                    kind TEXT NOT NULL,            -- tx | dues | reverse
+                    tx_type TEXT,                  -- in | out (untuk tx)
+                    amount INTEGER NOT NULL DEFAULT 0,
+                    category TEXT,
+                    description TEXT NOT NULL DEFAULT '',
+                    input_by TEXT NOT NULL,
+                    submitter_tg INTEGER NOT NULL,
+                    nis TEXT,
+                    week_num INTEGER,
+                    target_tx_id INTEGER,
+                    status TEXT NOT NULL DEFAULT 'pending', -- pending|verified|rejected|cancelled|failed
+                    created_at TEXT NOT NULL,
+                    decided_at TEXT,
+                    decided_by TEXT,
+                    tx_id INTEGER,
+                    note TEXT
+                );
+            """)
+            self.conn.execute("""
                 CREATE TABLE IF NOT EXISTS pin_attempts (
                     telegram_id INTEGER PRIMARY KEY,
                     fails INTEGER NOT NULL DEFAULT 0,
@@ -223,6 +248,10 @@ class CekasDB:
             for col in ("prev_hash", "hash"):
                 if col not in cols:
                     self.conn.execute(f"ALTER TABLE transactions ADD COLUMN {col} TEXT")
+
+            ccols = {r["name"] for r in self.conn.execute("PRAGMA table_info(classes)")}
+            if "pin_wali" not in ccols:
+                self.conn.execute("ALTER TABLE classes ADD COLUMN pin_wali TEXT")
 
             # Satu NIS hanya boleh terikat ke satu akun Telegram
             try:
@@ -276,6 +305,11 @@ class CekasDB:
                     self.conn.execute("UPDATE classes SET pin_bendahara = ? WHERE id = ?", (_hash_pin(legacy), class_id))
                 row = self.conn.execute("SELECT * FROM classes WHERE id = ?", (class_id,)).fetchone()
 
+            if PIN_WALI and not row["pin_wali"]:
+                with self.conn:
+                    self.conn.execute("UPDATE classes SET pin_wali = ? WHERE id = ?", (_hash_pin(PIN_WALI), class_id))
+                row = self.conn.execute("SELECT * FROM classes WHERE id = ?", (class_id,)).fetchone()
+
             data = dict(row)
             data["alokasi"] = json.loads(data["alokasi"])
             if initial_pin:
@@ -295,6 +329,15 @@ class CekasDB:
             self.conn.execute("UPDATE classes SET pin_bendahara = ? WHERE id = ?", (_hash_pin(new_pin), class_id))
 
     # ---------------------------------------------------------------- whitelist
+    @_mutating
+    def set_wali_pin(self, class_id: str, new_pin: str):
+        new_pin = new_pin.strip()
+        if len(new_pin) < 6:
+            raise ValueError("PIN Wali Kelas minimal 6 karakter.")
+        self.get_or_create_class(class_id)
+        with self._lock, self.conn:
+            self.conn.execute("UPDATE classes SET pin_wali = ? WHERE id = ?", (_hash_pin(new_pin), class_id))
+
     def seed_whitelist(self, class_id: str, students: List[Dict[str, str]], replace: bool = True):
         verb = "INSERT OR REPLACE" if replace else "INSERT OR IGNORE"
         with self._lock, self.conn:
@@ -387,7 +430,7 @@ class CekasDB:
             existing = self.conn.execute(
                 "SELECT role, notif_enabled FROM members WHERE telegram_id = ?", (telegram_id,)
             ).fetchone()
-            role = existing["role"] if existing and existing["role"] == "bendahara" else "siswa"
+            role = existing["role"] if existing and existing["role"] in ("bendahara", "wali_kelas") else "siswa"
             notif = existing["notif_enabled"] if existing else 1
             self.conn.execute(
                 """INSERT OR REPLACE INTO members (class_id, telegram_id, nama, nis, role, username, notif_enabled)
@@ -402,7 +445,7 @@ class CekasDB:
         """Lepas ikatan NIS dari akun Telegram (oleh Bendahara)."""
         with self._lock, self.conn:
             cur = self.conn.execute(
-                "DELETE FROM members WHERE class_id = ? AND nis = ? AND role != 'bendahara'",
+                "DELETE FROM members WHERE class_id = ? AND nis = ? AND role NOT IN ('bendahara', 'wali_kelas')",
                 (class_id, nis.strip()),
             )
             return cur.rowcount > 0
@@ -415,9 +458,27 @@ class CekasDB:
         member = self.get_member(telegram_id)
         return bool(member and member.get("role") == "bendahara")
 
+    def is_wali(self, telegram_id: int) -> bool:
+        member = self.get_member(telegram_id)
+        return bool(member and member.get("role") == "wali_kelas")
+
+    def get_wali_ids(self, class_id: str = CLASS_ID) -> List[int]:
+        rows = self.conn.execute(
+            "SELECT telegram_id FROM members WHERE class_id = ? AND role = 'wali_kelas'", (class_id,)).fetchall()
+        return [r["telegram_id"] for r in rows]
+
     @_mutating
     def claim_bendahara(self, class_id: str, telegram_id: int, pin: str, display_name: str = "",
                         now: Optional[float] = None) -> Dict[str, Any]:
+        return self._claim_role("bendahara", "pin_bendahara", "Bendahara", class_id, telegram_id, pin, display_name, now)
+
+    @_mutating
+    def claim_wali(self, class_id: str, telegram_id: int, pin: str, display_name: str = "",
+                   now: Optional[float] = None) -> Dict[str, Any]:
+        return self._claim_role("wali_kelas", "pin_wali", "Wali Kelas", class_id, telegram_id, pin, display_name, now)
+
+    def _claim_role(self, role: str, pin_key: str, label: str, class_id: str, telegram_id: int, pin: str,
+                    display_name: str = "", now: Optional[float] = None) -> Dict[str, Any]:
         now = time.time() if now is None else now
         with self._lock:
             att = self.conn.execute(
@@ -428,7 +489,9 @@ class CekasDB:
                 return {"success": False, "error": f"Terlalu banyak percobaan. Coba lagi dalam {mins} menit."}
 
             cls = self.get_or_create_class(class_id)
-            if not _verify_pin(pin.strip(), cls["pin_bendahara"]):
+            if not cls.get(pin_key):
+                return {"success": False, "error": f"PIN {label} belum diatur. Minta admin menjalankan set-{'wali-' if role == 'wali_kelas' else ''}pin."}
+            if not _verify_pin(pin.strip(), cls[pin_key]):
                 fails = (att["fails"] if att else 0) + 1
                 locked_until = now + PIN_LOCK_SECONDS if fails >= PIN_MAX_FAILS else 0
                 with self.conn:
@@ -438,20 +501,20 @@ class CekasDB:
                     )
                 if locked_until:
                     return {"success": False, "error": "PIN salah. Akses dikunci 15 menit."}
-                return {"success": False, "error": f"PIN Bendahara tidak valid! (sisa percobaan: {PIN_MAX_FAILS - fails})"}
+                return {"success": False, "error": f"PIN {label} tidak valid! (sisa percobaan: {PIN_MAX_FAILS - fails})"}
 
             with self.conn:
                 self.conn.execute("DELETE FROM pin_attempts WHERE telegram_id = ?", (telegram_id,))
                 member = self.conn.execute("SELECT * FROM members WHERE telegram_id = ?", (telegram_id,)).fetchone()
                 if member:
-                    self.conn.execute("UPDATE members SET role = 'bendahara' WHERE telegram_id = ?", (telegram_id,))
+                    self.conn.execute("UPDATE members SET role = ? WHERE telegram_id = ?", (role, telegram_id))
                     nama = member["nama"]
                 else:
-                    nama = display_name.strip() or f"Bendahara {telegram_id}"
+                    nama = display_name.strip() or f"{label} {telegram_id}"
                     self.conn.execute(
                         """INSERT INTO members (class_id, telegram_id, nama, role, notif_enabled)
-                           VALUES (?, ?, ?, 'bendahara', 1)""",
-                        (class_id, telegram_id, nama),
+                           VALUES (?, ?, ?, ?, 1)""",
+                        (class_id, telegram_id, nama, role),
                     )
             return {"success": True, "nama": nama}
 
@@ -578,39 +641,41 @@ class CekasDB:
         self, class_id: str, tx_id: int, reason: str, reversed_by: str, telegram_id: int
     ) -> Dict[str, Any]:
         with self._lock, self.conn:
-            cur = self.conn.cursor()
-            orig_tx = cur.execute(
-                "SELECT * FROM transactions WHERE id = ? AND class_id = ?", (tx_id, class_id)
-            ).fetchone()
-            if not orig_tx:
-                raise ValueError(f"Transaksi ID #{tx_id} tidak ditemukan.")
-            if orig_tx["is_reversal"] or orig_tx["type"] == "correction":
-                raise ValueError(f"Transaksi ID #{tx_id} sudah pernah dibatalkan / dikoreksi.")
+            return self._reverse_core(self.conn.cursor(), class_id, tx_id, reason, reversed_by, telegram_id)
 
-            saldo, alokasi = self._load_balances(cur, class_id)
-            cat = orig_tx["category"]
-            orig_amount = orig_tx["amount"]
-            if orig_tx["type"] == "in":
-                saldo -= orig_amount
-                alokasi[cat] = alokasi.get(cat, 0) - orig_amount
-            else:
-                saldo += orig_amount
-                alokasi[cat] = alokasi.get(cat, 0) + orig_amount
+    def _reverse_core(self, cur, class_id: str, tx_id: int, reason: str, reversed_by: str,
+                      telegram_id: int, suffix: str = "") -> Dict[str, Any]:
+        orig_tx = cur.execute(
+            "SELECT * FROM transactions WHERE id = ? AND class_id = ?", (tx_id, class_id)
+        ).fetchone()
+        if not orig_tx:
+            raise ValueError(f"Transaksi ID #{tx_id} tidak ditemukan.")
+        if orig_tx["is_reversal"] or orig_tx["type"] == "correction":
+            raise ValueError(f"Transaksi ID #{tx_id} sudah pernah dibatalkan / dikoreksi.")
 
-            reason = (reason or "").strip()[:150] or "Koreksi oleh Bendahara"
-            correction_id = self._insert_tx_row(
-                cur, class_id, "correction", orig_amount, cat, f"KOREKSI #{tx_id}: {reason}",
-                reversed_by, telegram_id, reverses_tx_id=tx_id,
-            )
-            cur.execute("UPDATE transactions SET is_reversal = 1 WHERE id = ?", (tx_id,))
-            # Jika transaksi ini adalah pembayaran iuran, status lunas ikut dibatalkan
-            cur.execute(
-                """UPDATE weekly_dues SET is_paid = 0, paid_at = NULL, paid_by_tx_id = NULL
-                   WHERE class_id = ? AND paid_by_tx_id = ?""",
-                (class_id, tx_id),
-            )
-            self._store_balances(cur, class_id, saldo, alokasi)
+        saldo, alokasi = self._load_balances(cur, class_id)
+        cat = orig_tx["category"]
+        orig_amount = orig_tx["amount"]
+        if orig_tx["type"] == "in":
+            saldo -= orig_amount
+            alokasi[cat] = alokasi.get(cat, 0) - orig_amount
+        else:
+            saldo += orig_amount
+            alokasi[cat] = alokasi.get(cat, 0) + orig_amount
 
+        reason = (reason or "").strip()[:130] or "Koreksi oleh Bendahara"
+        correction_id = self._insert_tx_row(
+            cur, class_id, "correction", orig_amount, cat, f"KOREKSI #{tx_id}: {reason}{suffix}",
+            reversed_by, telegram_id, reverses_tx_id=tx_id,
+        )
+        cur.execute("UPDATE transactions SET is_reversal = 1 WHERE id = ?", (tx_id,))
+        # Jika transaksi ini adalah pembayaran iuran, status lunas ikut dibatalkan
+        cur.execute(
+            """UPDATE weekly_dues SET is_paid = 0, paid_at = NULL, paid_by_tx_id = NULL
+               WHERE class_id = ? AND paid_by_tx_id = ?""",
+            (class_id, tx_id),
+        )
+        self._store_balances(cur, class_id, saldo, alokasi)
         return {
             "correction_id": correction_id,
             "reversed_tx_id": tx_id,
@@ -624,6 +689,42 @@ class CekasDB:
         }
 
     # -------------------------------------------------------------------- dues
+    def _validate_dues(self, class_id: str, nis: str, week_num: int):
+        nis = nis.strip()
+        wl = self.get_whitelist_student(class_id, nis)
+        if not wl:
+            raise ValueError(f"NIS {nis} tidak ditemukan di daftar siswa kelas {class_id}.")
+        if wl["role"] == "wali_kelas":
+            raise ValueError("Wali kelas tidak dikenai iuran.")
+        if not isinstance(week_num, int) or week_num < 1 or week_num > 52:
+            raise ValueError("Nomor minggu harus antara 1 sampai 52.")
+        return nis, wl
+
+    def _dues_core(self, cur, class_id: str, nis: str, week_num: int, recorded_by: str, telegram_id: int,
+                   wl: Dict[str, Any], nominal: int, auto_tx: bool = True, suffix: str = "") -> Dict[str, Any]:
+        """Catat uang + tandai lunas. Tanpa commit; pemanggil membuka transaksi."""
+        existing = cur.execute(
+            "SELECT is_paid FROM weekly_dues WHERE class_id = ? AND nis = ? AND week_num = ?",
+            (class_id, nis, week_num),
+        ).fetchone()
+        if existing and existing["is_paid"]:
+            raise ValueError(f"Siswa {wl['nama_resmi']} (NIS {nis}) sudah tercatat LUNAS untuk Minggu ke-{week_num}.")
+        tx_id = None
+        saldo_total = self._load_balances(cur, class_id)[0]
+        if auto_tx:
+            res = self._apply_tx(
+                cur, class_id, "in", nominal, "operasional",
+                f"Iuran kas minggu ke-{week_num} ({wl['nama_resmi']}){suffix}", recorded_by, telegram_id,
+            )
+            tx_id, saldo_total = res["tx_id"], res["saldo_total"]
+        cur.execute(
+            """INSERT OR REPLACE INTO weekly_dues (class_id, nis, week_num, is_paid, paid_at, paid_by_tx_id)
+               VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, ?)""",
+            (class_id, nis, week_num, tx_id),
+        )
+        return {"nis": nis, "nama": wl["nama_resmi"], "week_num": week_num, "nominal": nominal,
+                "tx_id": tx_id, "saldo_total": saldo_total}
+
     @_mutating
     def mark_dues_paid(
         self,
@@ -634,50 +735,205 @@ class CekasDB:
         telegram_id: int,
         auto_tx: bool = True,
     ) -> Dict[str, Any]:
-        nis = nis.strip()
-        wl = self.get_whitelist_student(class_id, nis)
-        if not wl:
-            raise ValueError(f"NIS {nis} tidak ditemukan di daftar siswa kelas {class_id}.")
-        if wl["role"] == "wali_kelas":
-            raise ValueError("Wali kelas tidak dikenai iuran.")
-        if not isinstance(week_num, int) or week_num < 1 or week_num > 52:
-            raise ValueError("Nomor minggu harus antara 1 sampai 52.")
-
+        """Langsung mencatat iuran (tanpa antrean guru). Aplikasi memakai `submit_dues`."""
+        nis, wl = self._validate_dues(class_id, nis, week_num)
         with self._lock:
-            cls = self.get_or_create_class(class_id)
-            nominal = cls["nominal_iuran"]
+            nominal = self.get_or_create_class(class_id)["nominal_iuran"]
             with self.conn:  # satu transaksi atomik: catat uang + tandai lunas
-                cur = self.conn.cursor()
-                existing = cur.execute(
-                    "SELECT is_paid FROM weekly_dues WHERE class_id = ? AND nis = ? AND week_num = ?",
-                    (class_id, nis, week_num),
-                ).fetchone()
-                if existing and existing["is_paid"]:
-                    raise ValueError(
-                        f"Siswa {wl['nama_resmi']} (NIS {nis}) sudah tercatat LUNAS untuk Minggu ke-{week_num}."
-                    )
-                tx_id = None
-                saldo_total = cls["saldo"]
-                if auto_tx:
-                    res = self._apply_tx(
-                        cur, class_id, "in", nominal, "operasional",
-                        f"Iuran kas minggu ke-{week_num} ({wl['nama_resmi']})", recorded_by, telegram_id,
-                    )
-                    tx_id, saldo_total = res["tx_id"], res["saldo_total"]
-                cur.execute(
-                    """INSERT OR REPLACE INTO weekly_dues (class_id, nis, week_num, is_paid, paid_at, paid_by_tx_id)
-                       VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, ?)""",
-                    (class_id, nis, week_num, tx_id),
-                )
+                return self._dues_core(self.conn.cursor(), class_id, nis, week_num, recorded_by,
+                                       telegram_id, wl, nominal, auto_tx)
 
-        return {
-            "nis": nis,
-            "nama": wl["nama_resmi"],
-            "week_num": week_num,
-            "nominal": nominal,
-            "tx_id": tx_id,
-            "saldo_total": saldo_total,
-        }
+    # ------------------------------------------------------ verifikasi Wali Kelas
+    def _insert_pending(self, cur, class_id: str, kind: str, *, tx_type=None, amount: int = 0, category=None,
+                        description: str = "", input_by: str, submitter_tg: int, nis=None, week_num=None,
+                        target_tx_id=None) -> int:
+        cur.execute(
+            """INSERT INTO pending_tx (class_id, kind, tx_type, amount, category, description, input_by,
+                                       submitter_tg, nis, week_num, target_tx_id, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (class_id, kind, tx_type, amount, category, description, input_by, submitter_tg, nis, week_num,
+             target_tx_id, _utc_now_str()),
+        )
+        return cur.lastrowid
+
+    def _pocket_available(self, cur, class_id: str, cat: str) -> int:
+        """Saldo pos dikurangi pengeluaran yang sedang menunggu guru (agar tidak dijanjikan dua kali)."""
+        _, alokasi = self._load_balances(cur, class_id)
+        held = cur.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM pending_tx WHERE class_id = ? AND kind = 'tx' "
+            "AND tx_type = 'out' AND status = 'pending' AND category = ?", (class_id, cat)).fetchone()[0]
+        return alokasi.get(cat, 0) - held
+
+    @_mutating
+    def submit_transaction(self, class_id: str, tx_type: str, amount: int, category: str, description: str,
+                           input_by: str, telegram_id: int) -> Dict[str, Any]:
+        """Pintu pencatatan aplikasi. Dengan verifikasi guru aktif: dititipkan, saldo BELUM berubah."""
+        if not self.require_teacher:
+            res = self.record_transaction(class_id, tx_type, amount, category, description, input_by, telegram_id)
+            res["pending"] = False
+            return res
+        if not isinstance(amount, int) or amount <= 0:
+            raise ValueError("Nominal transaksi harus bilangan bulat lebih dari 0!")
+        if tx_type not in ("in", "out"):
+            raise ValueError(f"Tipe transaksi '{tx_type}' tidak valid.")
+        cat = category if category in POCKET_CONFIG else "operasional"
+        desc = (description or "").strip()[:170] or ("Pemasukan kas" if tx_type == "in" else "Pengeluaran kas")
+        self.get_or_create_class(class_id)
+        with self._lock, self.conn:
+            cur = self.conn.cursor()
+            if tx_type == "out":
+                avail = self._pocket_available(cur, class_id, cat)
+                if amount > avail:
+                    raise ValueError(
+                        f"Saldo pos {POCKET_CONFIG[cat]['label']} tidak cukup "
+                        f"(tersedia {format_rupiah(avail)} setelah pengajuan lain, diminta {format_rupiah(amount)}).")
+            pid = self._insert_pending(cur, class_id, "tx", tx_type=tx_type, amount=amount, category=cat,
+                                       description=desc, input_by=input_by, submitter_tg=telegram_id)
+        return {"pending": True, "pending_id": pid, "type": tx_type, "amount": amount, "category": cat,
+                "description": desc, "input_by": input_by}
+
+    @_mutating
+    def submit_dues(self, class_id: str, nis: str, week_num: int, recorded_by: str, telegram_id: int) -> Dict[str, Any]:
+        if not self.require_teacher:
+            res = self.mark_dues_paid(class_id, nis, week_num, recorded_by, telegram_id)
+            res["pending"] = False
+            return res
+        nis, wl = self._validate_dues(class_id, nis, week_num)
+        nominal = self.get_or_create_class(class_id)["nominal_iuran"]
+        with self._lock, self.conn:
+            cur = self.conn.cursor()
+            paid = cur.execute("SELECT is_paid FROM weekly_dues WHERE class_id=? AND nis=? AND week_num=?",
+                               (class_id, nis, week_num)).fetchone()
+            if paid and paid["is_paid"]:
+                raise ValueError(f"{wl['nama_resmi']} sudah LUNAS untuk minggu ke-{week_num}.")
+            if cur.execute("SELECT 1 FROM pending_tx WHERE class_id=? AND kind='dues' AND nis=? AND week_num=? "
+                           "AND status='pending'", (class_id, nis, week_num)).fetchone():
+                raise ValueError(f"Iuran {wl['nama_resmi']} minggu ke-{week_num} sudah diajukan, tinggal menunggu guru.")
+            pid = self._insert_pending(cur, class_id, "dues", amount=nominal, category="operasional",
+                                       description=f"Iuran minggu ke-{week_num} ({wl['nama_resmi']})",
+                                       input_by=recorded_by, submitter_tg=telegram_id, nis=nis, week_num=week_num)
+        return {"pending": True, "pending_id": pid, "nis": nis, "nama": wl["nama_resmi"], "week_num": week_num,
+                "nominal": nominal}
+
+    @_mutating
+    def submit_reverse(self, class_id: str, tx_id: int, reason: str, reversed_by: str, telegram_id: int) -> Dict[str, Any]:
+        if not self.require_teacher:
+            res = self.reverse_transaction(class_id, tx_id, reason, reversed_by, telegram_id)
+            res["pending"] = False
+            return res
+        with self._lock, self.conn:
+            cur = self.conn.cursor()
+            orig = cur.execute("SELECT * FROM transactions WHERE id=? AND class_id=?", (tx_id, class_id)).fetchone()
+            if not orig:
+                raise ValueError(f"Transaksi ID #{tx_id} tidak ditemukan.")
+            if orig["is_reversal"] or orig["type"] == "correction":
+                raise ValueError(f"Transaksi ID #{tx_id} sudah pernah dibatalkan / dikoreksi.")
+            if cur.execute("SELECT 1 FROM pending_tx WHERE class_id=? AND kind='reverse' AND target_tx_id=? "
+                           "AND status='pending'", (class_id, tx_id)).fetchone():
+                raise ValueError(f"Koreksi untuk #{tx_id} sudah diajukan, tinggal menunggu guru.")
+            pid = self._insert_pending(cur, class_id, "reverse", amount=orig["amount"], category=orig["category"],
+                                       description=(reason or "").strip()[:130] or "Koreksi oleh Bendahara",
+                                       input_by=reversed_by, submitter_tg=telegram_id, target_tx_id=tx_id)
+        return {"pending": True, "pending_id": pid, "tx_id": tx_id, "amount": orig["amount"],
+                "orig_description": orig["description"]}
+
+    def get_pending(self, pid: int) -> Optional[Dict[str, Any]]:
+        row = self.conn.execute("SELECT * FROM pending_tx WHERE id = ?", (pid,)).fetchone()
+        return dict(row) if row else None
+
+    def list_pending(self, class_id: str = CLASS_ID, status: Optional[str] = "pending", kind: Optional[str] = None,
+                     limit: int = 200) -> List[Dict[str, Any]]:
+        q, args = "SELECT * FROM pending_tx WHERE class_id = ?", [class_id]
+        if status:
+            q += " AND status = ?"; args.append(status)
+        if kind:
+            q += " AND kind = ?"; args.append(kind)
+        q += " ORDER BY id ASC LIMIT ?"; args.append(limit)
+        return [dict(r) for r in self.conn.execute(q, args).fetchall()]
+
+    def pending_dues_nis(self, class_id: str, week_num: int) -> set:
+        return {r["nis"] for r in self.conn.execute(
+            "SELECT nis FROM pending_tx WHERE class_id=? AND kind='dues' AND week_num=? AND status='pending'",
+            (class_id, week_num))}
+
+    def _require_wali(self, telegram_id: int):
+        if not self.is_wali(telegram_id):
+            raise ValueError("Hanya Wali Kelas yang dapat memverifikasi. Aktifkan dengan /klaimwali <PIN>.")
+
+    @_mutating
+    def verify_pending(self, pid: int, wali_tg: int, wali_name: str) -> Dict[str, Any]:
+        """Wali Kelas menyetujui: barulah transaksi masuk ledger (nama guru tercatat di keterangan & hash)."""
+        self._require_wali(wali_tg)
+        suffix = f" ✓ {wali_name}"
+        with self._lock, self.conn:
+            cur = self.conn.cursor()
+            p = cur.execute("SELECT * FROM pending_tx WHERE id = ?", (pid,)).fetchone()
+            if not p:
+                raise ValueError(f"Pengajuan #{pid} tidak ditemukan.")
+            if p["status"] != "pending":
+                raise ValueError(f"Pengajuan #{pid} sudah diproses ({p['status']}).")
+            res, note, status, tx_id = None, None, "verified", None
+            try:
+                if p["kind"] == "tx":
+                    res = self._apply_tx(cur, p["class_id"], p["tx_type"], p["amount"], p["category"],
+                                         p["description"][:200 - len(suffix)] + suffix, p["input_by"], p["submitter_tg"])
+                    tx_id = res["tx_id"]
+                elif p["kind"] == "dues":
+                    wl = self.get_whitelist_student(p["class_id"], p["nis"])
+                    res = self._dues_core(cur, p["class_id"], p["nis"], p["week_num"], p["input_by"],
+                                          p["submitter_tg"], wl, p["amount"], suffix=suffix)
+                    tx_id = res["tx_id"]
+                else:  # reverse
+                    res = self._reverse_core(cur, p["class_id"], p["target_tx_id"], p["description"], p["input_by"],
+                                             p["submitter_tg"], suffix=suffix)
+                    tx_id = res["correction_id"]
+            except ValueError as err:  # kondisi berubah sejak diajukan (saldo habis, sudah lunas, dll.)
+                res, status, note = None, "failed", str(err)
+            cur.execute("UPDATE pending_tx SET status=?, decided_at=?, decided_by=?, tx_id=?, note=? WHERE id=?",
+                        (status, _utc_now_str(), wali_name, tx_id, note, pid))
+        return {"status": status, "note": note, "pending": self.get_pending(pid), "result": res}
+
+    @_mutating
+    def reject_pending(self, pid: int, wali_tg: int, wali_name: str, note: str = "") -> Dict[str, Any]:
+        self._require_wali(wali_tg)
+        with self._lock, self.conn:
+            p = self.conn.execute("SELECT status FROM pending_tx WHERE id = ?", (pid,)).fetchone()
+            if not p:
+                raise ValueError(f"Pengajuan #{pid} tidak ditemukan.")
+            if p["status"] != "pending":
+                raise ValueError(f"Pengajuan #{pid} sudah diproses ({p['status']}).")
+            self.conn.execute("UPDATE pending_tx SET status='rejected', decided_at=?, decided_by=?, note=? WHERE id=?",
+                              (_utc_now_str(), wali_name, (note or "").strip()[:150] or None, pid))
+        return self.get_pending(pid)
+
+    @_mutating
+    def cancel_pending(self, pid: int, telegram_id: int, as_admin: bool = False) -> Dict[str, Any]:
+        with self._lock, self.conn:
+            p = self.conn.execute("SELECT * FROM pending_tx WHERE id = ?", (pid,)).fetchone()
+            if not p:
+                raise ValueError(f"Pengajuan #{pid} tidak ditemukan.")
+            if p["status"] != "pending":
+                raise ValueError(f"Pengajuan #{pid} sudah diproses ({p['status']}).")
+            if not as_admin and telegram_id != p["submitter_tg"] and not self.is_bendahara(telegram_id):
+                raise ValueError("Hanya pengaju atau Bendahara yang dapat membatalkan pengajuan.")
+            self.conn.execute("UPDATE pending_tx SET status='cancelled', decided_at=? WHERE id=?",
+                              (_utc_now_str(), pid))
+        return self.get_pending(pid)
+
+    def verify_dues_week(self, class_id: str, week_num: int, wali_tg: int, wali_name: str) -> Dict[str, Any]:
+        """Verifikasi semua iuran yang menunggu untuk satu minggu (satu ketukan)."""
+        self._require_wali(wali_tg)
+        ok, failed, total = 0, 0, 0
+        for p in self.list_pending(class_id, "pending", "dues"):
+            if p["week_num"] != week_num:
+                continue
+            r = self.verify_pending(p["id"], wali_tg, wali_name)
+            if r["status"] == "verified":
+                ok += 1
+                total += p["amount"]
+            else:
+                failed += 1
+        return {"week_num": week_num, "verified": ok, "failed": failed, "total": total}
 
     def get_dues_status(self, class_id: str = CLASS_ID, week_num: int = 1) -> Dict[str, Any]:
         students = self.get_all_whitelist_students(class_id)
@@ -880,8 +1136,17 @@ class CekasDB:
                 (pid,)).fetchone()
             yes, no = tally["y"] or 0, tally["n"] or 0
             tx = None
+            pend_id = None
             status = "open"
-            if yes >= prop["needed"]:
+            if yes >= prop["needed"] and self.require_teacher:
+                pend_id = self._insert_pending(
+                    cur, prop["class_id"], "tx", tx_type="out", amount=prop["amount"], category=prop["category"],
+                    description=f"{prop['description']} (usulan #{pid}, disetujui {yes} siswa)",
+                    input_by=prop["proposed_by"], submitter_tg=prop["proposer_tg"])
+                status = "approved"
+                cur.execute("UPDATE proposals SET status='approved', decided_at=?, note=? WHERE id=?",
+                            (_utc_now_str(), f"menunggu verifikasi guru (pengajuan #{pend_id})", pid))
+            elif yes >= prop["needed"]:
                 try:
                     tx = self._apply_tx(
                         cur, prop["class_id"], "out", prop["amount"], prop["category"],
@@ -900,6 +1165,7 @@ class CekasDB:
                             (_utc_now_str(), pid))
         result = self.get_proposal(pid)
         result["tx"] = tx
+        result["pending_id"] = pend_id
         return result
 
     @_mutating

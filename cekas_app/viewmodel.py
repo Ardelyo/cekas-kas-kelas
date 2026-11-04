@@ -1,4 +1,4 @@
-﻿"""Penyusun data tampilan web & laporan (murni; tidak menyentuh HTTP)."""
+"""Penyusun data tampilan web & laporan (murni; tidak menyentuh HTTP)."""
 
 from datetime import datetime, timezone
 from typing import Any, Dict, List
@@ -41,7 +41,10 @@ def students_view(db, class_id: str, week: int) -> Dict[str, Any]:
         return {"nis": s["nis"], "nama": s["nama_resmi"], "first": parts[0], "ini": ini,
                 "av": int(s["nis"][-3:] or 0) % 6, "paid": paid}
 
-    return {"paid": [one(s, True) for s in st["paid_students"]], "unpaid": [one(s, False) for s in st["unpaid_students"]],
+    waiting_nis = db.pending_dues_nis(class_id, week) if db.require_teacher else set()
+    return {"paid": [one(s, True) for s in st["paid_students"]],
+            "unpaid": [one(s, False) for s in st["unpaid_students"] if s["nis"] not in waiting_nis],
+            "wait": [one(s, False) for s in st["unpaid_students"] if s["nis"] in waiting_nis],
             "total": st["total_students"], "paid_n": st["paid_count"], "pct": round(st["percentage"])}
 
 

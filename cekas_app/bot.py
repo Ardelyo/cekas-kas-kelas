@@ -1,4 +1,4 @@
-﻿"""
+"""
 CEKAS Telegram Bot (Pure Python).
 
 Prinsip: setiap perintah slash dan setiap tombol memakai layar yang sama (tg_ui.py),
@@ -96,6 +96,20 @@ async def notify_many(context: ContextTypes.DEFAULT_TYPE, ids, text: str, spec=N
         except Exception as exc:  # pengguna belum membuka DM bot / memblokir
             logger.debug("Kirim ke %s gagal: %s", chat_id, exc)
     return sent
+
+
+async def notify_wali(context, p: dict):
+    """Beri tahu semua Wali Kelas bahwa ada pengajuan baru (dengan tombol setujui/tolak)."""
+    if p:
+        await notify_many(context, db.get_wali_ids(CLASS_ID), ui.pending_for_wali(p), ui.verify_buttons(p["id"]))
+
+
+async def _after_decision(context, p: dict, res=None):
+    """Kabari pengaju; pemasukan/pengeluaran yang disetujui juga disiarkan ke siswa."""
+    if p["submitter_tg"]:
+        await notify_many(context, [p["submitter_tg"]], ui.decision_card(p, res), [ui.nav()])
+    if p["status"] == "verified" and p["kind"] == "tx" and res:
+        await broadcast_tx(context, p["tx_type"], res, exclude=p["submitter_tg"])
 
 
 async def broadcast_tx(context, kind: str, res: dict, exclude: int):
@@ -220,6 +234,31 @@ async def cmd_klaim(update, context):
         parse_mode=HTML, reply_markup=_markup([[("➕ Catat Kas", "c"), ("📋 Tagihan", f"t:{db.active_week(CLASS_ID)}:0")], ui.nav()]))
 
 
+async def cmd_klaimwali(update, context):
+    if not context.args:
+        await say(update, "\n".join([ui.head("AKSES WALI KELAS", "🎓"), "", "Ketik: <code>/klaimwali PIN</code>",
+                                     "<i>Lakukan lewat chat pribadi agar PIN tidak terbaca orang lain.</i>"]))
+        return
+    user = update.effective_user
+    if update.effective_chat.type != "private":
+        try:
+            await update.effective_message.delete()
+        except Exception:
+            pass
+    res = db.claim_wali(CLASS_ID, user.id, context.args[0].strip(), user.first_name or "Wali Kelas")
+    if not res["success"]:
+        await context.bot.send_message(update.effective_chat.id, "\n".join([ui.head("AKSES DITOLAK", "❌"), "", _e(res["error"])]), parse_mode=HTML)
+        return
+    await context.bot.send_message(
+        update.effective_chat.id,
+        "\n".join([ui.head("WALI KELAS AKTIF", "🎓"), "", f"Halo <b>{_e(res['nama'])}</b>. Semua pengajuan kas akan menunggu persetujuan Bapak/Ibu."]),
+        parse_mode=HTML, reply_markup=_markup([[("✅ Lihat pengajuan", "w")], ui.nav()]))
+
+
+async def cmd_verifikasi(update, context):
+    await show(update, *ui.screen_verifikasi(db, db.is_wali(update.effective_user.id)))
+
+
 async def cmd_notif(update, context):
     if not me(update):
         await say(update, "⚠️ Daftar dulu: <code>/daftar NIS</code>")
@@ -259,9 +298,14 @@ async def _commit_or_propose(update: Update, context, kind: str, amount: int, ca
                   ui.proposal_kb(p, can_vote=False, can_cancel=True))
         return
     try:
-        res = db.record_transaction(CLASS_ID, kind, amount, cat, desc, name, user.id)
+        res = db.submit_transaction(CLASS_ID, kind, amount, cat, desc, name, user.id)
     except ValueError as err:
         await say(update, f"❌ {_e(str(err))}", [ui.nav()])
+        return
+    if res["pending"]:
+        await say(update, ui.pending_card(res, "tx"),
+                  [[(f"Batalkan pengajuan #{res['pending_id']}", f"pc:{res['pending_id']}")], ui.nav(("⏳ Antrean", "w"))])
+        await notify_wali(context, db.get_pending(res["pending_id"]))
         return
     await say(update, ui.receipt_card(kind, res), [[(f"↩️ Koreksi #{res['tx_id']}", f"k:{res['tx_id']}")], ui.nav(("💰 Saldo", "s"))])
     await broadcast_tx(context, kind, res, exclude=user.id)
@@ -299,9 +343,16 @@ async def cmd_bayar(update, context):
         return
     try:
         week = int(context.args[1]) if len(context.args) > 1 else db.active_week(CLASS_ID)
-        res = db.mark_dues_paid(CLASS_ID, context.args[0].strip(), week, actor_name(update), update.effective_user.id)
+        first = not db.pending_dues_nis(CLASS_ID, week)
+        res = db.submit_dues(CLASS_ID, context.args[0].strip(), week, actor_name(update), update.effective_user.id)
     except ValueError as err:
         await say(update, f"❌ {_e(str(err))}", [ui.nav()])
+        return
+    if res["pending"]:
+        await say(update, ui.pending_card(res, "dues"),
+                  [[(f"Batalkan pengajuan #{res['pending_id']}", f"pc:{res['pending_id']}")], ui.nav(("📋 Tagihan", f"t:{week}:0"))])
+        if first:
+            await notify_wali(context, db.get_pending(res["pending_id"]))
         return
     await say(update, ui.dues_card(res), [[(f"↩️ Koreksi #{res['tx_id']}", f"k:{res['tx_id']}")], ui.nav(("📋 Tagihan", f"t:{res['week_num']}:0"))])
 
@@ -319,14 +370,20 @@ async def cmd_koreksi(update, context):
     except ValueError:
         await say(update, "⚠️ ID harus angka, mis. <code>/koreksi 5 salah ketik</code>")
         return
-    await _do_reverse(update, tx_id, " ".join(context.args[1:]).strip() or "Koreksi oleh Bendahara")
+    await _do_reverse(update, tx_id, " ".join(context.args[1:]).strip() or "Koreksi oleh Bendahara", context)
 
 
-async def _do_reverse(update: Update, tx_id: int, reason: str):
+async def _do_reverse(update: Update, tx_id: int, reason: str, context=None):
     try:
-        res = db.reverse_transaction(CLASS_ID, tx_id, reason, actor_name(update), update.effective_user.id)
+        res = db.submit_reverse(CLASS_ID, tx_id, reason, actor_name(update), update.effective_user.id)
     except ValueError as err:
         await say(update, f"❌ {_e(str(err))}", [ui.nav()])
+        return
+    if res["pending"]:
+        await say(update, ui.pending_card(res, "reverse"),
+                  [[(f"Batalkan pengajuan #{res['pending_id']}", f"pc:{res['pending_id']}")], ui.nav(("⏳ Antrean", "w"))])
+        if context is not None:
+            await notify_wali(context, db.get_pending(res["pending_id"]))
         return
     await say(update, ui.correction_card(res, reason), [ui.nav(("💰 Saldo", "s"))])
 
@@ -422,7 +479,11 @@ async def _on_vote(update: Update, context, pid: int, vote: str):
         return
     await toast(update, "Suara tercatat ✓")
     await show(update, ui.proposal_card(p, "yes" if vote == "y" else "no"), ui.proposal_kb(p, can_vote=False))
-    if p["status"] == "approved":
+    if p["status"] == "approved" and p.get("pending_id"):
+        await notify_many(context, [p["proposer_tg"]],
+                          ui.proposal_card(p) + "\n\n⏳ Disetujui siswa. Tinggal menunggu verifikasi Wali Kelas.", [ui.nav()])
+        await notify_wali(context, db.get_pending(p["pending_id"]))
+    elif p["status"] == "approved":
         await notify_many(context, [p["proposer_tg"]], ui.proposal_card(p), [ui.nav()])
         await broadcast_tx(context, "out", p["tx"], exclude=p["proposer_tg"])
     elif p["status"] in ("rejected", "failed"):
@@ -448,11 +509,56 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not await require_bendahara(update):
                 return
             try:
-                res = db.mark_dues_paid(CLASS_ID, parts[1], int(parts[2]), actor_name(update), uid)
-                await toast(update, f"✅ {res['nama'].split()[0]} lunas")
+                first = not db.pending_dues_nis(CLASS_ID, int(parts[2]))
+                res = db.submit_dues(CLASS_ID, parts[1], int(parts[2]), actor_name(update), uid)
+                if res["pending"]:
+                    await toast(update, f"⏳ {res['nama'].split()[0]}: dikirim ke guru")
+                    if first:
+                        await notify_wali(context, db.get_pending(res["pending_id"]))
+                else:
+                    await toast(update, f"✅ {res['nama'].split()[0]} lunas")
             except ValueError as err:
                 await toast(update, str(err), alert=True)
             await show(update, *ui.screen_tagihan(db, int(parts[2]), int(parts[3]), True, me(update)))
+        elif key == "w":
+            await show(update, *ui.screen_verifikasi(db, db.is_wali(uid)))
+        elif key in ("wv", "wr", "wd"):
+            if not db.is_wali(uid):
+                await toast(update, "Hanya Wali Kelas yang dapat memverifikasi. Aktifkan dengan /klaimwali PIN.", alert=True)
+                return
+            name = actor_name(update)
+            try:
+                if key == "wv":
+                    r = db.verify_pending(int(parts[1]), uid, name)
+                    if r["status"] == "verified":
+                        await toast(update, "✅ Diverifikasi")
+                    else:
+                        await toast(update, f"Gagal dicatat: {r['note']}", alert=True)
+                    await _after_decision(context, r["pending"], r["result"])
+                elif key == "wr":
+                    p = db.reject_pending(int(parts[1]), uid, name, "Ditolak oleh Wali Kelas")
+                    await toast(update, "Pengajuan ditolak")
+                    await _after_decision(context, p)
+                else:
+                    week = int(parts[1])
+                    before = db.list_pending(CLASS_ID, "pending", "dues")
+                    r = db.verify_dues_week(CLASS_ID, week, uid, name)
+                    await toast(update, f"✅ {r['verified']} iuran diverifikasi ({format_rupiah(r['total'])})", alert=bool(r["failed"]))
+                    for sub_tg in {p["submitter_tg"] for p in before if p["week_num"] == week and p["submitter_tg"]}:
+                        await notify_many(context, [sub_tg], "\n".join([
+                            ui.head("IURAN DIVERIFIKASI", "✅"), "",
+                            f"Iuran minggu {week}: <b>{r['verified']}</b> siswa disetujui <b>{_e(name)}</b> ✓",
+                            f"Total <code>{_e(format_rupiah(r['total']))}</code> masuk ke kas."]), [ui.nav()])
+            except ValueError as err:
+                await toast(update, str(err), alert=True)
+            await show(update, *ui.screen_verifikasi(db, True))
+        elif key == "pc":
+            try:
+                db.cancel_pending(int(parts[1]), uid)
+                await toast(update, "Pengajuan dibatalkan")
+            except ValueError as err:
+                await toast(update, str(err), alert=True)
+            await show(update, *ui.screen_verifikasi(db, db.is_wali(uid)))
         elif key == "me":
             await show(update, *ui.screen_profil(db, me(update)))
         elif key == "notif":
@@ -485,7 +591,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not await require_bendahara(update):
                 return
             await toast(update, "Memproses…")
-            await _do_reverse(update, int(parts[1]), "Dikoreksi via tombol")
+            await _do_reverse(update, int(parts[1]), "Dikoreksi via tombol", context)
             await show(update, *ui.screen_saldo(db))
         elif key == "c":
             await _on_wizard(update, context, parts)
@@ -531,6 +637,7 @@ COMMANDS_ALL = [
     ("insight", "Prakiraan & peringatan"), ("rekap", "Rekap siap tempel ke WhatsApp"),
     ("grafik", "Grafik alokasi"), ("excel", "Unduh buku kas Excel"), ("cek", "Verifikasi buku kas"),
     ("daftar", "Daftar dengan NIS"), ("profil", "Profil & iuran saya"), ("notif", "Atur notifikasi"),
+    ("verifikasi", "Antrean verifikasi Wali Kelas"), ("klaimwali", "Aktivasi Wali Kelas dengan PIN"),
 ]
 COMMANDS_BENDAHARA = COMMANDS_ALL + [
     ("catat", "Catat kas dengan tombol"), ("tambah", "Catat pemasukan cepat"), ("kurang", "Catat pengeluaran cepat"),
@@ -556,7 +663,7 @@ def build_telegram_app() -> Application:
         "tagihan": cmd_tagihan, "profil": cmd_profil, "insight": cmd_insight, "usulan": cmd_usulan,
         "cek": cmd_cek, "rekap": cmd_rekap, "grafik": cmd_grafik, "excel": cmd_excel, "spj": cmd_spj,
         "daftar": cmd_daftar, "klaimbendahara": cmd_klaim, "notif": cmd_notif, "lepas": cmd_lepas,
-        "catat": cmd_catat, "tambah": cmd_tambah, "kurang": cmd_kurang, "bayar": cmd_bayar, "koreksi": cmd_koreksi,
+        "klaimwali": cmd_klaimwali, "verifikasi": cmd_verifikasi, "catat": cmd_catat, "tambah": cmd_tambah, "kurang": cmd_kurang, "bayar": cmd_bayar, "koreksi": cmd_koreksi,
     }
     for names, fn in handlers.items():
         app.add_handler(CommandHandler(list(names) if isinstance(names, tuple) else names, fn))

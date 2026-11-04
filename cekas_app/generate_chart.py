@@ -1,4 +1,4 @@
-﻿"""
+"""
 Grafik kas untuk Telegram & unduhan (PNG). Bahasa visual sama dengan web:
 kartu tonal membulat per pos + kartu saldo besar. Tidak memakai emoji (font matplotlib tidak mendukungnya).
 """

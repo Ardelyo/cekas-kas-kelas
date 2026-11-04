@@ -1,4 +1,4 @@
-﻿"""Usulan pengeluaran, insight, rekap WA, replikasi GCS, pembaca nota, dan tampilan Telegram."""
+"""Usulan pengeluaran, insight, rekap WA, replikasi GCS, pembaca nota, dan tampilan Telegram."""
 import gzip
 import json
 import tempfile

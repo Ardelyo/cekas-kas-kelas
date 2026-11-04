@@ -1,4 +1,4 @@
-﻿"""Akses web: publik read-only, tulis butuh login, webhook butuh secret, halaman & endpoint baru."""
+"""Akses web: publik read-only, tulis butuh login, webhook butuh secret, halaman & endpoint baru."""
 import unittest
 
 from fastapi.testclient import TestClient

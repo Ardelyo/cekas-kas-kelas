@@ -15,6 +15,10 @@ db = CekasDB(DB_PATH)
 db.get_or_create_class(CLASS_ID)
 db.seed_initial_students(CLASS_ID)
 
+if db.require_teacher and not db.get_or_create_class(CLASS_ID).get("pin_wali"):
+    logger.warning("Verifikasi guru AKTIF tetapi PIN Wali Kelas belum diatur: semua catatan akan menunggu tanpa batas. "
+                   "Isi PIN_WALI di .env atau jalankan: python run.py set-wali-pin <PIN>.")
+
 if store:
     store.attach(db)
     logger.info("Replikasi Cloud Storage aktif (restore: %s) -> gs://%s/%s", restore_state, GCS_BUCKET, GCS_OBJECT)

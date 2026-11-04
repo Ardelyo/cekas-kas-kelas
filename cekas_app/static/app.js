@@ -1,4 +1,4 @@
-﻿/* CEKAS — interaksi minimal: dialog catat, konfirmasi, salin teks, service worker. */
+/* CEKAS — interaksi minimal: dialog catat, konfirmasi, salin teks, service worker. */
 (function () {
   "use strict";
 

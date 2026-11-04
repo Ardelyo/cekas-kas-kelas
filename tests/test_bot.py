@@ -1,4 +1,4 @@
-﻿"""Alur bot Telegram end-to-end dengan objek Update tiruan (tanpa jaringan)."""
+"""Alur bot Telegram end-to-end dengan objek Update tiruan (tanpa jaringan)."""
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 CEKAS Configuration & School Metadata
 Satu sumber kebenaran untuk branding, pos anggaran, dan pengaturan lingkungan.
 """
@@ -36,6 +36,12 @@ WEB_ADMIN_NAME = os.getenv("WEB_ADMIN_NAME", "Bendahara (Web)")
 SECRET_KEY = os.getenv("CEKAS_SECRET_KEY", "")
 TELEGRAM_WEBHOOK_SECRET = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+
+# --- Verifikasi Wali Kelas -------------------------------------------------
+# Aktif (default): semua pemasukan, pengeluaran, iuran, dan koreksi DITAHAN sampai Wali Kelas menyetujui.
+# Wali Kelas masuk lewat /klaimwali <PIN_WALI> di bot Telegram. Set TEACHER_VERIFICATION=0 untuk mematikan.
+TEACHER_VERIFICATION = os.getenv("TEACHER_VERIFICATION", "1").strip().lower() not in ("0", "false", "off", "no")
+PIN_WALI = os.getenv("PIN_WALI", "").strip()
 
 # --- Tata kelola pengeluaran ----------------------------------------------
 # Pengeluaran >= ambang butuh persetujuan N siswa terdaftar. 0 = nonaktif.

@@ -36,6 +36,7 @@ from cekas_app.config import (
     GCP_PROJECT_ID, TELEGRAM_BOT_TOKEN, CLASS_ID, DEFAULT_PIN_BENDAHARA, DB_PATH,
     WEB_ADMIN_PASSWORD, WEB_ADMIN_NAME, SECRET_KEY, TELEGRAM_WEBHOOK_SECRET,
     APPROVAL_THRESHOLD, APPROVALS_NEEDED, NOMINAL_IURAN_MINGGUAN, SEMESTER_START, OLLAMA_URL,
+    TEACHER_VERIFICATION, PIN_WALI,
 )
 from cekas_app.gcs_store import get_gcp_access_token
 
@@ -52,6 +53,8 @@ REQUIRED = {
     "PIN_BENDAHARA": DEFAULT_PIN_BENDAHARA, "WEB_ADMIN_PASSWORD": WEB_ADMIN_PASSWORD,
     "TELEGRAM_WEBHOOK_SECRET": TELEGRAM_WEBHOOK_SECRET, "CEKAS_SECRET_KEY": SECRET_KEY,
 }
+if TEACHER_VERIFICATION:
+    REQUIRED["PIN_WALI"] = PIN_WALI  # tanpa PIN wali, antrean verifikasi tidak bisa dibuka siapa pun
 
 
 def api(url: str, token: str, method: str = "GET", data=None, content_type: str = "application/json",
@@ -122,6 +125,7 @@ def env_vars(public_url: str = "") -> list:
         "CEKAS_GCS_BUCKET": DATA_BUCKET, "CEKAS_GCS_OBJECT": DATA_OBJECT, "PUBLIC_URL": public_url,
         "APPROVAL_THRESHOLD": str(APPROVAL_THRESHOLD), "APPROVALS_NEEDED": str(APPROVALS_NEEDED),
         "NOMINAL_IURAN_MINGGUAN": str(NOMINAL_IURAN_MINGGUAN), "SEMESTER_START": SEMESTER_START,
+        "PIN_WALI": PIN_WALI, "TEACHER_VERIFICATION": "1" if TEACHER_VERIFICATION else "0",
     }
     return [{"name": k, "value": v} for k, v in values.items() if v != ""]
 

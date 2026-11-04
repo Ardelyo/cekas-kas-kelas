@@ -1,4 +1,4 @@
-﻿"""
+"""
 CEKAS Excel Financial Report Generator
 Generates multi-sheet Excel workbook with official SMA Kartika XIX-1 Bandung formatting.
 100% offline, pure Python with openpyxl.

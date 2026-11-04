@@ -1,4 +1,4 @@
-﻿/* CEKAS — Material 3 Expressive, versi kelas.
+/* CEKAS — Material 3 Expressive, versi kelas.
    Warna tonal lembut (benih hijau-teal), bentuk besar yang berubah saat disentuh,
    huruf judul yang berkarakter, dan gerak pegas. Mobile-first, tombol besar, bahasa santai.
    Font ditanam sendiri (Bricolage Grotesque + Figtree, SIL OFL) -> tetap jalan tanpa internet. */
@@ -294,3 +294,9 @@ details[open] > summary.safe-badge::after { transform: rotate(180deg); }
 .tx.ca .ic { --c: var(--pos-cadangan-c); --on: var(--pos-cadangan-on); }
 .tx form.act { margin: 0; }
 @media (max-width: 560px) { .hide-sm { display: none; } .appbar .wrap { gap: 6px; } }
+
+/* ---------- menunggu guru ---------- */
+.stu.wait { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.prop.wait { background: var(--secondary-container); color: var(--on-secondary-container); }
+.prop.wait .a { color: inherit; }
+.sec-h .note { display: block; }
