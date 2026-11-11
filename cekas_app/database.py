@@ -52,6 +52,7 @@ def _mutating(fn):
 logger = logging.getLogger("cekas.db")
 
 GENESIS = "GENESIS"
+WEB_WALI_ID = -1   # id pseudo untuk Wali Kelas yang masuk lewat web; id Telegram asli selalu positif
 PIN_MAX_FAILS = 5
 PIN_LOCK_SECONDS = 15 * 60
 PIN_ITERATIONS = 200_000
@@ -856,8 +857,17 @@ class CekasDB:
             "SELECT nis FROM pending_tx WHERE class_id=? AND kind='dues' AND week_num=? AND status='pending'",
             (class_id, week_num))}
 
+    def wali_pin_ready(self, class_id: str = CLASS_ID) -> bool:
+        """True bila verifikasi guru aktif dan PIN Wali Kelas sudah diatur (syarat login guru di web)."""
+        return bool(self.require_teacher and self.get_or_create_class(class_id).get("pin_wali"))
+
+    def check_wali_pin(self, class_id: str, pin: str) -> bool:
+        """Cocokkan PIN Wali Kelas (untuk login web). Pembatasan percobaan dilakukan oleh pemanggil."""
+        stored = self.get_or_create_class(class_id).get("pin_wali")
+        return bool(stored) and _verify_pin((pin or "").strip(), stored)
+
     def _require_wali(self, telegram_id: int):
-        if not self.is_wali(telegram_id):
+        if telegram_id != WEB_WALI_ID and not self.is_wali(telegram_id):
             raise ValueError("Hanya Wali Kelas yang dapat memverifikasi. Aktifkan dengan /klaimwali <PIN>.")
 
     @_mutating

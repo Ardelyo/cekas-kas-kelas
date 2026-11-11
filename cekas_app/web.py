@@ -8,6 +8,7 @@ import logging
 import secrets
 import time
 from contextlib import asynccontextmanager
+from types import SimpleNamespace
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -23,9 +24,10 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from . import insights, recap, runtime, tg_ui
 from .config import (
     CLASS_ID, SCHOOL_NAME, POCKET_CONFIG, TELEGRAM_BOT_TOKEN, PUBLIC_URL, APPROVAL_THRESHOLD, APPROVALS_NEEDED,
-    WEB_ADMIN_PASSWORD, WEB_ADMIN_NAME, SECRET_KEY, TELEGRAM_WEBHOOK_SECRET,
+    WEB_ADMIN_PASSWORD, WEB_ADMIN_NAME, WEB_WALI_NAME, SECRET_KEY, TELEGRAM_WEBHOOK_SECRET,
 )
-from .bot import db, build_telegram_app, _post_init
+from .bot import db, build_telegram_app, _post_init, _after_decision, notify_many
+from .database import WEB_WALI_ID
 from .export_excel import generate_excel_report
 from .formatters import format_rupiah, parse_nominal, format_wib, WIB
 from .generate_chart import generate_financial_chart
@@ -36,18 +38,23 @@ logger = logging.getLogger("cekas.web")
 
 tg_app = None
 COOKIE_NAME = "cekas_session"
+GURU_COOKIE = "cekas_guru"
 SESSION_TTL = 8 * 3600
 _SECRET = (SECRET_KEY or secrets.token_hex(32)).encode()
 _login_fails: dict = {}  # ip -> (count, locked_until)
+_guru_fails: dict = {}   # idem, untuk login Wali Kelas
 WEB_TELEGRAM_ID = 0      # 0 = aksi dari web (bukan akun Telegram)
 
 
-# ------------------------------------------------------------------ sesi admin
-def _sign(expiry: int) -> str:
-    return f"{expiry}.{hmac.new(_SECRET, str(expiry).encode(), hashlib.sha256).hexdigest()}"
+# ------------------------------------------------------------------ sesi admin & guru
+def _sign(expiry: int, scope: str = "") -> str:
+    # scope kosong = sesi Bendahara (format lama); "guru" memakai tanda tangan berbeda,
+    # jadi cookie Bendahara tidak pernah sah sebagai cookie guru, dan sebaliknya.
+    msg = f"{scope}:{expiry}" if scope else str(expiry)
+    return f"{expiry}.{hmac.new(_SECRET, msg.encode(), hashlib.sha256).hexdigest()}"
 
 
-def _valid_session(token) -> bool:
+def _valid_session(token, scope: str = "") -> bool:
     if not token or "." not in token:
         return False
     exp_s, _, sig = token.partition(".")
@@ -55,7 +62,8 @@ def _valid_session(token) -> bool:
         exp = int(exp_s)
     except ValueError:
         return False
-    expected = hmac.new(_SECRET, exp_s.encode(), hashlib.sha256).hexdigest()
+    msg = f"{scope}:{exp_s}" if scope else exp_s
+    expected = hmac.new(_SECRET, msg.encode(), hashlib.sha256).hexdigest()
     return hmac.compare_digest(sig, expected) and exp > time.time()
 
 
@@ -66,6 +74,19 @@ def is_admin(request: Request) -> bool:
 def require_admin(request: Request):
     if not is_admin(request):
         raise HTTPException(status_code=303, headers={"Location": "/login"})
+
+
+def guru_enabled() -> bool:
+    return db.wali_pin_ready(CLASS_ID)
+
+
+def is_guru(request: Request) -> bool:
+    return guru_enabled() and _valid_session(request.cookies.get(GURU_COOKIE), "guru")
+
+
+def require_guru(request: Request):
+    if not is_guru(request):
+        raise HTTPException(status_code=303, headers={"Location": "/guru/login"})
 
 
 def _back(msg: str = "", err: bool = False, to: str = "/", frag: str = "") -> RedirectResponse:
@@ -164,6 +185,7 @@ async def dashboard_view(request: Request, week: int = Query(0, ge=0, le=52),
         "approval_note": _approval_note(), "qr": qr_svg(url), "public_url": url,
         "now_label": datetime.now(WIB).strftime("%d/%m/%Y %H.%M WIB"),
         "is_admin": is_admin(request), "admin_enabled": bool(WEB_ADMIN_PASSWORD),
+        "is_guru": is_guru(request), "guru_enabled": guru_enabled(),
         "flash": err or msg, "flash_err": bool(err), "format_rupiah": format_rupiah,
     })
 
@@ -178,7 +200,7 @@ async def laporan(request: Request):
 async def login_page(request: Request):
     return templates.TemplateResponse(request=request, name="login.html", context={
         "class_id": CLASS_ID, "school": SCHOOL_NAME, "enabled": bool(WEB_ADMIN_PASSWORD),
-        "error": "", "is_admin": False, "admin_enabled": False})
+        "error": "", "is_admin": False, "admin_enabled": False, "guru": False})
 
 
 @app.post("/login")
@@ -189,7 +211,7 @@ async def login(request: Request, password: str = Form(...)):
     def page(error: str, code: int):
         return templates.TemplateResponse(request=request, name="login.html", status_code=code, context={
             "class_id": CLASS_ID, "school": SCHOOL_NAME, "enabled": bool(WEB_ADMIN_PASSWORD),
-            "error": error, "is_admin": False, "admin_enabled": False})
+            "error": error, "is_admin": False, "admin_enabled": False, "guru": False})
 
     if locked_until > time.time():
         return page("Terlalu banyak percobaan. Coba lagi 15 menit lagi.", 429)
@@ -209,6 +231,45 @@ async def login(request: Request, password: str = Form(...)):
 async def logout():
     resp = RedirectResponse(url="/", status_code=303)
     resp.delete_cookie(COOKIE_NAME)
+    return resp
+
+
+# ------------------------------------------------------------- login Wali Kelas
+def _guru_page(request: Request, error: str = "", code: int = 200):
+    return templates.TemplateResponse(request=request, name="login.html", status_code=code, context={
+        "class_id": CLASS_ID, "school": SCHOOL_NAME, "enabled": guru_enabled(),
+        "error": error, "is_admin": False, "admin_enabled": False, "guru": True})
+
+
+@app.get("/guru/login", response_class=HTMLResponse)
+async def guru_login_page(request: Request):
+    return _guru_page(request)
+
+
+@app.post("/guru/login")
+async def guru_login(request: Request, pin: str = Form(...)):
+    ip = request.client.host if request.client else "?"
+    count, locked_until = _guru_fails.get(ip, (0, 0))
+    if not guru_enabled():
+        return _guru_page(request, "Verifikasi guru belum aktif atau PIN Wali Kelas belum diatur.", 403)
+    if locked_until > time.time():
+        return _guru_page(request, "Terlalu banyak percobaan. Coba lagi 15 menit lagi.", 429)
+    if not db.check_wali_pin(CLASS_ID, pin):
+        count += 1
+        _guru_fails[ip] = (0, time.time() + 900) if count >= 5 else (count, 0)
+        return _guru_page(request, "PIN salah.", 401)
+    _guru_fails.pop(ip, None)
+    resp = RedirectResponse(url="/#guru", status_code=303)
+    secure = request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
+    resp.set_cookie(GURU_COOKIE, _sign(int(time.time()) + SESSION_TTL, "guru"), max_age=SESSION_TTL,
+                    httponly=True, samesite="strict", secure=secure)
+    return resp
+
+
+@app.post("/guru/logout")
+async def guru_logout():
+    resp = RedirectResponse(url="/", status_code=303)
+    resp.delete_cookie(GURU_COOKIE)
     return resp
 
 
@@ -307,6 +368,55 @@ async def _push_wali(pending_id: int):
                                                    for row in tg_ui.verify_buttons(p["id"])]))
         except Exception:
             pass
+
+
+def _bot_ctx():
+    """Pembungkus tipis agar helper notifikasi bot bisa dipakai dari web (hanya butuh `.bot`)."""
+    return SimpleNamespace(bot=tg_app.bot) if tg_app else None
+
+
+@app.post("/api/pending/verify", dependencies=[Depends(require_guru)])
+async def verify_pending(pid: int = Form(...)):
+    try:
+        r = db.verify_pending(pid, WEB_WALI_ID, WEB_WALI_NAME)
+    except ValueError as err:
+        return _back(str(err), err=True, frag="guru")
+    ctx = _bot_ctx()
+    if ctx:
+        await _after_decision(ctx, r["pending"], r["result"])
+    if r["status"] != "verified":
+        return _back(f"Gagal dicatat: {r['note']}", err=True, frag="guru")
+    return _back(f"Pengajuan #{pid} diverifikasi ✅", frag="guru")
+
+
+@app.post("/api/pending/reject", dependencies=[Depends(require_guru)])
+async def reject_pending(pid: int = Form(...), note: str = Form("")):
+    try:
+        p = db.reject_pending(pid, WEB_WALI_ID, WEB_WALI_NAME, note or "Ditolak oleh Wali Kelas")
+    except ValueError as err:
+        return _back(str(err), err=True, frag="guru")
+    ctx = _bot_ctx()
+    if ctx:
+        await _after_decision(ctx, p)
+    return _back(f"Pengajuan #{pid} ditolak.", frag="guru")
+
+
+@app.post("/api/pending/verify-week", dependencies=[Depends(require_guru)])
+async def verify_week(week: int = Form(..., ge=1, le=52)):
+    before = db.list_pending(CLASS_ID, "pending", "dues")
+    try:
+        r = db.verify_dues_week(CLASS_ID, week, WEB_WALI_ID, WEB_WALI_NAME)
+    except ValueError as err:
+        return _back(str(err), err=True, frag="guru")
+    ctx = _bot_ctx()
+    if ctx:
+        subs = list({p["submitter_tg"] for p in before if p["week_num"] == week and p["submitter_tg"]})
+        await notify_many(ctx, subs, "\n".join([
+            tg_ui.head("IURAN DIVERIFIKASI", "✅"), "",
+            f"Iuran minggu {week}: <b>{r['verified']}</b> siswa disetujui <b>{tg_ui.E(WEB_WALI_NAME)}</b> ✓",
+            f"Total <code>{tg_ui.E(format_rupiah(r['total']))}</code> masuk ke kas."]), [tg_ui.nav()])
+    msg = f"Iuran minggu {week}: {r['verified']} diverifikasi ({format_rupiah(r['total'])})"
+    return _back(msg + (f", {r['failed']} gagal" if r["failed"] else ""), err=bool(r["failed"]), frag="guru")
 
 
 @app.post("/api/transaction/create", dependencies=[Depends(require_admin)])

@@ -39,9 +39,11 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
 # --- Verifikasi Wali Kelas -------------------------------------------------
 # Aktif (default): semua pemasukan, pengeluaran, iuran, dan koreksi DITAHAN sampai Wali Kelas menyetujui.
-# Wali Kelas masuk lewat /klaimwali <PIN_WALI> di bot Telegram. Set TEACHER_VERIFICATION=0 untuk mematikan.
+# Wali Kelas masuk lewat /klaimwali <PIN_WALI> di bot Telegram, atau lewat tombol "Guru" di web (PIN yang sama).
+# Set TEACHER_VERIFICATION=0 untuk mematikan.
 TEACHER_VERIFICATION = os.getenv("TEACHER_VERIFICATION", "1").strip().lower() not in ("0", "false", "off", "no")
 PIN_WALI = os.getenv("PIN_WALI", "").strip()
+WEB_WALI_NAME = os.getenv("WEB_WALI_NAME", "Wali Kelas (Web)")  # tercatat di buku kas: "✓ <nama>"
 
 # --- Tata kelola pengeluaran ----------------------------------------------
 # Pengeluaran >= ambang butuh persetujuan N siswa terdaftar. 0 = nonaktif.

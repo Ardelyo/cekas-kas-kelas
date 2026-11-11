@@ -37,6 +37,7 @@ Database SQLite direplikasi ke bucket Cloud Storage (**versioning aktif**) setia
 ## Verifikasi Wali Kelas
 1. Atur PIN guru: isi `PIN_WALI` di `.env`, atau `python run.py set-wali-pin <PIN>` (minimal 6 karakter, harus berbeda dari PIN Bendahara).
 2. Guru membuka bot lalu mengetik `/klaimwali <PIN>` di chat pribadi. Guru tidak bisa memberi suara usulan dan tidak dikenai iuran.
+   Tanpa Telegram, guru juga bisa masuk dari web lewat tombol **🎓 Guru** (`/guru/login`) dengan PIN yang sama, lalu menyetujui atau menolak langsung dari bagian *Menunggu guru*. Sesi guru terpisah dari sesi Bendahara, dan tercatat di buku kas sebagai `WEB_WALI_NAME` (default `Wali Kelas (Web)`).
 3. Bendahara mencatat seperti biasa (bot, web, atau CLI). Pengajuan masuk antrean dan guru mendapat notifikasi dengan tombol **Setujui / Tolak**. Iuran menumpuk per minggu dan diverifikasi dengan satu tombol.
 4. Pengeluaran besar: siswa memberi suara lebih dulu; setelah kuorum tercapai, usulan masuk antrean guru.
 5. Bendahara tidak bisa menyetujui pengajuannya sendiri. Jika saldo berubah sebelum disetujui, pengajuan berstatus *gagal* dan tidak mencatat apa pun.

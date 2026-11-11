@@ -23,6 +23,11 @@
       {% elif admin_enabled %}
         <a class="btn tonal sm" href="/login">🔐 Bendahara</a>
       {% endif %}
+      {% if is_guru %}
+        <form action="/guru/logout" method="post" style="display:inline"><button class="btn text sm" type="submit">Keluar (guru)</button></form>
+      {% elif guru_enabled %}
+        <a class="btn tonal sm" href="/guru/login">🎓 Guru</a>
+      {% endif %}
     </div>
   </header>
 

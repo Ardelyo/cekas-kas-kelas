@@ -1,13 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Masuk Bendahara · CEKAS{% endblock %}
+{% block title %}{{ 'Masuk Guru' if guru else 'Masuk Bendahara' }} · CEKAS{% endblock %}
 {% block content %}
 <main class="login">
-  <div class="blob" aria-hidden="true">🔐</div>
+  <div class="blob" aria-hidden="true">{{ '🎓' if guru else '🔐' }}</div>
+  {% if guru %}
+  <h1>Halo, Bu/Pak Guru!</h1>
+  <p class="muted" style="margin:0 0 22px">Masuk dengan PIN Wali Kelas untuk menyetujui atau menolak catatan kas. Semua orang tetap bisa melihat buku kas tanpa masuk.</p>
+  {% else %}
   <h1>Halo, Bendahara!</h1>
   <p class="muted" style="margin:0 0 22px">Masuk dulu untuk mencatat kas. Teman-teman tetap bisa melihat semuanya tanpa masuk.</p>
+  {% endif %}
   {% if error %}<div class="flash err" role="alert">{{ error }}</div>{% endif %}
   {% if not enabled %}
+    {% if guru %}
+    <div class="flash err">Verifikasi guru belum aktif. Pastikan <code>TEACHER_VERIFICATION</code> menyala dan <code>PIN_WALI</code> sudah diisi.</div>
+    {% else %}
     <div class="flash err">Login belum diatur. Isi <code>WEB_ADMIN_PASSWORD</code> di .env lalu jalankan ulang.</div>
+    {% endif %}
+  {% elif guru %}
+  <form method="post" action="/guru/login" style="display:grid; gap:16px">
+    <label class="f" for="pin">PIN Wali Kelas
+      <input class="field" id="pin" type="password" name="pin" inputmode="numeric" autocomplete="off" autofocus required>
+    </label>
+    <button class="btn fill" type="submit" style="min-height:54px">Masuk</button>
+  </form>
   {% else %}
   <form method="post" action="/login" style="display:grid; gap:16px">
     <label class="f" for="pw">Kata sandi

@@ -59,7 +59,7 @@
     <div class="col-r">
       {% if gate %}
       <section id="guru" aria-labelledby="h-guru">
-        <h2 class="sec-h" id="h-guru">Menunggu guru <span class="note">Setiap catatan kas baru berlaku setelah Wali Kelas memverifikasi di bot Telegram.</span></h2>
+        <h2 class="sec-h" id="h-guru">Menunggu guru <span class="note">Setiap catatan kas baru berlaku setelah Wali Kelas memverifikasi, lewat bot Telegram atau tombol 🎓 Guru di atas.</span></h2>
         {% if pend_tx or pend_dues %}
         <div class="props">
           {% for p in pend_tx %}
@@ -67,6 +67,12 @@
             <div class="top"><span class="t">{{ '↩️ Koreksi #' ~ p.target_tx_id if p.kind == 'reverse' else p.description }}</span>
               <span class="a">{{ '−' if p.tx_type == 'out' }}{{ format_rupiah(p.amount) }}</span></div>
             <div style="opacity:.8; font-size:14px">#{{ p.id }} · {{ p.cat_label }} · diajukan {{ p.input_by }}{% if p.kind == 'reverse' %} · {{ p.description }}{% endif %}</div>
+            {% if is_guru %}
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+              <form method="post" action="/api/pending/verify"><input type="hidden" name="pid" value="{{ p.id }}"><button class="btn fill sm" type="submit">✅ Setujui</button></form>
+              <form method="post" action="/api/pending/reject" data-confirm="Tolak pengajuan #{{ p.id }}?"><input type="hidden" name="pid" value="{{ p.id }}"><button class="btn tonal sm" type="submit">❌ Tolak</button></form>
+            </div>
+            {% endif %}
             {% if is_admin %}<form method="post" action="/api/pending/cancel" data-confirm="Batalkan pengajuan #{{ p.id }}?"><input type="hidden" name="pid" value="{{ p.id }}"><button class="btn text sm" type="submit" style="color:inherit">Batalkan pengajuan</button></form>{% endif %}
           </div>
           {% endfor %}
@@ -74,6 +80,9 @@
           <div class="prop wait">
             <div class="top"><span class="t">🙋 Iuran minggu {{ w.week }}</span><span class="a">{{ format_rupiah(w.total) }}</span></div>
             <div style="opacity:.8; font-size:14px">{{ w.n }} siswa menunggu diverifikasi sekaligus</div>
+            {% if is_guru %}
+            <form method="post" action="/api/pending/verify-week" data-confirm="Verifikasi {{ w.n }} iuran minggu {{ w.week }}?" style="margin-top:8px"><input type="hidden" name="week" value="{{ w.week }}"><button class="btn fill sm" type="submit">✅ Verifikasi semua minggu {{ w.week }}</button></form>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
