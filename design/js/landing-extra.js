@@ -144,7 +144,7 @@
         var p = (((i - t) % N) + N) % N; if (p >= N / 2) p -= N;
         var d = Math.abs(p), o = Math.max(0, Math.min(1, (vis - d) / 0.85));
         c.style.setProperty('--px', p.toFixed(4)); c.style.setProperty('--o', o.toFixed(3)); c.style.zIndex = Math.round(100 - d * 12);
-        c.classList.toggle('is-front', d < 0.5);
+        var fr = d < 0.5; if (fr && !c.classList.contains('is-front') && window.motion && c.__seen) motion.sound('gear'); c.__seen = true; c.classList.toggle('is-front', fr);
         if (reduce) c.style.setProperty('transform', 'translate3d(' + (p * sp).toFixed(1) + 'px,' + (p * p * 9).toFixed(1) + 'px,0) rotateY(' + (-p * 12).toFixed(1) + 'deg)', 'important');
       });
     }
@@ -194,5 +194,14 @@
       v.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 800, delay: 450, easing: 'ease-in', fill: 'forwards' });
       setTimeout(function () { try { if (href === 'kas.html') sessionStorage.setItem('cekas-scene', 'masuk'); } catch (x) {} location.href = href; }, 1300);
     });
+  });
+})();
+
+/* ---------- kartu karakter: miring mengikuti kursor ---------- */
+(function () {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('.ccard:not(.ccard--slot)').forEach(function (c) {
+    c.addEventListener('pointermove', function (e) { var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; c.style.setProperty('--ry', (x * 14).toFixed(2) + 'deg'); c.style.setProperty('--rx', (-y * 10).toFixed(2) + 'deg'); c.style.setProperty('--sx', (x * 160 + 20).toFixed(0) + '%'); });
+    c.addEventListener('pointerleave', function () { c.style.setProperty('--ry', '0deg'); c.style.setProperty('--rx', '0deg'); c.style.setProperty('--sx', '-120%'); });
   });
 })();

@@ -6,7 +6,7 @@
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   var root = document.documentElement, body = document.body;
-  var tick = function () { if (window.fx) fx.haptic('tick'); };
+  var tick = function () { if (window.fx) fx.buzz([6]); };
 
   /* ---------- tab bawah untuk halaman situs (mobile) ---------- */
   var nav = $('#nav'), isKas = body.hasAttribute('data-sky-kasmode');
@@ -24,6 +24,31 @@
     bar.innerHTML = '<span class="mtabs__pill" aria-hidden="true" style="--i:' + ai + '"></span>' + tabs.map(function (t, i) { return '<a href="' + t[0] + '"' + (i === ai ? ' class="on" aria-current="page"' : '') + '><svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + IC[t[2]] + '</svg><span>' + t[1] + '</span></a>'; }).join('');
     body.appendChild(bar); body.classList.add('has-mtabs');
     bar.addEventListener('click', tick);
+    // pil bergeser dari tab halaman sebelumnya ke tab halaman ini, dan langsung bergerak saat tab disentuh
+    var pill = $('.mtabs__pill', bar), prevI = null;
+    try { prevI = sessionStorage.getItem('cekas-tab'); sessionStorage.removeItem('cekas-tab'); } catch (e) {}
+    if (prevI !== null && +prevI !== ai && !reduce) {
+      pill.style.transition = 'none'; pill.style.setProperty('--i', prevI);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { pill.style.transition = ''; pill.style.setProperty('--i', ai); }); });
+    }
+    $$('a', bar).forEach(function (a, i) {
+      a.addEventListener('click', function () {
+        if (i === ai) return;
+        try { sessionStorage.setItem('cekas-tab', String(ai)); } catch (e) {}
+        pill.style.setProperty('--i', i); $$('a', bar).forEach(function (x, j) { x.classList.toggle('on', j === i); });
+      });
+    });
+  }
+
+  /* ---------- tautan ke bagian landing yang di mobile pindah halaman ---------- */
+  if (small.matches) {
+    var MOVED = { '#coba': 'fitur.html#keaslian', 'index.html#coba': 'fitur.html#keaslian', 'index.html#faq': 'tanya.html#faq', 'index.html#testimoni': 'tanya.html#testimoni' };
+    $$('a[href]').forEach(function (a) {
+      var h = a.getAttribute('href'), to = MOVED[h];
+      if (!to) return;
+      if (h.charAt(0) === '#') { var tgt = document.getElementById(h.slice(1)); if (tgt && tgt.offsetParent !== null) return; }
+      a.setAttribute('href', to);
+    });
   }
 
   /* ---------- dashboard ---------- */
@@ -77,7 +102,7 @@
     sheet.addEventListener('pointermove', function (e) { if (!drag) return; dy = Math.max(0, e.clientY - y0); sheet.style.transform = 'translate(-50%, ' + dy + 'px)'; d.style.setProperty('--dim', String(Math.max(0, 1 - dy / 320))); });
     function end(e) {
       if (!drag) return; drag = false; var v = dy / Math.max(1, e.timeStamp - t0); sheet.style.transition = '';
-      if (dy > 110 || v > 0.7) { if (window.fx) fx.haptic('tick'); sheet.style.transform = ''; fx.closeSheet(d); } else { sheet.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)'; sheet.style.transform = ''; setTimeout(function () { sheet.style.transition = ''; }, 520); }
+      if (dy > 110 || v > 0.7) { if (window.fx) fx.buzz([6]); sheet.style.transform = ''; fx.closeSheet(d); } else { sheet.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)'; sheet.style.transform = ''; setTimeout(function () { sheet.style.transition = ''; }, 520); }
     }
     sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
     d.addEventListener('close', function () { sheet.style.transform = ''; sheet.style.transition = ''; });

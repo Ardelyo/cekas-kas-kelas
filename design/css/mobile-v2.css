@@ -20,7 +20,7 @@
   /* ---------- ruang lega dan permukaan rata ---------- */
   .page { gap: var(--space-7); padding-bottom: var(--space-6); }
   .sec-h { font-size: 26px; letter-spacing: -.04em; margin-bottom: var(--space-4); } .sec-h small, .note { font-size: 14px; }
-  .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+  .page .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
   .tip { background: none; box-shadow: none; border-radius: 0; padding: 14px 0; border-top: 1px solid var(--line); } .tips { gap: 0; } .tip:first-child { border-top: 0; }
   .prop { padding: 22px; border-radius: 28px; box-shadow: 0 0 0 1px var(--line); background: #fff; } .props { gap: var(--space-4); }
   .pos { background: var(--paper-2); box-shadow: none; padding: 18px; border-radius: 26px; } .pos__v { font-size: 22px; }
@@ -59,8 +59,15 @@
   .locked { padding: var(--space-5) 0; }
 }
 @media (max-width: 759px) {
-  body.fitur-tabs .fsec, body.fitur-tabs #banding, body.fitur-tabs #peran { display: none; } body.fitur-tabs .is-fshown { display: block; animation: scrr .6s var(--ease) both; }
+  body.fitur-tabs .fsec, body.fitur-tabs #banding, body.fitur-tabs #peran { display: none; } body.fitur-tabs .is-fshown, body.fitur-tabs #banding.is-fshown, body.fitur-tabs #peran.is-fshown { display: block; animation: scrr .6s var(--ease) both; }
+  /* hero beranda: kartu berputar tidak tertutup tab bawah */
+  .has-mtabs .hero { min-height: max(100svh, 780px); } .has-mtabs .arc { --cw: 50vw; margin-bottom: calc(104px + env(safe-area-inset-bottom)); }
+  /* kartu prinsip: tanpa hover di HP, batang visual bergerak sendiri */
+  .vcard.is-in .vcard__vis i { animation: vbar 2.6s var(--ease) infinite; } .vcard.is-in .vcard__vis i:nth-child(2) { animation-delay: .15s; } .vcard.is-in .vcard__vis i:nth-child(3) { animation-delay: .3s; } .vcard.is-in .vcard__vis i:nth-child(4) { animation-delay: .45s; }
+  @keyframes vbar { 0%, 100% { opacity: .16; transform: none; } 35% { opacity: .55; transform: translateY(-6px); } 60% { opacity: .3; transform: none; } }
+  .mtabs a { -webkit-tap-highlight-color: transparent; } .mtabs a:active .ic { transform: scale(.86); transition-duration: .12s; }
+  .bottomnav a { -webkit-tap-highlight-color: transparent; } .bottomnav a:active svg { transform: scale(.86); transition: transform .12s; }
   .fnav { margin-top: -26px; } .fsec, .psec { padding-top: var(--space-6); } body.fitur-tabs .cta-band { margin-top: var(--space-7); }
   .tx .am { white-space: nowrap; } body[data-sky-kasmode] { padding-bottom: 150px; }
 }
-@media (prefers-reduced-motion: reduce) { .mtabs__pill, .mtabs .ic { transition: none; } body.scr-r .page > section, body.scr-l .page > section { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .vcard .vcard__vis i { animation: none !important; } .mtabs__pill, .mtabs .ic { transition: none; } body.scr-r .page > section, body.scr-l .page > section { animation: none !important; } }

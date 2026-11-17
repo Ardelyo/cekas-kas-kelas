@@ -109,6 +109,7 @@
     var calc = paintValues();
     rowEls.forEach(function (li) { li.classList.remove('is-ok', 'is-bad'); $('.row__ic', li).innerHTML = ICON_DOT; });
     setBadge(null, 'Memeriksa…', false);
+    if (window.motion) motion.sound('chain', rowEls.length);
     tamperBtn.disabled = restoreBtn.disabled = true;
     var firstBad = -1;
     for (var i = 0; i < rowEls.length; i++) {
@@ -122,6 +123,7 @@
     }
     tamperBtn.disabled = restoreBtn.disabled = false;
     if (firstBad < 0) {
+      if (window.motion) setTimeout(function () { motion.sound('done'); }, 0);
       setBadge(true, 'Terverifikasi · ' + rowEls.length + ' baris utuh', true);
       note.textContent = 'Rantai utuh. Data fiktif untuk contoh.';
     } else {

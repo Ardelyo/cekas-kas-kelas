@@ -138,6 +138,7 @@
   /* ---------- toast ---------- */
   var toastEl = $('#toast'), toastMsg = $('#toastMsg'), toastUndo = $('#toastUndo'), toastT = 0, undoFn = null;
   function toast(msg, undo) {
+    if (window.motion) motion.sound(/^(Gagal|Saldo pos|Tidak)/.test(msg) ? 'toastErr' : 'toast');
     toastMsg.textContent = msg; undoFn = undo || null; toastUndo.hidden = !undo;
     var dur = undo ? 6000 : 3200; toastEl.style.setProperty('--dur', dur + 'ms');
     toastEl.classList.remove('is-on'); void toastEl.offsetWidth; toastEl.classList.add('is-on'); clearTimeout(toastT);
@@ -319,7 +320,7 @@
     var x0 = 0, dx = 0, on = false, hint = $('.prop__hint', card);
     card.addEventListener('pointerdown', function (e) { if (e.target.closest('button') || e.button > 0) return; on = true; x0 = e.clientX; dx = 0; card.setPointerCapture(e.pointerId); card.style.transition = 'none'; });
     card.addEventListener('pointermove', function (e) { if (!on) return; dx = Math.max(0, e.clientX - x0); card.style.transform = 'translateX(' + dx + 'px)'; hint.style.opacity = Math.min(1, dx / 110); });
-    function end() { if (!on) return; on = false; card.style.transition = ''; if (dx > 110) { fx.haptic('check'); act('approve', +card.dataset.pid); } else { card.style.transform = ''; hint.style.opacity = 0; } }
+    function end() { if (!on) return; on = false; card.style.transition = ''; if (dx > 110) { fx.haptic('stamp'); act('approve', +card.dataset.pid); } else { card.style.transform = ''; hint.style.opacity = 0; } }
     card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
   }
 
@@ -339,7 +340,7 @@
   async function liveAct(kind, id, w, btn) {
     var data = kind === 'approve-week' ? { week: dbWeek(w) } : { pid: id }, url = kind === 'approve-week' ? '/api/pending/verify-week' : LIVE_URL[kind], res = null;
     if (btn) await fx.commit(btn, async function () { res = await serverPost(url, data); return res.ok; }, { keep: false }); else res = await serverPost(url, data);
-    fx.haptic(res && res.ok ? 'check' : 'reject'); toast(res && res.msg ? res.msg : (res && res.ok ? 'Berhasil.' : 'Gagal.'));
+    fx.haptic(res && res.ok ? (kind === 'reject' || kind.indexOf('cancel') === 0 ? 'btnx' : 'stamp') : 'reject'); toast(res && res.msg ? res.msg : (res && res.ok ? 'Berhasil.' : 'Gagal.'));
     if (res && res.ok && kind !== 'cancel-pend' && kind !== 'cancel-prop' && kind !== 'reject') { fx.glow($('.skyhead')); fx.sheen($('#amount')); }
   }
   async function act(kind, id, w, btn) {
@@ -368,7 +369,7 @@
     var msg = 'Gagal: saldo pos ' + posName(p.cat) + ' tidak cukup. Tidak ada yang dicatat.';
     if (btn) { var ok = await fx.commit(btn, function () { return !short; }, { keep: true }); if (!ok) { toast(msg); return; } }
     else if (short) { toast(msg); return; }
-    fx.haptic('check');
+    fx.haptic(p.amt < 0 ? 'stamp' : 'stamp');
     var card = $('.prop[data-pid="' + id + '"]');
     if (card) { var r = card.getBoundingClientRect(); fx.burst(r.left + r.width / 2, r.top + r.height / 2); await fx.stamp(card, 'Disahkan'); }
     var label = (p.amt < 0 ? '\u2212' : '+') + 'Rp ' + fmt(Math.abs(p.amt));
@@ -381,7 +382,7 @@
   async function approveWeek(w, btn) {
     var arr = state.dues[w], n = arr.filter(function (s) { return s === 'wait'; }).length; if (!n) return;
     if (btn) await fx.commit(btn, null, { keep: true });
-    fx.haptic('check');
+    fx.haptic('stamp');
     if (+w === state.week) wave(w);
     var card = $('.prop[data-kind="week"][data-w="' + w + '"]');
     if (card) { var r = card.getBoundingClientRect(); fx.burst(r.left + r.width / 2, r.top + r.height / 2, 16); }
@@ -392,7 +393,7 @@
       state.dues[w] = arr.map(function (s) { return s === 'wait' ? 'paid' : s; });
       addTx({ desc: 'Iuran minggu ' + w + ' (' + n + ' siswa)', cat: 'op', amt: n * NOMINAL, by: 'Bendahara' });
       renderAll(true); toast(n + ' iuran minggu ' + w + ' disahkan. Saldo bertambah ' + rp(n * NOMINAL) + '.'); state.tx[state.tx.length - 1].isNew = false;
-      if (counts(w).todo === 0) setTimeout(function () { fx.glow($('.skyhead')); fx.sheen($('#amount')); fx.haptic('check'); toast('Semua lunas untuk minggu ' + w + '. Keren, XI-F2.'); }, 1100);
+      if (counts(w).todo === 0) setTimeout(function () { fx.glow($('.skyhead')); fx.sheen($('#amount')); fx.haptic('allpaid'); toast('Semua lunas untuk minggu ' + w + '. Keren, XI-F2.'); }, 1100);
     });
   }
   function wave(w) {
@@ -536,8 +537,8 @@
   $('#duesCard').addEventListener('click', function (e) {
     var more = e.target.closest('.dues-more'); if (more) { var on = !$('#duesCard').classList.contains('show-paid'); $('#duesCard').classList.toggle('show-paid', on); more.setAttribute('aria-expanded', on); more.textContent = on ? 'Sembunyikan' : 'Tampilkan ' + counts(state.week).paid; return; }
     var b = e.target.closest('button.stu'); if (!b) return;
-    if (state.live) { var li = +b.dataset.i; serverPost('/api/dues/pay', { cell: NIS[li] + '|' + dbWeek(state.week) }).then(function (r) { fx.haptic(r.ok ? 'check' : 'reject'); toast(r.msg || (r.ok ? NAMES[li] + ' ditandai lunas.' : 'Gagal.')); }); return; }
-    var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
+    if (state.live) { var li = +b.dataset.i; serverPost('/api/dues/pay', { cell: NIS[li] + '|' + dbWeek(state.week) }).then(function (r) { fx.haptic(r.ok ? 'paid' : 'reject'); toast(r.msg || (r.ok ? NAMES[li] + ' ditandai lunas.' : 'Gagal.')); }); return; }
+    var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); if (window.motion) motion.sound('paid'); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
     toast(NAMES[i] + ' ditandai lunas. Menunggu Wali Kelas.', function () { state.dues[w][i] = 'todo'; renderAll(); });
   });
 
@@ -608,6 +609,7 @@
     if (asProposal) { item = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara', yes: 0, needed: 3 }; state.proposals.push(item); }
     else { item = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara' }; state.pending.push(item); }
     state.flash = item.id; renderAll(); state.flash = null;
+    if (window.motion) motion.sound(out ? 'coinout' : 'coin');
     var card = $('.prop--new');
     if (card) { card.scrollIntoView({ behavior: fx.reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(function () { var r2 = card.getBoundingClientRect(); fx.burst(r2.left + 40, r2.top + 30, 9); }, 420); }
     toast(asProposal ? 'Jadi usulan. Menunggu 3 teman setuju.' : 'Diajukan ke Wali Kelas. Saldo belum berubah.', function () {
@@ -633,7 +635,7 @@
   async function leaveScene(was) {
     if (leaving) return; leaving = true;
     var name = { bendahara: 'Bendahara', guru: 'Wali Kelas' }[was] || '';
-    var go = function () { try { sessionStorage.removeItem('cekas-role'); sessionStorage.setItem('cekas-scene', 'keluar'); } catch (x) {} location.href = 'login.html'; };
+    var go = function () { try { sessionStorage.removeItem('cekas-role'); sessionStorage.setItem('cekas-scene', 'keluar'); } catch (x) {} if (window.motion) motion.sound('logout'); location.href = 'login.html'; };
     if (fx.reduce) return go();
     var ease = 'cubic-bezier(.2,.7,.1,1)';
     document.body.classList.add('leaving'); toastEl.classList.remove('is-on');
@@ -701,7 +703,7 @@
     document.addEventListener('touchend', async function () {
       if (!on) return; on = false;
       if (pull >= 0.55 && !busy) {
-        busy = true; el.classList.add('is-busy'); fx.haptic('tick'); await skeleton(900); renderAll(true); renderWeeks(true); renderDues(true);
+        busy = true; el.classList.add('is-busy'); fx.haptic('pull'); await skeleton(900); if (window.motion) motion.sound('plop'); renderAll(true); renderWeeks(true); renderDues(true);
         el.classList.remove('is-busy'); el.classList.remove('on'); busy = false; toast('Diperbarui \u00b7 ' + clock(new Date()));
       } else el.classList.remove('on');
       el.style.setProperty('--pull', 0);
