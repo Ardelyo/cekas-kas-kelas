@@ -23,7 +23,7 @@
   var TOTAL = NAMES.length;
 
   var state = {
-    role: 'siswa', wx: 'auto', week: 12, activeWeek: 12, hidden: false,
+    role: (function () { var q = (location.search.match(/peran=([a-z]+)/) || [])[1], r = q || (function () { try { return sessionStorage.getItem('cekas-role'); } catch (e) { return null; } })(); return ['bendahara', 'guru'].indexOf(r) >= 0 ? r : 'siswa'; })(), wx: 'auto', flash: null, week: 12, activeWeek: 12, hidden: false,
     nextId: 1, nextPid: 41,
     tx: [], pending: [], proposals: [{ id: 7, desc: 'Fotokopi modul 12 minggu', cat: 'op', amt: -85000, by: 'Bendahara', yes: 2, needed: 3 }],
     dues: {}
@@ -69,8 +69,9 @@
   var toastEl = $('#toast'), toastMsg = $('#toastMsg'), toastUndo = $('#toastUndo'), toastT = 0, undoFn = null;
   function toast(msg, undo) {
     toastMsg.textContent = msg; undoFn = undo || null; toastUndo.hidden = !undo;
-    toastEl.classList.add('is-on'); clearTimeout(toastT);
-    toastT = setTimeout(function () { toastEl.classList.remove('is-on'); undoFn = null; }, undo ? 6000 : 3200);
+    var dur = undo ? 6000 : 3200; toastEl.style.setProperty('--dur', dur + 'ms');
+    toastEl.classList.remove('is-on'); void toastEl.offsetWidth; toastEl.classList.add('is-on'); clearTimeout(toastT);
+    toastT = setTimeout(function () { toastEl.classList.remove('is-on'); undoFn = null; }, dur);
   }
   toastUndo.addEventListener('click', function () { if (undoFn) { var f = undoFn; undoFn = null; f(); } toastEl.classList.remove('is-on'); });
 
@@ -193,7 +194,7 @@
     if (!state.proposals.length) { el.innerHTML = '<div class="empty"><b>Belum ada usulan</b>Belanja besar akan muncul di sini supaya disetujui bareng-bareng.</div>'; return; }
     el.innerHTML = state.proposals.map(function (p) {
       var pips = ''; for (var i = 0; i < p.needed; i++) pips += '<i class="' + (i < p.yes ? 'on' : '') + '">' + (i < p.yes ? ic('check', 'ic-sm') : '') + '</i>';
-      return '<div class="prop"><div class="top"><span class="t">' + esc(p.desc) + '</span><span class="a num out">' + rp(Math.abs(p.amt)) + '</span></div><div class="m">#' + p.id + ' · ' + posName(p.cat) + ' · diajukan ' + esc(p.by) + '</div><div class="pips" aria-label="' + p.yes + ' dari ' + p.needed + ' teman setuju">' + pips + '<span>' + p.yes + ' dari ' + p.needed + ' teman setuju</span></div><div class="m">Beri suara lewat bot Telegram.</div>' + (isAdmin() ? '<div class="acts"><button class="btn btn--tonal btn--sm" data-act="cancel-prop" data-id="' + p.id + '" type="button">Batalkan usulan</button></div>' : '') + '</div>';
+      return '<div class="prop' + (state.flash === p.id ? ' prop--new' : '') + '"><div class="top"><span class="t">' + esc(p.desc) + '</span><span class="a num out">' + rp(Math.abs(p.amt)) + '</span></div><div class="m">#' + p.id + ' · ' + posName(p.cat) + ' · diajukan ' + esc(p.by) + '</div><div class="pips" aria-label="' + p.yes + ' dari ' + p.needed + ' teman setuju">' + pips + '<span>' + p.yes + ' dari ' + p.needed + ' teman setuju</span></div><div class="m">Beri suara lewat bot Telegram.</div>' + (isAdmin() ? '<div class="acts"><button class="btn btn--tonal btn--sm" data-act="cancel-prop" data-id="' + p.id + '" type="button">Batalkan usulan</button></div>' : '') + '</div>';
     }).join('');
   }
 
@@ -216,9 +217,9 @@
   function renderQueue() {
     var el = $('#queue'), g = dueGroups(), n = state.pending.length + g.length;
     $('#queueCount').textContent = n ? n + ' menunggu' : '';
-    if (!n) { el.innerHTML = '<div class="empty"><b>Semua sudah disahkan</b>Tidak ada catatan yang menunggu Wali Kelas.</div>'; return; }
+    if (!n) { el.innerHTML = '<div class="empty empty--ok"><span class="seal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b>Semua sudah disahkan</b>Tidak ada catatan yang menunggu Wali Kelas.</div>'; return; }
     var html = state.pending.map(function (p) {
-      return '<div class="prop wait" data-pid="' + p.id + '" data-kind="tx"><div class="prop__hint">' + ic('check') + '&nbsp;Setujui</div><div class="top"><span class="t">' + esc(p.desc) + '</span><span class="a num ' + (p.amt < 0 ? 'out' : 'in') + '">' + (p.amt < 0 ? '−' : '+') + rp(Math.abs(p.amt)).replace('−', '') + '</span></div><div class="m">#' + p.id + ' · ' + posName(p.cat) + ' · diajukan ' + esc(p.by) + '</div><span class="waitpill">' + ic('clock', 'ic-sm') + 'Menunggu Wali Kelas</span>' +
+      return '<div class="prop wait' + (state.flash === p.id ? ' prop--new' : '') + '" data-pid="' + p.id + '" data-kind="tx"><div class="prop__hint">' + ic('check') + '&nbsp;Setujui</div><div class="top"><span class="t">' + esc(p.desc) + '</span><span class="a num ' + (p.amt < 0 ? 'out' : 'in') + '">' + (p.amt < 0 ? '−' : '+') + rp(Math.abs(p.amt)).replace('−', '') + '</span></div><div class="m">#' + p.id + ' · ' + posName(p.cat) + ' · diajukan ' + esc(p.by) + '</div><span class="waitpill">' + ic('clock', 'ic-sm') + 'Menunggu Wali Kelas</span>' +
         (isGuru() ? '<div class="acts"><button class="btn btn--ok btn--sm" data-act="approve" data-id="' + p.id + '" type="button">' + ic('check', 'ic-sm') + 'Setujui</button><button class="btn btn--tonal btn--sm hold" data-hold="reject" data-id="' + p.id + '" type="button">Tahan untuk tolak</button></div><div class="m">Geser kartu ke kanan untuk menyetujui.</div>' : '') +
         (isAdmin() ? '<div class="acts"><button class="btn btn--tonal btn--sm" data-act="cancel-pend" data-id="' + p.id + '" type="button">Batalkan pengajuan</button></div>' : '') + '</div>';
     }).join('');
@@ -244,46 +245,69 @@
     var tx = { id: id, day: TODAY, time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), desc: t.desc, cat: t.cat, amt: t.amt, w: state.activeWeek, by: t.by || 'Bendahara', ok: 'Wali Kelas (contoh)', isNew: true };
     state.tx.push(tx); rehash(); return tx;
   }
-  function removeCard(sel, cb) {
+  function removeCard(sel, cb, cls) {
     var el = $(sel);
-    if (!el || reduce) return cb();
-    el.classList.add('is-gone'); setTimeout(cb, 380);
+    if (!el || window.fx.reduce) return cb();
+    el.classList.add(cls || 'is-gone'); setTimeout(cb, cls ? 520 : 380);
   }
-  function act(kind, id, w) {
-    if (kind === 'approve') {
-      var p = state.pending.filter(function (x) { return x.id === id; })[0]; if (!p) return;
-      if (posSaldo(p.cat) + p.amt < 0) { toast('Gagal: saldo pos ' + posName(p.cat) + ' tidak cukup. Tidak ada yang dicatat.'); return; }
-      removeCard('.prop[data-pid="' + id + '"]', function () {
-        state.pending = state.pending.filter(function (x) { return x.id !== id; }); var tx = addTx(p); renderAll(true);
-        toast('Disetujui. Saldo diperbarui menjadi ' + rp(saldo()) + '.'); tx.isNew = false;
-      });
-    } else if (kind === 'reject') {
-      buzz(20); removeCard('.prop[data-pid="' + id + '"]', function () { state.pending = state.pending.filter(function (x) { return x.id !== id; }); renderAll(); toast('Pengajuan #' + id + ' ditolak.'); });
-    } else if (kind === 'cancel-pend') {
-      var gone = state.pending.filter(function (x) { return x.id === id; })[0];
-      state.pending = state.pending.filter(function (x) { return x.id !== id; }); renderAll();
-      toast('Pengajuan dibatalkan.', function () { state.pending.push(gone); renderAll(); });
-    } else if (kind === 'cancel-prop') {
-      var gp = state.proposals.filter(function (x) { return x.id === id; })[0];
-      state.proposals = state.proposals.filter(function (x) { return x.id !== id; }); renderAll();
-      toast('Usulan dibatalkan.', function () { state.proposals.push(gp); renderAll(); });
-    } else if (kind === 'approve-week') {
-      var arr = state.dues[w], n = arr.filter(function (s) { return s === 'wait'; }).length; if (!n) return; buzz(16);
-      if (+w === state.week) wave(w);
-      var finish = function () {
-        state.dues[w] = arr.map(function (s) { return s === 'wait' ? 'paid' : s; });
-        addTx({ desc: 'Iuran minggu ' + w + ' (' + n + ' siswa)', cat: 'op', amt: n * NOMINAL, by: 'Bendahara' });
-        renderAll(true); toast(n + ' iuran minggu ' + w + ' disahkan. Saldo bertambah ' + rp(n * NOMINAL) + '.');
-      };
-      reduce ? finish() : setTimeout(finish, Math.min(900, 160 + n * 60));
-    }
+  var busy = {};
+  async function act(kind, id, w, btn) {
+    var key = kind + ':' + (id || w); if (busy[key]) return; busy[key] = true;
+    try {
+      if (kind === 'approve') await approvePending(id, btn);
+      else if (kind === 'reject') {
+        var rc = $('.prop[data-pid="' + id + '"]'); fx.buzz(20);
+        if (rc) await fx.stamp(rc, 'Ditolak', true);
+        removeCard('.prop[data-pid="' + id + '"]', function () { state.pending = state.pending.filter(function (x) { return x.id !== id; }); renderAll(); toast('Pengajuan #' + id + ' ditolak.'); }, 'is-rejected');
+      } else if (kind === 'cancel-pend') {
+        var gone = state.pending.filter(function (x) { return x.id === id; })[0];
+        state.pending = state.pending.filter(function (x) { return x.id !== id; }); renderAll();
+        toast('Pengajuan dibatalkan.', function () { state.pending.push(gone); renderAll(); });
+      } else if (kind === 'cancel-prop') {
+        var gp = state.proposals.filter(function (x) { return x.id === id; })[0];
+        state.proposals = state.proposals.filter(function (x) { return x.id !== id; }); renderAll();
+        toast('Usulan dibatalkan.', function () { state.proposals.push(gp); renderAll(); });
+      } else if (kind === 'approve-week') await approveWeek(w, btn);
+    } finally { delete busy[key]; }
+  }
+  async function approvePending(id, btn) {
+    var p = state.pending.filter(function (x) { return x.id === id; })[0]; if (!p) return;
+    var short = posSaldo(p.cat) + p.amt < 0;
+    var msg = 'Gagal: saldo pos ' + posName(p.cat) + ' tidak cukup. Tidak ada yang dicatat.';
+    if (btn) { var ok = await fx.commit(btn, function () { return !short; }, { keep: true }); if (!ok) { toast(msg); return; } }
+    else if (short) { toast(msg); return; }
+    fx.buzz(14);
+    var card = $('.prop[data-pid="' + id + '"]');
+    if (card) { var r = card.getBoundingClientRect(); fx.burst(r.left + r.width / 2, r.top + r.height / 2); await fx.stamp(card, 'Disahkan'); }
+    var label = (p.amt < 0 ? '\u2212' : '+') + 'Rp ' + fmt(Math.abs(p.amt));
+    fx.fly(card, label, $('#amountNum'), p.amt < 0).then(function () { fx.sheen($('#amount')); fx.glow($('.skyhead')); });
+    removeCard('.prop[data-pid="' + id + '"]', function () {
+      state.pending = state.pending.filter(function (x) { return x.id !== id; }); addTx(p); renderAll(true);
+      toast('Disetujui. Saldo sekarang ' + rp(saldo()) + '.'); state.tx[state.tx.length - 1].isNew = false;
+    });
+  }
+  async function approveWeek(w, btn) {
+    var arr = state.dues[w], n = arr.filter(function (s) { return s === 'wait'; }).length; if (!n) return;
+    if (btn) await fx.commit(btn, null, { keep: true });
+    fx.buzz([16, 40, 16]);
+    if (+w === state.week) wave(w);
+    var card = $('.prop[data-kind="week"][data-w="' + w + '"]');
+    if (card) { var r = card.getBoundingClientRect(); fx.burst(r.left + r.width / 2, r.top + r.height / 2, 16); }
+    await fx.wait(fx.reduce ? 0 : Math.min(900, 160 + n * 60));
+    if (card) await fx.stamp(card, 'Disahkan');
+    fx.fly(card, '+Rp ' + fmt(n * NOMINAL), $('#amountNum')).then(function () { fx.sheen($('#amount')); fx.glow($('.skyhead')); });
+    removeCard('.prop[data-kind="week"][data-w="' + w + '"]', function () {
+      state.dues[w] = arr.map(function (s) { return s === 'wait' ? 'paid' : s; });
+      addTx({ desc: 'Iuran minggu ' + w + ' (' + n + ' siswa)', cat: 'op', amt: n * NOMINAL, by: 'Bendahara' });
+      renderAll(true); toast(n + ' iuran minggu ' + w + ' disahkan. Saldo bertambah ' + rp(n * NOMINAL) + '.'); state.tx[state.tx.length - 1].isNew = false;
+    });
   }
   function wave(w) {
     $$('#duesCard .stu.wait').forEach(function (el, i) { setTimeout(function () { el.classList.add('wave'); }, i * 70); });
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-act]'); if (!b) return;
-    var k = b.dataset.act; act(k, +b.dataset.id, +b.dataset.w);
+    act(b.dataset.act, +b.dataset.id, +b.dataset.w, b);
   });
 
   /* ---------- iuran ---------- */
@@ -296,7 +320,7 @@
   }
   function chip(i, s, as) {
     var inner = '<span class="av" data-t="' + (i % 4) + '">' + ini(NAMES[i]) + '</span><span>' + NAMES[i] + '</span>' + (s === 'paid' ? ic('check', 'st') : s === 'wait' ? ic('clock', 'st') : '');
-    return as === 'button' ? '<button class="stu todo" type="button" data-i="' + i + '" aria-label="Tandai ' + NAMES[i] + ' lunas minggu ' + state.week + '">' + inner + ic('plus', 'st') + '</button>' : '<span class="stu ' + s + '">' + inner + '</span>';
+    return as === 'button' ? '<button class="stu todo" type="button" data-i="' + i + '" aria-label="Tandai ' + NAMES[i] + ' lunas minggu ' + state.week + '">' + inner + ic('plus', 'st') + '</button>' : '<span class="stu ' + s + '" data-i="' + i + '">' + inner + '</span>';
   }
   var lastPct = 0;
   function renderDues(animate) {
@@ -312,7 +336,7 @@
   $('#weeks').addEventListener('click', function (e) { var b = e.target.closest('.wk'); if (!b) return; state.week = +b.dataset.w; renderWeeks(); renderDues(true); renderTips(); });
   $('#duesCard').addEventListener('click', function (e) {
     var b = e.target.closest('button.stu'); if (!b) return;
-    var i = +b.dataset.i, w = state.week; state.dues[w][i] = 'wait'; buzz(10); renderAll(); var el = $('#duesCard .stu.wait:last-child'); if (el) el.classList.add('just');
+    var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
     toast(NAMES[i] + ' ditandai lunas. Menunggu Wali Kelas.', function () { state.dues[w][i] = 'todo'; renderAll(); });
   });
 
@@ -362,32 +386,42 @@
   nom.addEventListener('input', function () { var v = amtVal(); nom.value = v ? fmt(v) : ''; err.textContent = ''; syncForm(); });
   form.addEventListener('change', function () { err.textContent = ''; syncForm(); });
   $('#quick').addEventListener('click', function (e) { var b = e.target.closest('[data-add]'); if (!b) return; nom.value = fmt(amtVal() + +b.dataset.add); syncForm(); });
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
     e.preventDefault();
     var v = amtVal(), out = curType() === 'out', cat = form.elements.cat.value, d = desc.value.trim();
-    if (!v) { err.textContent = 'Isi nominalnya dulu.'; nom.focus(); return; }
-    if (!d) { err.textContent = 'Tulis buat apa uang ini.'; desc.focus(); return; }
-    if (out && posSaldo(cat) - v < 0) { err.textContent = 'Saldo pos ' + posName(cat) + ' tidak cukup (tersisa ' + rp(posSaldo(cat)) + ').'; return; }
-    var amt = out ? -v : v;
-    if (out && v >= APPROVAL_MIN) {
-      var pr = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara', yes: 0, needed: 3 }; state.proposals.push(pr); dlg.close(); renderAll();
-      toast('Jadi usulan. Menunggu 3 teman setuju.', function () { state.proposals = state.proposals.filter(function (x) { return x !== pr; }); renderAll(); });
-    } else {
-      var pd = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara' }; state.pending.push(pd); dlg.close(); renderAll();
-      toast('Diajukan ke Wali Kelas. Saldo belum berubah.', function () { state.pending = state.pending.filter(function (x) { return x !== pd; }); renderAll(); });
-    }
+    var fail = function (msg, el) { err.textContent = msg; fx.shake($('.sheet', dlg)); if (el) el.focus(); };
+    if (!v) return fail('Isi nominalnya dulu.', nom);
+    if (!d) return fail('Tulis buat apa uang ini.', desc);
+    if (out && posSaldo(cat) - v < 0) return fail('Saldo pos ' + posName(cat) + ' tidak cukup (tersisa ' + rp(posSaldo(cat)) + ').');
+    var amt = out ? -v : v, asProposal = out && v >= APPROVAL_MIN, item;
+    await fx.commit($('#txSubmit'), null, { loading: 480 });
+    fx.closeSheet(dlg); await fx.wait(fx.reduce ? 0 : 280);
+    if (asProposal) { item = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara', yes: 0, needed: 3 }; state.proposals.push(item); }
+    else { item = { id: state.nextPid++, desc: d, cat: cat, amt: amt, by: 'Bendahara' }; state.pending.push(item); }
+    state.flash = item.id; renderAll(); state.flash = null;
+    var card = $('.prop--new');
+    if (card) { card.scrollIntoView({ behavior: fx.reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(function () { var r2 = card.getBoundingClientRect(); fx.burst(r2.left + 40, r2.top + 30, 9); }, 420); }
+    toast(asProposal ? 'Jadi usulan. Menunggu 3 teman setuju.' : 'Diajukan ke Wali Kelas. Saldo belum berubah.', function () {
+      state.proposals = state.proposals.filter(function (x) { return x !== item; }); state.pending = state.pending.filter(function (x) { return x !== item; }); renderAll();
+    });
   });
   $('#fab').addEventListener('click', function () { form.reset(); nom.value = ''; err.textContent = ''; syncForm(); dlg.showModal(); setTimeout(function () { nom.focus(); }, 60); });
-  [dlg, detailDlg].forEach(function (d) { d.addEventListener('click', function (e) { if (e.target === d) d.close(); }); $$('[data-close]', d).forEach(function (b) { b.addEventListener('click', function () { d.close(); }); }); });
+  [dlg, detailDlg].forEach(function (d) { d.addEventListener('click', function (e) { if (e.target === d) fx.closeSheet(d); }); d.addEventListener('cancel', function (e) { e.preventDefault(); fx.closeSheet(d); }); $$('[data-close]', d).forEach(function (b) { b.addEventListener('click', function () { fx.closeSheet(d); }); }); });
 
   /* ---------- peran dan demo ---------- */
   function applyRole() {
     var r = state.role; document.body.dataset.role = r;
-    $('#roleLabel span').textContent = { siswa: 'Siswa', bendahara: 'Bendahara', guru: 'Wali Kelas' }[r];
+    var rl = $('#roleLabel'); $('span', rl).textContent = { siswa: 'Masuk', bendahara: 'Bendahara', guru: 'Wali Kelas' }[r];
+    rl.setAttribute('href', r === 'siswa' ? 'login.html' : '#'); rl.title = r === 'siswa' ? 'Masuk sebagai Bendahara atau Wali Kelas' : 'Ketuk untuk keluar';
     $('#fab').hidden = r !== 'bendahara';
     $$('#demoRole button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === r); });
     renderAll();
   }
+  $('#roleLabel').addEventListener('click', function (e) {
+    if (state.role === 'siswa') return; e.preventDefault();
+    var was = state.role; state.role = 'siswa'; try { sessionStorage.removeItem('cekas-role'); } catch (x) {} applyRole();
+    toast('Kamu sudah keluar.', function () { state.role = was; try { sessionStorage.setItem('cekas-role', was); } catch (x) {} applyRole(); });
+  });
   $('#demoRole').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { state.role = b.dataset.v; applyRole(); } });
   $('#demoWx').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.wx = b.dataset.v; $$('#demoWx button').forEach(function (x) { x.classList.toggle('on', x === b); }); applyWeather(); });
 

@@ -6,8 +6,10 @@ Branch `design/sky-ui`. Tanpa Python, tanpa build. Buka dengan server statis apa
     # lewati intro: http://127.0.0.1:8765/#nointro
 
 - `index.html` — intro + landing page
+- `login.html` — masuk Bendahara / Wali Kelas (peran, percobaan 5x, kunci 15 menit, transisi sukses). Sandi contoh di panel Alat desain
+- `status.html` — 404 dan offline (`?s=offline`)
 - `kas.html` — dashboard publik (cuaca kas, antrean Wali Kelas, iuran, riwayat, catat kas). Panel "Alat desain" di pojok untuk ganti peran dan cuaca
-- `css/site.css`, `js/main.js` — landing; `css/app.css`, `js/kas.js`, `js/sha256.js` — dashboard (GSAP 3.12.5 lokal di `assets/vendor`)
+- `css/site.css`, `js/main.js` — landing; `css/app.css`, `js/kas.js`, `js/sha256.js` — dashboard; `css/fx.css`, `js/fx.js` — sistem mikro-interaksi aksi; `css/auth.css`, `js/login.js` — masuk/status (GSAP 3.12.5 lokal di `assets/vendor`)
 - `assets/sky/` — langit hasil olahan foto (kredit di `credits.json` dan footer halaman)
 - Rencana lengkap: `docs/superpowers/specs/2026-11-17-sky-ui-landing-design.md`
 

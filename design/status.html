@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Halaman tidak ditemukan — CEKAS</title>
+<meta name="theme-color" content="#06173f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/fx.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cloud" viewBox="0 0 26 18"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></symbol>
+</svg>
+
+<div class="authsky" id="sky" aria-hidden="true">
+  <div class="sky">
+    <picture><source media="(max-width: 699px)" srcset="assets/sky/sky-day-sm.jpg"><img class="sky__photo" src="assets/sky/sky-day.jpg" alt=""></picture>
+    <div class="sky__tint"></div><div class="sky__haze"></div>
+    <img class="sky__cloud sky__cloud--b" data-depth=".3" src="assets/sky/cloud-b.webp" alt="">
+    <img class="sky__cloud sky__cloud--d" data-depth=".5" src="assets/sky/cloud-d.webp" alt="">
+    <img class="sky__cloud sky__cloud--a" data-depth=".8" src="assets/sky/cloud-a.webp" alt="">
+  </div>
+</div>
+
+<div class="authwrap">
+  <header class="authbar">
+    <a class="nav__logo" href="index.html" aria-label="cekas, ke beranda"><svg width="26" height="18"><use href="#i-cloud"/></svg><span>cekas</span></a>
+    <a class="back" href="kas.html"><svg class="ic ic-sm"><use href="#i-back"/></svg>Ke kas</a>
+  </header>
+
+  <main class="status">
+    <div class="status__big" id="big" aria-hidden="true"><span>4</span><span>0</span><span>4</span><img class="passcloud" src="assets/sky/cloud-d.webp" alt=""></div>
+    <h1 id="sTitle">Halaman ini tertiup angin.</h1>
+    <p class="s" id="sText">Tautan yang kamu buka tidak ada atau sudah dipindah. Kas kelasmu aman, tidak ada yang hilang.</p>
+    <div class="saved" id="saved" hidden><svg class="ic"><use href="#i-cloud"/></svg><div><b>Rp 1.785.000</b><small>Saldo terakhir tersimpan · 17 Nov, 10:02</small></div></div>
+    <div class="status__cta">
+      <a class="btn btn--lime btn--lg" id="ctaMain" href="kas.html">Kembali ke kas</a>
+      <button class="btn btn--glass btn--lg" id="ctaRetry" type="button" hidden>Coba lagi</button>
+      <a class="btn btn--glass btn--lg" id="ctaHome" href="index.html">Ke beranda</a>
+    </div>
+  </main>
+</div>
+
+<details class="demo" id="demo">
+  <summary>Alat desain</summary>
+  <div class="demo__body">
+    <div><b>Tampilan</b><div class="demo__row" id="dView"><button data-v="404" class="on">404</button><button data-v="offline">Offline</button></div></div>
+    <p class="note">Di mode offline, "Coba lagi" selalu gagal di prototipe ini supaya keadaannya bisa dilihat.</p>
+  </div>
+</details>
+
+<script src="js/fx.js"></script>
+<script>
+(function () {
+  var q = (location.search.match(/s=(\w+)/) || [])[1] === 'offline' ? 'offline' : '404';
+  var $ = function (s) { return document.querySelector(s); };
+  function apply(v) {
+    document.body.classList.toggle('is-offline', v === 'offline');
+    document.title = v === 'offline' ? 'Offline — CEKAS' : 'Halaman tidak ditemukan — CEKAS';
+    $('#big').firstElementChild.textContent = v === 'offline' ? 'Z' : '4';
+    $('#big').classList.toggle('is-small', v === 'offline');
+    var spans = $('#big').querySelectorAll('span'); spans[0].textContent = v === 'offline' ? 'offline' : '4'; spans[1].textContent = '0'; spans[2].textContent = '4'; spans[1].style.display = spans[2].style.display = v === 'offline' ? 'none' : '';
+    $('#sTitle').textContent = v === 'offline' ? 'Kamu sedang offline.' : 'Halaman ini tertiup angin.';
+    $('#sText').textContent = v === 'offline' ? 'Tidak ada sinyal. Kamu masih bisa membaca data terakhir yang tersimpan. Catatan baru dikirim saat kamu online lagi.' : 'Tautan yang kamu buka tidak ada atau sudah dipindah. Kas kelasmu aman, tidak ada yang hilang.';
+    $('#saved').hidden = v !== 'offline'; $('#ctaRetry').hidden = v !== 'offline';
+    $('#ctaMain').textContent = v === 'offline' ? 'Buka data tersimpan' : 'Kembali ke kas';
+    document.querySelectorAll('#dView button').forEach(function (b) { b.classList.toggle('on', b.dataset.v === v); });
+  }
+  apply(q);
+  document.getElementById('dView').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) apply(b.dataset.v); });
+  document.getElementById('ctaRetry').addEventListener('click', async function () {
+    var ok = await fx.commit(this, function () { return new Promise(function (r) { setTimeout(function () { r(false); }, 700); }); }, { loading: 800 });
+    if (!ok) fx.shake(document.querySelector('.saved'));
+  });
+  if (!fx.reduce && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var clouds = [].slice.call(document.querySelectorAll('.sky__cloud'));
+    window.addEventListener('pointermove', function (e) { var x = e.clientX / innerWidth - .5, y = e.clientY / innerHeight - .5; clouds.forEach(function (c) { var d = parseFloat(c.dataset.depth || .3); c.style.translate = (-x * 70 * d).toFixed(1) + 'px ' + (-y * 30 * d).toFixed(1) + 'px'; }); }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

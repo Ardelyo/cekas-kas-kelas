@@ -13,14 +13,14 @@ Status: ✅ sudah ada di prototipe · 🔜 berikutnya · 💡 opsional.
 | 1 | **Intro** | overlay di `/` | umum | Langit malam → siang, wordmark, lewati | ✅ |
 | 2 | **Landing** | `/` (belum ada; sekarang `/` = dashboard) | umum | Hero, pernyataan, fitur, coba hash, cara kerja, penutup | ✅ |
 | 3 | **Dashboard publik** | `/` atau `/kas` | semua siswa | Lihat bagian B | ✅ (`design/kas.html`) |
-| 4 | **Login Bendahara** | `/login` | Bendahara | Satu kolom kata sandi, status kunci 15 menit | 🔜 |
-| 5 | **Login Wali Kelas** | `/guru/login` | Guru | Satu kolom PIN, terpisah dari sesi Bendahara | 🔜 |
+| 4 | **Login Bendahara** | `/login` | Bendahara | Satu kolom kata sandi, status kunci 15 menit | ✅ (`design/login.html`) |
+| 5 | **Login Wali Kelas** | `/guru/login` | Guru | Satu kolom PIN, terpisah dari sesi Bendahara | ✅ (peran di `login.html`) |
 | 6 | **Laporan SPJ** | `/laporan` | Bendahara/Guru | Kertas siap cetak, tanda tangan, kode verifikasi | 🔜 |
 | 7 | **Cek keaslian** | `/cek` (halaman untuk `/api/ledger/verify`) | umum | Hasil verifikasi rantai hash besar, bisa dibagikan | 🔜 |
 | 8 | **Tentang / Tim** | `/tentang` | umum, juri | Kelompok 5 XI-F2, cara kerja keamanan, kredit foto & font | 💡 |
-| 9 | **Offline** | dilayani `sw.js` | semua | "Kamu sedang offline", tampilkan saldo terakhir yang tersimpan | 🔜 |
-| 10 | **404 / Error** | otomatis | semua | Awan tersesat, tombol kembali | 🔜 |
-| 11 | **Terkunci** | respons login 429/423 | Bendahara/Guru | Hitung mundur sisa kunci 15 menit | 🔜 |
+| 9 | **Offline** | dilayani `sw.js` | semua | "Kamu sedang offline", tampilkan saldo terakhir yang tersimpan | ✅ (`status.html?s=offline`) |
+| 10 | **404 / Error** | otomatis | semua | Awan tersesat, tombol kembali | ✅ (`status.html`) |
+| 11 | **Terkunci** | respons login 429/423 | Bendahara/Guru | Hitung mundur sisa kunci 15 menit | ✅ (di `login.html`) |
 
 ## B. Bagian di dalam Dashboard publik (satu halaman, banyak seksi)
 

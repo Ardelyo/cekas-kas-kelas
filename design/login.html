@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Masuk — CEKAS</title>
+<meta name="theme-color" content="#06173f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/fx.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cloud" viewBox="0 0 26 18"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7a3 3 0 0 1 3-3h11v4M4 7v10a3 3 0 0 0 3 3h12V8H7a3 3 0 0 1-3-1zM16 14h.01"/></symbol>
+  <symbol id="i-stamp" viewBox="0 0 24 24"><path d="M9 4h6v5l3 4v2H6v-2l3-4zM5 19h14"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.7A9 9 0 0 1 12 5.5c6.4 0 10 6.5 10 6.5a16 16 0 0 1-3.2 3.9M6.4 7.2A16 16 0 0 0 2 12s3.6 6.5 10 6.5a9.7 9.7 0 0 0 4.2-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l10 17H2zM12 10v5M12 18h.01"/></symbol>
+  <symbol id="i-caps" viewBox="0 0 24 24"><path d="M12 4l7 8h-4v4H9v-4H5zM9 20h6"/></symbol>
+</svg>
+
+<div class="authsky" id="sky" aria-hidden="true">
+  <div class="sky">
+    <picture><source media="(max-width: 699px)" srcset="assets/sky/sky-day-sm.jpg"><img class="sky__photo" src="assets/sky/sky-day.jpg" alt=""></picture>
+    <div class="sky__tint"></div><div class="sky__haze"></div>
+    <img class="sky__cloud sky__cloud--b" data-depth=".3" src="assets/sky/cloud-b.webp" alt="">
+    <img class="sky__cloud sky__cloud--d" data-depth=".5" src="assets/sky/cloud-d.webp" alt="">
+    <img class="sky__cloud sky__cloud--a" data-depth=".8" src="assets/sky/cloud-a.webp" alt="">
+  </div>
+</div>
+
+<div class="authwrap">
+  <header class="authbar">
+    <a class="nav__logo" href="index.html" aria-label="cekas, ke beranda"><svg width="26" height="18"><use href="#i-cloud"/></svg><span>cekas</span></a>
+    <a class="back" href="kas.html"><svg class="ic ic-sm"><use href="#i-back"/></svg>Lihat kas</a>
+  </header>
+
+  <main class="gate">
+    <div class="gate__intro">
+      <p class="eyebrow">Khusus pengurus kelas</p>
+      <h1 id="introTitle">Masuk untuk <em>mencatat</em> kas kelas.</h1>
+      <p id="introSub">Hanya Bendahara dan Wali Kelas yang perlu masuk. Siswa cukup membuka kas tanpa kata sandi.</p>
+    </div>
+
+    <section class="panel" id="panel" aria-label="Masuk">
+      <!-- form -->
+      <div class="view on" id="vForm">
+        <div class="rs" role="radiogroup" aria-label="Masuk sebagai">
+          <span class="rs__thumb" aria-hidden="true"></span>
+          <label><input type="radio" name="role" value="bendahara" checked><svg class="ic ic-sm"><use href="#i-wallet"/></svg>Bendahara</label>
+          <label><input type="radio" name="role" value="guru"><svg class="ic ic-sm"><use href="#i-stamp"/></svg>Wali Kelas</label>
+        </div>
+        <h2 class="swap" id="pTitle">Masuk sebagai Bendahara</h2>
+        <p class="sub swap" id="pSub">Catat uang masuk dan keluar, tandai iuran, dan ajukan belanja.</p>
+
+        <form id="loginForm" novalidate>
+          <div class="fieldwrap">
+            <div class="flab"><label for="pw" id="pwLabel">Kata sandi</label><span class="caps" id="caps"><svg class="ic ic-sm"><use href="#i-caps"/></svg>Caps Lock aktif</span></div>
+            <div class="pw" id="pwBox">
+              <input id="pw" name="password" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" aria-describedby="err hint" placeholder="Ketik kata sandi">
+              <button class="eye2" id="eye2" type="button" aria-label="Tampilkan kata sandi" aria-pressed="false"><svg class="ic"><use href="#i-eye"/></svg></button>
+            </div>
+            <div class="meter" id="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="meter__t" id="hint"><span>Minimal 6 karakter</span><span id="pwCount">0/6</span></div>
+          </div>
+          <div class="errline" id="err" role="alert" aria-live="assertive"><span id="errText"></span><span class="attempts" id="attempts" aria-label="Percobaan"><i></i><i></i><i></i><i></i><i></i></span></div>
+          <button class="btn btn--dark btn--lg submit" id="submit" type="submit">Masuk</button>
+        </form>
+
+        <div class="assure"><svg class="ic ic-sm"><use href="#i-shield"/></svg><span>Sesi Bendahara dan Wali Kelas terpisah. Catatan baru tetap menunggu Wali Kelas menyetujui.</span></div>
+        <div class="alt"><a href="kas.html">Lihat kas tanpa masuk</a></div>
+      </div>
+
+      <!-- terkunci -->
+      <div class="view lock" id="vLock">
+        <div class="lockring" role="timer" aria-live="off">
+          <svg class="r" viewBox="0 0 100 100" aria-hidden="true"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="lockFg" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/></svg>
+          <div class="core"><svg class="cloudico" aria-hidden="true"><use href="#i-cloud"/></svg><span class="t" id="lockTime">15:00</span><span class="l">tersisa</span></div>
+        </div>
+        <h2>Istirahat sebentar</h2>
+        <p id="lockText">Terlalu banyak percobaan masuk. Demi keamanan, masuk dikunci sementara. Peran lain tidak terpengaruh.</p>
+        <div class="alt" style="margin-top:20px"><a href="kas.html">Lihat kas (hanya baca)</a></div>
+      </div>
+
+      <!-- berhasil -->
+      <div class="view welcome" id="vDone">
+        <div class="seal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h2 id="doneTitle">Selamat datang</h2>
+        <p id="doneSub">Membuka kas kelas…</p>
+        <div class="progress" aria-hidden="true"><i></i></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<details class="demo" id="demo">
+  <summary>Alat desain</summary>
+  <div class="demo__body">
+    <p class="note">Kata sandi contoh: Bendahara <b>langit123</b>, Wali Kelas <b>wali-langit</b>.</p>
+    <div><b>Aksi</b><div class="demo__row"><button id="dFill">Isi sandi benar</button><button id="dLock">Lihat terkunci</button><button id="dReset">Atur ulang</button></div></div>
+  </div>
+</details>
+
+<script src="js/fx.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>
