@@ -1,0 +1,16 @@
+# Vercel hanya menyajikan situs statis design/. Aplikasi Python tidak ikut.
+cekas_app
+cekas_core
+tests
+backups
+showcase_screens
+docs
+requirements.txt
+run.py
+Dockerfile
+cekas.db*
+*.bat
+*.py
+*.xlsx
+*.ipynb
+design/assets/sky/raw
