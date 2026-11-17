@@ -99,13 +99,17 @@
     var f = S[name]; if (!f) return false;
     var now = performance.now(), gap = GAP[name] || 35; if (stamp[name] && now - stamp[name] < gap) return false; stamp[name] = now;
     if (!ctx()) return false;
-    if (AC.state === 'suspended') { try { AC.resume(); } catch (e) {} if (AC.state === 'suspended') { if (now - born < 2600) pending.push([name, arg, now]); return false; } }
+    if (AC.state === 'suspended') { pending.push([name, arg, now]); try { AC.resume().then(flush); } catch (e) {} if (AC.state === 'suspended') return false; }
     try { f(arg); } catch (e) {}
     return true;
   }
+  function flush() {
+    if (!AC || AC.state !== 'running') return; var now = performance.now(), q = pending.splice(0);
+    q.forEach(function (p) { if (now - p[2] < 2600) { try { S[p[0]](p[1]); } catch (e) {} } });
+  }
   function unlock() {
     if (!enabled()) return; if (!ctx()) return; try { AC.resume(); } catch (e) {}
-    var now = performance.now(); var q = pending.splice(0); q.forEach(function (p) { if (now - p[2] < 2600 && AC.state === 'running') { try { S[p[0]](p[1]); } catch (e) {} } });
+    try { AC.resume().then(flush); } catch (e) {} flush();
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { document.addEventListener(ev, unlock, { passive: true, capture: true }); });
 
@@ -169,8 +173,24 @@
     }, { threshold: 0.55 });
     Array.prototype.forEach.call(document.querySelectorAll('.qcard,[data-count],#balNum,.psec,.fsec,main > section'), function (el) { io.observe(el); });
   }
+  var ICON_ON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+  var ICON_OFF = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>';
+  var sndBtns = [];
+  function paintBtns() { var on = !!(M && M.state && M.state.sound); sndBtns.forEach(function (b) { b.innerHTML = on ? ICON_ON : ICON_OFF; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.title = on ? 'Suara nyala. Ketuk untuk mematikan.' : 'Suara mati. Ketuk untuk menyalakan.'; b.setAttribute('aria-label', b.title); b.classList.toggle('is-on', on); }); }
+  function addButtons() {
+    if (!M) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-skyctl]'), function (host) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'skybtn sndbtn'; b.setAttribute('data-nosfx', '');
+      b.addEventListener('click', function (e) {
+        e.stopPropagation(); var v = !M.state.sound; M.set('sound', v);
+        if (v) { ctx(); try { AC.resume(); } catch (x) {} setTimeout(function () { play('logo'); }, 30); }
+      });
+      host.appendChild(b); sndBtns.push(b);
+    });
+    paintBtns(); if (M.onchange) M.onchange(paintBtns);
+  }
   function boot() {
-    watchDialogs(); watchView();
+    addButtons(); watchDialogs(); watchView();
     if (root.classList.contains('intro-on')) { play('intro'); setTimeout(function () { play('logo'); }, 1500); }
     if (root.classList.contains('route-in')) play('whoosh2');
     if (/status\.html$/.test(location.pathname)) play('wind');
