@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CEKAS — Kas kelas seterang langit</title>
+<meta name="description" content="Buku kas kelas yang terbuka untuk semua siswa dan tidak bisa diubah diam-diam. Diverifikasi Wali Kelas.">
+<meta name="theme-color" content="#1E6FE8">
+<script>
+  (function () {
+    var d = document.documentElement;
+    d.classList.add('js');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var seen = false;
+    try { seen = sessionStorage.getItem('cekas-intro') === '1'; } catch (e) {}
+    if (!reduce && !seen && location.hash !== '#nointro') d.classList.add('intro-on');
+  })();
+</script>
+<link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/sky/sky-day.jpg" as="image" media="(min-width: 700px)">
+<link rel="preload" href="assets/sky/sky-day-sm.jpg" as="image" media="(max-width: 699px)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+<!-- ============ INTRO ============ -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro__sky"></div>
+  <div class="intro__stars" id="introStars"></div>
+  <div class="intro__sun" id="introSun"></div>
+  <div class="intro__mark" id="introMark" aria-label="cekas">
+    <span>c</span><span>e</span><span>k</span><span>a</span><span>s</span>
+  </div>
+  <p class="intro__tag" id="introTag">kas kelas, seterang langit</p>
+  <button class="intro__skip" id="introSkip" type="button">Lewati</button>
+</div>
+
+<a class="skip-link" href="#isi">Langsung ke isi</a>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a class="nav__logo" href="#top" aria-label="cekas, ke atas">
+    <svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor"/></svg>
+    <span>cekas</span>
+  </a>
+  <nav class="nav__links" aria-label="Utama">
+    <a href="#fitur">Fitur</a>
+    <a href="#coba">Coba sendiri</a>
+    <a href="#cara">Cara kerja</a>
+  </nav>
+  <a class="btn btn--dark btn--sm" href="/login">Masuk</a>
+</header>
+
+<main id="isi">
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero__sky" aria-hidden="true">
+    <picture>
+      <source media="(max-width: 699px)" srcset="assets/sky/sky-day-sm.jpg">
+      <img class="hero__photo" id="skyPhoto" src="assets/sky/sky-day.jpg" alt="" decoding="async" fetchpriority="high">
+    </picture>
+    <div class="hero__tint"></div>
+    <img class="cloud cloud--b" data-depth="0.35" src="assets/sky/cloud-b.webp" alt="" loading="eager">
+    <img class="cloud cloud--d" data-depth="0.5" src="assets/sky/cloud-d.webp" alt="" loading="eager">
+    <img class="cloud cloud--a" data-depth="0.8" src="assets/sky/cloud-a.webp" alt="" loading="eager">
+    <div class="hero__fade"></div>
+  </div>
+
+  <div class="hero__inner">
+    <p class="chip chip--glass" data-hero="in"><span class="dot"></span> Kelas XI-F2 · SMA Kartika XIX-1 Bandung</p>
+    <h1 class="hero__title" id="heroTitle">
+      <span class="line"><span class="line__in" data-hero="in">Uang kas kelas,</span></span>
+      <span class="line"><span class="line__in" data-hero="in">seterang <em>langit.</em></span></span>
+    </h1>
+    <p class="hero__sub" data-hero="in">Setiap rupiah tercatat, terbuka untuk semua siswa, dan tidak bisa diubah diam-diam. Wali Kelas yang mengesahkan.</p>
+    <div class="hero__cta" data-hero="in">
+      <a class="btn btn--lime btn--lg magnetic" href="/">Lihat kas kelas <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      <a class="btn btn--glass btn--lg" href="#coba">Coba buktinya</a>
+    </div>
+  </div>
+
+  <div class="arc" id="arc" aria-label="Contoh tampilan CEKAS">
+    <article class="card card--bal" style="--i:-2">
+      <p class="card__k">Saldo kas · contoh</p>
+      <p class="card__big"><small>Rp</small><span id="balNum" data-to="1284000">1.284.000</span></p>
+      <svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none" aria-hidden="true"><path id="sparkPath" d="M0 40 C20 38 30 30 50 32 S85 12 105 18 S140 30 160 14 S190 6 200 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </article>
+    <article class="card card--photo" style="--i:-1">
+      <p class="card__k">Iuran minggu ke-12</p>
+      <p class="card__big"><span>31</span><small>/ 34 lunas</small></p>
+      <div class="bar"><i style="--w:91%"></i></div>
+      <p class="card__s">3 siswa belum bayar</p>
+    </article>
+    <article class="card card--ink" style="--i:0">
+      <span class="badge badge--ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Terverifikasi</span>
+      <p class="card__t">Rantai 48 transaksi utuh</p>
+      <p class="card__mono">a91f·04c2·77de·b3a0</p>
+    </article>
+    <article class="card card--lime" style="--i:1">
+      <p class="card__k">Wali Kelas</p>
+      <p class="card__t">Menyetujui 3 transaksi</p>
+      <div class="avatars" aria-hidden="true"><i></i><i></i><i></i></div>
+    </article>
+    <article class="card card--out" style="--i:2">
+      <p class="card__k">Pengeluaran</p>
+      <p class="card__t">Spidol &amp; kertas</p>
+      <p class="card__amt">−Rp 35.000</p>
+    </article>
+  </div>
+  <button class="scrollcue" id="scrollCue" type="button" aria-label="Gulir ke bawah"><i></i></button>
+</section>
+
+<!-- ============ PERNYATAAN ============ -->
+<section class="statement" id="statement">
+  <p class="eyebrow">Kenapa CEKAS</p>
+  <p class="statement__text" id="statementText">Biasanya uang kas dicatat di satu buku yang hanya dipegang satu orang. CEKAS membuat catatan itu terbuka untuk semua, dan setiap barisnya terkunci supaya tidak bisa diubah diam-diam.</p>
+</section>
+
+<!-- ============ BENTO ============ -->
+<section class="bento" id="fitur">
+  <header class="sec-head">
+    <p class="eyebrow">Fitur</p>
+    <h2>Dibuat supaya <em>percaya</em> tidak perlu diminta.</h2>
+  </header>
+  <div class="bento__grid">
+    <article class="tile tile--sky reveal">
+      <h3>Buku kas anti-manipulasi</h3>
+      <p>Setiap transaksi menyimpan sidik jari SHA-256 yang mengikat transaksi sebelumnya. Ubah satu baris, rantainya putus.</p>
+      <div class="chain" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i><b></b><i></i></div>
+    </article>
+    <article class="tile tile--paper reveal">
+      <h3>Disahkan Wali Kelas</h3>
+      <p>Pemasukan dan pengeluaran ditahan sampai guru menyetujui. Saldo baru berubah setelah itu.</p>
+      <label class="toggle"><input type="checkbox" checked aria-label="Contoh: Wali Kelas menyetujui"><span class="toggle__t"></span><span class="toggle__l">Disetujui</span></label>
+    </article>
+    <article class="tile tile--lime reveal">
+      <h3>Rekap siap tempel ke WhatsApp</h3>
+      <p>Satu ketukan, satu pesan rapi untuk grup kelas.</p>
+      <div class="bubble"><span>Kas XI-F2 · Minggu 12</span><span>Saldo Rp 1.284.000 ✔</span></div>
+    </article>
+    <article class="tile tile--ink reveal">
+      <h3>Prakiraan saldo</h3>
+      <p>"Cukup sekitar 17 minggu." Dihitung dari kebiasaan belanja kelas, bukan tebakan.</p>
+      <p class="tile__num"><span data-count="17">17</span><small>minggu</small></p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ COBA SENDIRI ============ -->
+<section class="try" id="coba">
+  <header class="sec-head sec-head--center">
+    <p class="eyebrow">Coba sendiri</p>
+    <h2>Ubah satu angka. <em>Lihat apa yang terjadi.</em></h2>
+    <p class="lede">Ini buku kas contoh dengan rantai hash sungguhan yang dihitung di browsermu. Tidak ada data yang dikirim ke mana pun.</p>
+  </header>
+  <div class="ledger" id="ledger">
+    <div class="ledger__bar">
+      <span class="badge badge--ok" id="ledgerBadge" role="status"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Memeriksa…</span></span>
+      <div class="ledger__actions">
+        <button class="btn btn--dark btn--sm" id="tamperBtn" type="button">Ubah satu baris</button>
+        <button class="btn btn--ghost btn--sm" id="restoreBtn" type="button" hidden>Kembalikan</button>
+      </div>
+    </div>
+    <ol class="ledger__rows" id="ledgerRows"></ol>
+    <p class="ledger__note" id="ledgerNote">Data fiktif untuk contoh.</p>
+  </div>
+</section>
+
+<!-- ============ CARA KERJA ============ -->
+<section class="steps" id="cara">
+  <header class="sec-head">
+    <p class="eyebrow">Cara kerja</p>
+    <h2>Tiga langkah, <em>semua terlihat.</em></h2>
+  </header>
+  <ol class="steps__list">
+    <li class="step reveal"><span class="step__n">01</span><h3>Bendahara mencatat</h3><p>Lewat bot Telegram atau web. Iuran dicentang per minggu, pengeluaran besar jadi usulan yang dipilih siswa.</p></li>
+    <li class="step reveal"><span class="step__n">02</span><h3>Wali Kelas mengesahkan</h3><p>Satu ketukan untuk menyetujui atau menolak. Nama guru ikut terkunci di sidik jari transaksi.</p></li>
+    <li class="step reveal"><span class="step__n">03</span><h3>Semua siswa melihat</h3><p>Dashboard publik dan kode QR untuk ditempel di kelas. Lencana hijau tanda rantai masih utuh.</p></li>
+  </ol>
+</section>
+
+<!-- ============ PENUTUP SENJA ============ -->
+<section class="dusk" id="dusk">
+  <div class="dusk__bg" aria-hidden="true"></div>
+  <div class="dusk__inner">
+    <h2>Kas yang terang,<br><em>kelas yang tenang.</em></h2>
+    <p>Buka dashboard dan lihat sendiri ke mana uang kelasmu pergi.</p>
+    <a class="btn btn--lime btn--lg magnetic" href="/">Buka kas kelas <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </div>
+  <footer class="foot">
+    <p>CEKAS · Kelompok 5 · Kelas XI-F2 SMA Kartika XIX-1 Bandung</p>
+    <p class="foot__credit">Foto langit: Lance Vanlewen via Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC BY-SA 4.0</a>, diubah ukuran dan dipotong jadi lapisan awan. Font: Inter Tight dan Bricolage Grotesque (SIL OFL).</p>
+  </footer>
+</section>
+</main>
+
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
