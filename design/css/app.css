@@ -152,8 +152,8 @@ button.stu.todo { background: #fff; box-shadow: inset 0 0 0 1.5px var(--paper-3)
 
 /* bagikan */
 .share { display: grid; grid-template-columns: 116px 1fr; gap: 16px; align-items: center; }
-.qr { width: 116px; height: 116px; border-radius: 18px; background: repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0 / 14px 14px; position: relative; box-shadow: 0 0 0 6px #fff, 0 0 0 7px var(--line); }
-.qr::after { content: "contoh"; position: absolute; inset: 40% 12%; display: grid; place-items: center; background: #fff; border-radius: 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.qr { width: 116px; height: 116px; border-radius: 18px; background: #fff; padding: 8px; box-shadow: 0 0 0 1px var(--line), 0 10px 24px -14px rgba(10, 42, 120, .45); }
+.qr__svg { display: block; width: 100%; height: 100%; }
 .share h3 { font-size: 18px; letter-spacing: -.03em; } .share p { color: var(--ink-3); font-size: 14.5px; margin: 4px 0 12px; }
 .share .row { display: flex; gap: 8px; flex-wrap: wrap; } .share .url { margin-top: 10px; font: 500 12.5px ui-monospace, Consolas, monospace; color: var(--ink-3); word-break: break-all; }
 .bubble { margin-top: 12px; display: inline-flex; flex-direction: column; gap: 2px; background: var(--lime); color: var(--lime-ink); padding: 10px 14px; border-radius: 16px 16px 16px 4px; font-size: 13.5px; font-weight: 500; }

@@ -19,7 +19,7 @@
   var POSNOTE = { op: 'Spidol, fotokopi, kebersihan', so: 'Jenguk dan sumbangan', ev: 'Lomba dan acara kelas', ca: 'Dana darurat' };
   var posName = function (k) { return POS.filter(function (p) { return p.k === k; })[0].name; };
   var AVG_SPEND = 105000, NOMINAL = 10000, APPROVAL_MIN = 50000;
-  var NAMES = ['Aditya', 'Bella', 'Citra', 'Dimas', 'Eka', 'Farhan', 'Gita', 'Hana', 'Indra', 'Jihan', 'Kevin', 'Laila', 'Mario', 'Nadia', 'Okta', 'Putri', 'Qori', 'Rafi', 'Salsa', 'Tegar', 'Umar', 'Vina', 'Wulan', 'Yusuf', 'Zahra', 'Alya', 'Bima', 'Cakra', 'Dwi', 'Elsa', 'Fikri', 'Galih', 'Hafiz', 'Ilham'];
+  var NAMES = ['Ailsa Aneira Sachi', 'Ardelio Satria', 'Ardiraya Barlian', 'Adzan Marwan', 'Bilqis Nur Syifa', 'Carissa P', 'Feby R', 'Gladies K', 'Hilal', 'Indra Hari', 'Jahfal A', 'Julia Nur', 'Lingga Zivana', 'Lovy Shariza', 'Marchel P', 'Maydeline', 'Mei Mei', 'Khayliana T', 'Muh Faiz', 'Muhammad Nur Rifky', 'Muhammad Prabu', 'Muhammad Rafa', 'Nabila Zahrotusifa', 'Nur Amelia', 'Raditya Arya', 'Rafif Sava', 'Raysa Amelia', 'Revalina', 'Rhayendra Aryasatya', 'Riska Maulida', 'Sabrynna R', 'Tanisha', 'Tarina Putri', 'Vania Putri', 'Laudya Ayu', 'Cinta Quinsha Khairunisha'];
   var TOTAL = NAMES.length, NIS = [], FULLPOS = { op: 'operasional', so: 'sosial', ev: 'event', ca: 'cadangan' };
 
   var state = {
@@ -61,9 +61,9 @@
     var rows = [
       [1, 0, '07:10', 'Saldo awal operasional', 'op', 100000], [1, 0, '07:11', 'Dana cadangan awal', 'ca', 300000], [1, 0, '07:12', 'Iuran sosial semester', 'so', 390000],
       [1, 1, '09:05', 'Beli spidol dan penghapus', 'op', -45000],
-      [1, 4, '15:30', 'Iuran minggu 1 (34 siswa)', 'op', 340000, 1], [1, 4, '16:02', 'Pemasukan lomba kebersihan', 'ev', 300000],
+      [1, 4, '15:30', 'Iuran minggu 1 (' + NAMES.length + ' siswa)', 'op', 340000, 1], [1, 4, '16:02', 'Pemasukan lomba kebersihan', 'ev', 300000],
       [2, 0, '10:20', 'Konsumsi lomba kebersihan', 'ev', -120000], [2, 2, '13:15', 'Sumbangan jenguk teman sakit', 'so', -150000],
-      [2, 4, '15:35', 'Iuran minggu 2 (33 siswa)', 'op', 330000, 1], [3, 4, '15:40', 'Iuran minggu 3 (34 siswa)', 'op', 340000, 1]
+      [2, 4, '15:35', 'Iuran minggu 2 (' + NAMES.length + ' siswa)', 'op', 330000, 1], [3, 4, '15:40', 'Iuran minggu 3 (' + NAMES.length + ' siswa)', 'op', 340000, 1]
     ];
     rows.forEach(function (r) {
       if (r[6] && r[0] >= cw) return;

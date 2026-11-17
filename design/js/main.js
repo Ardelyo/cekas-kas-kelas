@@ -55,9 +55,9 @@
     { d: 'Saldo awal kas', n: 'Dicatat Bendahara', a: 500000 },
     { d: 'Iuran minggu 1', n: '31 siswa lunas', a: 310000 },
     { d: 'Beli spidol dan kertas', n: 'Disetujui Wali Kelas', a: -35000 },
-    { d: 'Iuran minggu 2', n: '34 siswa lunas', a: 340000 },
+    { d: 'Iuran minggu 2', n: '36 siswa lunas', a: 340000 },
     { d: 'Fotokopi tugas kelompok', n: 'Disetujui Wali Kelas', a: -22000 },
-    { d: 'Iuran minggu 3', n: '33 siswa lunas', a: 330000 }
+    { d: 'Iuran minggu 3', n: '36 siswa lunas', a: 330000 }
   ];
   var TAMPER_AT = 2, TAMPER_TO = -3500;
   var data = SEED.map(function (r) { return { d: r.d, n: r.n, a: r.a }; });
