@@ -266,3 +266,9 @@
 .qcard--word blockquote { font-size: clamp(30px, 4.6vw, 46px); line-height: 1.02; letter-spacing: -.04em; font-weight: 700; overflow-wrap: anywhere; }
 @media (min-width: 640px) { .cap--cols { grid-template-columns: 1fr 1fr; column-gap: 26px; } .cap--cols .cap__when { grid-column: 1 / -1; } }
 .cap--cols .talk span { font-size: clamp(16px, 1.9vw, 22px); }
+
+.s3d__skip { position: absolute; z-index: 7; top: 92px; right: 18px; transition: opacity .4s var(--ease); } .s3d__skip.off { opacity: 0; pointer-events: none; }
+.cap__btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 6px; } .cap--end .cap__btns > * { pointer-events: auto; }
+.s3d .story2__dots { pointer-events: auto; } .s3d .story2__dots i { position: relative; cursor: pointer; } .s3d .story2__dots i::after { content: ""; position: absolute; inset: -9px; }
+.s3d.is-static .s3d__skip, .s3d.is-static #s3dReplay { display: none; }
+@media (max-width: 759px) { .s3d__skip { top: 78px; right: 12px; } .s3d .story2__dots { right: 8px; } }

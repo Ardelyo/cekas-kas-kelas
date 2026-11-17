@@ -8,6 +8,7 @@
   if (reduce || !window.THREE || !window.gsap || !window.ScrollTrigger || !webgl()) { sec.classList.add('is-static'); return; }
   gsap.registerPlugin(ScrollTrigger);
   var T = THREE, stage = sec.querySelector('.s3d__stage'), canvas = sec.querySelector('#s3d');
+  var sk0 = null;
   var caps = Array.prototype.slice.call(sec.querySelectorAll('.cap')), dots = Array.prototype.slice.call(sec.querySelectorAll('.story2__dots i')), flashEl = sec.querySelector('.s3d__flash');
 
   var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
@@ -188,7 +189,7 @@
     if (inSky) pathAt(SKYKF, p, P3, L3); else pathAt(KF, p, P3, L3);
     var k = aspectK;
     cam.position.set(L3[0] + (P3[0] - L3[0]) * k, L3[1] + (P3[1] - L3[1]) * k, L3[2] + (P3[2] - L3[2]) * k); cam.lookAt(L3[0], L3[1], L3[2]);
-    if (Math.abs(p - last) > 0.0004 || true) setCaps(p); last = p;
+    if (sk) sk.classList.toggle('off', p > 0.86); setCaps(p); last = p;
     renderer.render(scene, cam);
   }
 
@@ -202,5 +203,22 @@
   function loop(now) { frame(now); raf = running ? requestAnimationFrame(loop) : 0; }
   new IntersectionObserver(function (es) { var on = es[0].isIntersecting; if (on && !running) { running = true; resize(); raf = requestAnimationFrame(loop); } else if (!on) { running = false; } }, { rootMargin: '30% 0px' }).observe(sec);
   document.addEventListener('visibilitychange', function () { if (document.hidden) running = false; });
+
+  /* ---------- navigasi: klik titik, putar ulang, lewati ---------- */
+  var tween = null;
+  function scrollToY(y) {
+    if (tween) tween.kill();
+    var html = document.documentElement, o = { v: window.pageYOffset };
+    html.style.scrollBehavior = 'auto';
+    tween = gsap.to(o, { v: y, duration: Math.min(2.2, 0.6 + Math.abs(y - o.v) / 4000), ease: 'power2.inOut', onUpdate: function () { window.scrollTo(0, o.v); }, onComplete: function () { html.style.scrollBehavior = ''; } });
+  }
+  function range() { return sec.offsetHeight - stage.clientHeight; }
+  function toScene(i) { scrollToY(sec.offsetTop + range() * (BOUND[i] + 0.006)); }
+  dots.forEach(function (d, i) { d.setAttribute('role', 'button'); d.setAttribute('tabindex', '0'); d.setAttribute('aria-label', 'Ke adegan ' + (i + 1)); d.addEventListener('click', function () { toScene(i); }); d.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toScene(i); } }); });
+  var rp = document.getElementById('s3dReplay'), sk = document.getElementById('s3dSkip');
+  if (rp) rp.addEventListener('click', function () { scrollToY(sec.offsetTop); });
+  if (sk) sk.addEventListener('click', function () { scrollToY(sec.offsetTop + sec.offsetHeight); });
+  window.addEventListener('wheel', function () { if (tween) { tween.kill(); tween = null; document.documentElement.style.scrollBehavior = ''; } }, { passive: true });
+  window.addEventListener('touchstart', function () { if (tween) { tween.kill(); tween = null; document.documentElement.style.scrollBehavior = ''; } }, { passive: true });
   window.__s3d = { set: function (p) { target = cur = p; frame(performance.now()); } };
 })();
