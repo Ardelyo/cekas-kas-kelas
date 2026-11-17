@@ -1,7 +1,7 @@
 # Cerita 3D halaman Tentang: "Episode 01 · Ke Mana Kas Kita?"
 
 Tujuan: orang paham masalah kas kelas dan siapa tim CEKAS lewat film pendek yang dimainkan dengan gulir.
-Gaya: tokoh dan ruang dari blok 3D (Three.js, tanpa file model), shading toon dua nada dengan garis tepi gelap ala anime. Foto datar anggota ditempel di sisi depan kepala blok. Cinta memakai wajah sementara bertuliskan "C" sampai fotonya ada.
+Gaya: tokoh dan ruang dari blok 3D (Three.js, tanpa file model), shading toon dua nada dengan garis tepi gelap ala anime. Foto datar anggota ditempel di sisi depan kepala blok. 
 Bendahara dan Bu Wali adalah tokoh fiksi berwajah gambar, supaya tidak ada anggota sungguhan yang memerankan pihak yang "bermasalah". Dialog adalah dramatisasi; hanya reaksi di Bab 3 yang memakai kutipan asli tim.
 
 ## Alur (waktu cerita t = 0..116, mengikuti gulir)
@@ -16,4 +16,4 @@ Suara: efek disintesis Web Audio (tanpa berkas, tanpa suara bicara), mati secara
 Fallback: tanpa WebGL atau dengan "kurangi gerakan", naskah tampil sebagai daftar bab statis.
 
 ## Menambah atau mengganti anggota
-Foto wajah: assets/team/face-<nama>.webp (persegi 256 px). Data: SPEC, SEATS, STU, NAMES, ROLES di js/story3d.js. Untuk Cinta, ganti `faceTex: CINTA_FACE` dengan `photo: 'cinta'` setelah fotonya ada.
+Foto wajah: assets/team/face-<nama>.webp (persegi 256 px). Data: SPEC, SEATS, STU, NAMES, ROLES di js/story3d.js. Ketujuh anggota sudah berfoto.

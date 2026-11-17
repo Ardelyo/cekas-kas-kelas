@@ -125,21 +125,16 @@
       x.fillStyle = 'rgba(214,120,110,.16)'; x.beginPath(); x.ellipse(w / 2 - 82, 170, 20, 10, 0, 0, 7); x.ellipse(w / 2 + 82, 170, 20, 10, 0, 0, 7); x.fill();
     });
   }
-  var CINTA_FACE = ctex(256, 256, function (x, w, h) {
-    var g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#9ccaff'); g.addColorStop(1, '#3d86f0'); x.fillStyle = g; x.fillRect(0, 0, w, h);
-    x.fillStyle = 'rgba(255,255,255,.95)'; x.font = '800 150px ' + FONT; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('C', w / 2, h / 2 + 4);
-    x.fillStyle = '#d6ff3f'; x.beginPath(); var sx = 196, sy = 60; for (var i = 0; i < 8; i++) { var r = i % 2 ? 7 : 22, a = i * Math.PI / 4; x.lineTo(sx + Math.cos(a) * r, sy + Math.sin(a) * r); } x.fill();
-  });
 
   /* ================= tokoh ================= */
   var SPEC = {
-    jahfal: { skin: 0xc9946b, hair: 0x211b18, top: 0xcdbb55, bot: 0x34405e, style: 'short', photo: 'jahfal' },
+    jahfal: { skin: 0xc9946b, hair: 0x1d1814, top: 0x1c2a52, bot: 0xe8edf5, style: 'short', photo: 'jahfal' },
     ardellio: { skin: 0xd9a67f, hair: 0x16130f, top: 0xf2f5fb, bot: 0x72839f, style: 'short', photo: 'ardellio', collar: 0xffffff },
     nabila: { skin: 0xe5b894, hair: 0xd8d9d6, top: 0x8b9097, bot: 0x40454f, style: 'hijab', photo: 'nabila' },
     rafa: { skin: 0xb98863, hair: 0x14110e, top: 0x1b1c20, bot: 0x3a3d46, style: 'short', photo: 'rafa' },
     revalina: { skin: 0xe0a98a, hair: 0x141414, top: 0x23285e, bot: 0x343a52, style: 'long', photo: 'revalina' },
     tarina: { skin: 0xe3b494, hair: 0x17120f, top: 0xbcd3ee, bot: 0x44546e, style: 'long', photo: 'tarina' },
-    cinta: { skin: 0xe9d6c4, hair: 0x9ccaff, top: 0xf2f5fb, bot: 0x7f93b8, style: 'none', faceTex: CINTA_FACE },
+    cinta: { skin: 0xe8c4a8, hair: 0x141414, top: 0xf6f7fa, bot: 0x7f93b8, style: 'long', photo: 'cinta', collar: 0xffffff },
     bendahara: { skin: 0xe4b48f, hair: 0x231a14, top: 0xf2f5fb, bot: 0x5f7396, style: 'short', drawn: { skin: '#e8b994', hair: '#231a14' } },
     wali: { skin: 0xe2b08a, hair: 0x6d84b0, top: 0x1f3468, bot: 0x2b3a5c, style: 'hijab', drawn: { skin: '#e6b48e', hijab: '#6d84b0', glasses: 1 } }
   };
@@ -415,10 +410,10 @@
     BUBS.push({ l: l, el: el, txt: el.querySelector('span'), n: -1, on: false });
   });
   var NARRS = LINES.filter(function (l) { return l[4] === 'narr'; });
-  var ROLES = { nabila: 'XI-F2', jahfal: 'XI-F2', rafa: 'XI-F2', tarina: 'XI-F2', revalina: 'XI-F2', cinta: 'foto menyusul', ardellio: 'Developer' };
+  var ROLES = { nabila: 'XI-F2', jahfal: 'XI-F2', rafa: 'XI-F2', tarina: 'XI-F2', revalina: 'XI-F2', cinta: 'XI-F2', ardellio: 'Developer' };
   var ROLL = [['nabila', 13.4], ['jahfal', 14.0], ['rafa', 14.6], ['tarina', 15.2], ['revalina', 16.0], ['cinta', 16.6], ['ardellio', 17.2]];
   var LBL = ROLL.map(function (r) { var el = document.createElement('div'); el.className = 'lbl'; el.innerHTML = NAMES[r[0]] + '<small>' + ROLES[r[0]] + '</small>'; lblLayer.appendChild(el); return { k: r[0], t: r[1], el: el, sky: false }; });
-  SKYC.forEach(function (c, i) { var k = c.userData.k, el = document.createElement('div'); el.className = 'lbl lbl--sky'; el.innerHTML = NAMES[k] + (k === 'cinta' ? '<small>foto menyusul</small>' : ''); lblLayer.appendChild(el); LBL.push({ k: k, t: 108.4 + i * 0.25, el: el, sky: true, c: c }); });
+  SKYC.forEach(function (c, i) { var k = c.userData.k, el = document.createElement('div'); el.className = 'lbl lbl--sky'; el.innerHTML = NAMES[k] + ''; lblLayer.appendChild(el); LBL.push({ k: k, t: 108.4 + i * 0.25, el: el, sky: true, c: c }); });
 
   /* ================= suara (disintesis, tanpa berkas) ================= */
   var AC = null, master = null, noiseBuf = null, windG = null, soundOn = !!(window.motion && motion.state && motion.state.sound);
