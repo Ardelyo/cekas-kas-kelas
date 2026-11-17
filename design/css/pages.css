@@ -144,3 +144,26 @@
 
 .badge svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .fact b span { font-size: inherit; color: inherit; }
+
+/* ---------- testimoni sinematik + tim berfoto ---------- */
+.quote { background: #fff; color: var(--ink); }
+.quote.q--feat { flex-basis: min(92vw, 720px); display: grid; grid-template-columns: 1fr; gap: 0; padding: 0; overflow: hidden; background: #fff; }
+.qphoto { position: relative; min-height: 280px; background: var(--sky-deep); } .qphoto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; transition: transform 1.6s var(--ease); }
+.quote:hover .qphoto img { transform: scale(1.05); }
+.qphoto::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6, 23, 63, 0) 40%, rgba(6, 23, 63, .82)); }
+.qphoto figcaption { position: absolute; z-index: 1; left: 20px; bottom: 16px; color: #fff; display: grid; } .qphoto figcaption b { font-size: 24px; letter-spacing: -.04em; } .qphoto figcaption small { opacity: .85; }
+.qbody { padding: clamp(22px, 4vw, 38px); display: grid; gap: 14px; align-content: center; } .q--feat .qbody blockquote { font-size: clamp(19px, 2.3vw, 25px); line-height: 1.32; letter-spacing: -.03em; font-weight: 500; }
+@media (min-width: 760px) { .quote.q--feat { grid-template-columns: .8fr 1.2fr; } .qphoto { min-height: 100%; } }
+.quote.q--ink { background: var(--ink); color: #fff; } .quote.q--sky { background: linear-gradient(160deg, var(--sky-1), var(--sky-2)); color: #fff; } .quote.q--lime { background: var(--lime); color: var(--lime-ink); }
+.q--ink .quote__mark, .q--sky .quote__mark { color: var(--lime); } .dim { opacity: .62; }
+.q--short { flex-basis: min(78vw, 340px); } .q--short blockquote { font-size: clamp(40px, 7vw, 58px); line-height: .98; letter-spacing: -.055em; font-weight: 600; }
+.qav { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 0 0 3px rgba(255, 255, 255, .85), 0 10px 20px -10px rgba(6, 23, 63, .7); }
+.quote figcaption { gap: 14px; }
+.quote mark { color: inherit; background: linear-gradient(transparent 56%, rgba(214, 255, 63, .9) 56%) 0 0 / 0% 100% no-repeat; padding: 0 .08em; border-radius: 3px; transition: background-size 1.1s var(--ease) .45s; }
+.q--feat mark { background-image: linear-gradient(transparent 56%, rgba(214, 255, 63, .95) 56%); } .q--lime mark { background-image: linear-gradient(transparent 56%, rgba(255, 255, 255, .9) 56%); } .q--sky mark { background-image: linear-gradient(transparent 56%, rgba(11, 27, 58, .55) 56%); }
+.quote.is-in mark { background-size: 100% 100%; }
+.quote.q--slot { background: transparent; box-shadow: none; border: 2px dashed rgba(11, 27, 58, .18); color: var(--ink-3); place-items: center; text-align: center; flex-basis: min(70vw, 300px); } .slot__plus { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; background: var(--paper-2); } .q--slot p { max-width: 20ch; font-size: 16px; }
+.person__ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.person--slot .person__ph { background: var(--paper-2); color: var(--ink-3); font-size: 44px; font-weight: 300; } .person--slot .person__ph::after { display: none; } .person--slot { box-shadow: none; border: 2px dashed rgba(11, 27, 58, .15); background: transparent; }
+@media (min-width: 900px) { .team2 { grid-template-columns: repeat(3, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .quote mark { background-size: 100% 100%; transition: none; } .qphoto img { transition: none; } }
