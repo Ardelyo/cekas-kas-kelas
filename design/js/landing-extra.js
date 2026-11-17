@@ -133,6 +133,44 @@
   var top = $('#toTop');
   if (top) top.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
 
+  /* ---------- kartu hero: karusel melingkar ---------- */
+  var arc = $('#arc');
+  if (arc) {
+    var cardsA = $$('.card', arc), N = cardsA.length, t = 2, speed = 0.2, targetSpeed = 0.2, dragging = false, lastX = 0, vel = 0, last = 0, raf = 0, heroVisible = true;
+    var stepPx = function () { return cardsA[0].offsetWidth + Math.max(10, Math.min(22, window.innerWidth * 0.016)); };
+    function layout() {
+      var sp = stepPx(), vis = Math.max(1.3, window.innerWidth / sp / 2 + 0.55);
+      cardsA.forEach(function (c, i) {
+        var p = (((i - t) % N) + N) % N; if (p >= N / 2) p -= N;
+        var d = Math.abs(p), o = Math.max(0, Math.min(1, (vis - d) / 0.85));
+        c.style.setProperty('--px', p.toFixed(4)); c.style.setProperty('--o', o.toFixed(3)); c.style.zIndex = Math.round(100 - d * 12);
+        c.classList.toggle('is-front', d < 0.5);
+        if (reduce) c.style.setProperty('transform', 'translate3d(' + (p * sp).toFixed(1) + 'px,' + (p * p * 9).toFixed(1) + 'px,0) rotateY(' + (-p * 12).toFixed(1) + 'deg)', 'important');
+      });
+    }
+    layout();
+    if (!reduce) {
+      var frame = function (now) {
+        raf = requestAnimationFrame(frame);
+        var dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+        if (!dragging) { speed += (targetSpeed - speed) * Math.min(1, dt * 4); t += speed * dt + vel; vel *= 0.92; }
+        layout();
+      };
+      var startLoop = function () { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } };
+      var stopLoop = function () { cancelAnimationFrame(raf); raf = 0; };
+      startLoop();
+      if (io) io(function (es) { heroVisible = es[0].isIntersecting; if (heroVisible && !document.hidden) startLoop(); else stopLoop(); }, { threshold: 0 }).observe($('.hero'));
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stopLoop(); else if (heroVisible) startLoop(); });
+      arc.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') targetSpeed = 0.04; });
+      arc.addEventListener('pointerleave', function () { targetSpeed = 0.2; });
+      arc.addEventListener('pointerdown', function (e) { dragging = true; lastX = e.clientX; vel = 0; arc.classList.add('is-drag'); try { arc.setPointerCapture(e.pointerId); } catch (x) {} });
+      arc.addEventListener('pointermove', function (e) { if (!dragging) return; var dx = e.clientX - lastX; lastX = e.clientX; var d2 = dx / stepPx(); t -= d2; vel = -d2 * 0.5; });
+      var up = function () { if (!dragging) return; dragging = false; arc.classList.remove('is-drag'); };
+      arc.addEventListener('pointerup', up); arc.addEventListener('pointercancel', up);
+    }
+    window.addEventListener('resize', layout);
+  }
+
   /* ---------- tiga langkah: garis mengisi saat digulir ---------- */
   var flow = $('#flowList'), flowFill = $('#flowFill');
   if (flow && flowFill) {

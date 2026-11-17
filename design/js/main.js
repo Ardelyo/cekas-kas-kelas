@@ -231,7 +231,7 @@
       .fromTo('.hero__sky', { scale: 1.16, transformOrigin: '50% 75%' }, { scale: 1, duration: 2.6, ease: 'power3.out', clearProps: 'transform' }, 0)
       .fromTo('.cloud--a', { yPercent: 14, opacity: 0 }, { yPercent: 0, opacity: 0.95, duration: 1.8, ease: 'power2.out' }, 0)
       .fromTo('.cloud--b, .cloud--d', { opacity: 0 }, { opacity: function (i, el) { return el.classList.contains('cloud--b') ? 0.85 : 0.8; }, duration: 2 }, 0.3)
-      .fromTo('.arc .card', { opacity: 0, '--ey': '90px' }, { opacity: 1, '--ey': '0px', duration: 1.1, stagger: { each: 0.09, from: 'center' }, ease: 'back.out(1.2)' }, 0.5)
+      .fromTo('.arc .card', { '--in': 0, '--ey': '90px' }, { '--in': 1, '--ey': '0px', duration: 1.1, stagger: { each: 0.08, from: 'center' }, ease: 'back.out(1.2)' }, 0.5)
       .fromTo('.bar i', { scaleX: 0 }, { scaleX: 1, duration: 1.3, ease: 'power3.inOut' }, 1.3)
       .add(sparkAndCount, 1.2)
       .add(startFloat, 1.6);

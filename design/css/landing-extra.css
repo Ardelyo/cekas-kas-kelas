@@ -144,3 +144,18 @@ body.is-leaving > main, body.is-leaving > .nav { transition: opacity .6s, transf
 .dusk__inner, .outro { position: relative; z-index: 1; }
 .allfeat--link { margin-top: 28px; text-align: center; } .allfeat--link .more-link { font-size: 17px; }
 .about--teaser .about__photo { aspect-ratio: 4 / 3.2; }
+
+/* ---------- kartu hero: karusel melingkar tanpa henti ---------- */
+.arc { --cw: clamp(150px, 19vw, 230px); --step: calc(var(--cw) + clamp(10px, 1.6vw, 22px)); display: block; position: relative; height: calc(var(--cw) * .95 + 80px); padding: 0; margin-top: auto; margin-bottom: clamp(30px, 6vh, 70px); perspective: 1500px; touch-action: pan-y; cursor: grab; }
+.arc.is-drag { cursor: grabbing; }
+.arc .card { --px: 0; position: absolute; left: 50%; bottom: 0; display: flex !important; width: var(--cw) !important; margin-left: calc(var(--cw) / -2); min-height: calc(var(--cw) * .86); user-select: none;
+  transform: translate3d(calc(var(--px) * var(--step)), calc(var(--px) * var(--px) * 9px + var(--ey, 0px) + var(--fy, 0px)), calc(var(--px) * var(--px) * -26px)) rotateX(var(--rx, 0deg)) rotateY(calc(var(--px) * -12deg + var(--ry, 0deg))) rotateZ(calc(var(--px) * 1.5deg)) scale(calc(1 - var(--px) * var(--px) * .012)); transform-origin: 50% 100%; }
+.js .arc .card { opacity: calc(var(--o, 1) * var(--in, 0)); }
+.arc .card.is-front { box-shadow: 0 36px 70px -22px rgba(10, 40, 110, .7), 0 0 0 1px rgba(11, 27, 58, .06); }
+.card--sky { background: linear-gradient(160deg, var(--sky-1), var(--sky-3)); color: #fff; } .card--sky .card__k { color: rgba(255, 255, 255, .8); } .cardcloud { margin-top: auto; align-self: flex-end; color: rgba(255, 255, 255, .92); animation: bob 5s ease-in-out infinite; } @keyframes bob { 50% { transform: translate(4px, -5px); } }
+.cpips { display: flex; gap: 6px; } .cpips i { width: 26px; height: 26px; border-radius: 50%; background: var(--paper-2, #eef2f8); display: grid; place-items: center; color: #fff; } .cpips i.on { background: var(--sky-1); } .cpips svg { width: 13px; height: 13px; }
+.card--vote { gap: 8px; } .card--vote .card__s { margin-top: auto; }
+.card--wa { background: var(--lime); color: var(--lime-ink); } .card--wa .card__k { color: rgba(27, 36, 0, .6); } .cbubble { margin-top: auto; display: grid; gap: 2px; background: #fff; color: var(--ink); padding: 10px 12px; border-radius: 14px 14px 14px 4px; font-size: 13px; font-weight: 500; }
+@media (max-width: 899px) { .arc { --cw: clamp(138px, 34vw, 200px); } }
+@media (max-width: 560px) { .arc { --cw: 62vw; height: calc(var(--cw) * .95 + 60px); } .arc .card { min-height: calc(var(--cw) * .74); } }
+@media (prefers-reduced-motion: reduce) { .js .arc .card { opacity: calc(var(--o, 1)) !important; } .cardcloud { animation: none; } }
