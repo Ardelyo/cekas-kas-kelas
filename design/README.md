@@ -17,3 +17,11 @@ Branch `design/sky-ui`. Tanpa Python, tanpa build. Buka dengan server statis apa
 - Rencana lengkap: `docs/superpowers/specs/2026-11-17-sky-ui-landing-design.md`
 
 Gerak mati otomatis jika perangkat memakai "reduce motion". Data di halaman adalah contoh fiktif.
+
+## Integrasi dengan server Python
+Saat dijalankan lewat `python run.py web` (atau Docker), folder ini disajikan di `/langit/`:
+`/langit/` landing, `/langit/kas.html` dashboard, `/langit/login.html` masuk.
+- `GET /api/langit/state` memberi saldo, pos, riwayat, antrean, usulan, iuran, status rantai hash, dan peran sesi.
+- `POST /api/langit/login` (JSON `{role, secret}`) memakai sesi, cookie, dan batas 5 percobaan/15 menit yang sama dengan `/login` dan `/guru/login`.
+- Di hosting statis (mis. Vercel) `js/live.js` tidak aktif dan halaman memakai data contoh.
+- Saat ini sinkronisasi bersifat **baca**; aksi tulis (setujui, catat) masih lewat halaman lama `/` atau bot Telegram.

@@ -83,6 +83,29 @@
   (function () { var m = location.search.match(/tanggal=(\d{4})-(\d\d)-(\d\d)/); if (m) state.now = new Date(+m[1], +m[2] - 1, +m[3], 10, 30); })();
   seed();
 
+  /* ---------- mode langsung: data dari server Python (bila ada) ---------- */
+  function applyLive() {
+    var L = window.CEKAS_LIVE; if (!L) return;
+    if (L.names && L.names.length) { NAMES = L.names; TOTAL = NAMES.length; }
+    state.nextId = 1; state.tx = [];
+    L.ledger.slice().reverse().forEach(function (r) {
+      var m = /(\d+)[\/-](\d+)[\/-](\d+)?/.exec(String(r.when || '')), d = r.when ? new Date(String(r.when).replace(' ', 'T')) : new Date(); if (isNaN(d)) d = new Date();
+      state.tx.push({ id: r.id, date: d, day: dayLabel(d), time: clock(d).replace('.', ':'), desc: r.desc, cat: r.cat, amt: r.amt, w: state.activeWeek, by: r.by || 'Bendahara', ok: 'Wali Kelas' });
+    });
+    state.nextId = (state.tx.length ? state.tx[state.tx.length - 1].id : 0) + 1;
+    state.pending = L.pending.filter(function (p) { return p.kind !== 'dues'; }).map(function (p) { return { id: p.id, desc: p.desc || 'Pengajuan', cat: p.cat || 'op', amt: (p.type === 'out' || p.type === 'keluar') ? -Math.abs(p.amt) : Math.abs(p.amt), by: p.by || 'Bendahara' }; });
+    state.proposals = L.proposals.map(function (p) { return { id: p.id, desc: p.desc, cat: p.cat, amt: -Math.abs(p.amt), by: p.by, yes: p.yes, needed: p.needed }; });
+    var cw = state.activeWeek; state.dues = {};
+    state.weeks.forEach(function (w) {
+      var key = String(L.active_week - (cw - w.n)), D = L.dues[key], a = [];
+      NAMES.forEach(function (n) { a.push(!D ? 'todo' : D.paid.indexOf(n) >= 0 ? 'paid' : D.wait.indexOf(n) >= 0 ? 'wait' : 'todo'); });
+      state.dues[w.n] = weekStatus(w) === 'akan' ? a.map(function () { return 'todo'; }) : a;
+    });
+    if (L.role && L.role !== 'siswa') state.role = L.role; else if (L.role === 'siswa') state.role = 'siswa';
+    state.live = true; rehash();
+  }
+  applyLive();
+
   function rehash() {
     var prev = 'GENESIS';
     state.tx.forEach(function (t) { t.prev = prev; t.hash = window.sha256(prev + '|' + t.desc + '|' + t.amt + '|' + t.cat); prev = t.hash; });

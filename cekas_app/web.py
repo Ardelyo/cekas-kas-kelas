@@ -492,3 +492,9 @@ async def cancel_proposal(pid: int = Form(...)):
     except ValueError as e:
         return _back(str(e), err=True)
     return _back(f"Usulan #{pid} dibatalkan.")
+
+
+# Desain "Langit": /langit (statis) + /api/langit/* (JSON). Tidak mengubah rute lama.
+import sys as _sys
+from . import langit as _langit
+_langit.setup(app, _sys.modules[__name__])
