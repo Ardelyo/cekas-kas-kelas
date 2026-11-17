@@ -20,7 +20,7 @@
   var posName = function (k) { return POS.filter(function (p) { return p.k === k; })[0].name; };
   var AVG_SPEND = 105000, NOMINAL = 10000, APPROVAL_MIN = 50000;
   var NAMES = ['Aditya', 'Bella', 'Citra', 'Dimas', 'Eka', 'Farhan', 'Gita', 'Hana', 'Indra', 'Jihan', 'Kevin', 'Laila', 'Mario', 'Nadia', 'Okta', 'Putri', 'Qori', 'Rafi', 'Salsa', 'Tegar', 'Umar', 'Vina', 'Wulan', 'Yusuf', 'Zahra', 'Alya', 'Bima', 'Cakra', 'Dwi', 'Elsa', 'Fikri', 'Galih', 'Hafiz', 'Ilham'];
-  var TOTAL = NAMES.length;
+  var TOTAL = NAMES.length, NIS = [], FULLPOS = { op: 'operasional', so: 'sosial', ev: 'event', ca: 'cadangan' };
 
   var state = {
     role: (function () { var q = (location.search.match(/peran=([a-z]+)/) || [])[1], r = q || (function () { try { return sessionStorage.getItem('cekas-role'); } catch (e) { return null; } })(); return ['bendahara', 'guru'].indexOf(r) >= 0 ? r : 'siswa'; })(), wx: 'auto', flash: null, week: 1, activeWeek: 1, hidden: false, now: new Date(), dateMode: 0, weeks: [],
@@ -86,7 +86,7 @@
   /* ---------- mode langsung: data dari server Python (bila ada) ---------- */
   function applyLive() {
     var L = window.CEKAS_LIVE; if (!L) return;
-    if (L.names && L.names.length) { NAMES = L.names; TOTAL = NAMES.length; }
+    if (L.names && L.names.length) { NAMES = L.names; TOTAL = NAMES.length; NIS = L.nis || []; }
     state.nextId = 1; state.tx = [];
     L.ledger.slice().reverse().forEach(function (r) {
       var m = /(\d+)[\/-](\d+)[\/-](\d+)?/.exec(String(r.when || '')), d = r.when ? new Date(String(r.when).replace(' ', 'T')) : new Date(); if (isNaN(d)) d = new Date();
@@ -105,6 +105,20 @@
     state.live = true; rehash();
   }
   applyLive();
+  var dbWeek = function (n) { return window.CEKAS_LIVE.active_week - (state.activeWeek - n); };
+  async function refreshLive() {
+    var r = await fetch('/api/langit/state', { credentials: 'same-origin', cache: 'no-store' }); window.CEKAS_LIVE = await r.json();
+    var keepWeek = state.week; seed(); applyLive(); state.week = Math.min(keepWeek, 4); renderAll(true); renderWeeks(true); renderDues(true);
+  }
+  /* kirim aksi ke endpoint server yang sama dengan halaman lama (dan bot Telegram ikut diberi tahu di sana) */
+  async function serverPost(url, data) {
+    try {
+      var r = await fetch(url, { method: 'POST', body: new URLSearchParams(data), credentials: 'same-origin', redirect: 'follow' });
+      var u = new URL(r.url), err = u.searchParams.get('err'), msg = err || u.searchParams.get('msg') || '';
+      if (r.status === 401 || r.status === 403) { msg = 'Sesi habis atau peran tidak berhak. Masuk lagi.'; err = msg; }
+      await refreshLive(); return { ok: !err && r.status < 400, msg: msg };
+    } catch (e) { return { ok: false, msg: 'Server tidak terjangkau.' }; }
+  }
 
   function rehash() {
     var prev = 'GENESIS';
@@ -321,9 +335,17 @@
     el.classList.add(cls || 'is-gone'); setTimeout(cb, cls ? 520 : 380);
   }
   var busy = {};
+  var LIVE_URL = { approve: '/api/pending/verify', reject: '/api/pending/reject', 'cancel-pend': '/api/pending/cancel', 'cancel-prop': '/api/proposal/cancel' };
+  async function liveAct(kind, id, w, btn) {
+    var data = kind === 'approve-week' ? { week: dbWeek(w) } : { pid: id }, url = kind === 'approve-week' ? '/api/pending/verify-week' : LIVE_URL[kind], res = null;
+    if (btn) await fx.commit(btn, async function () { res = await serverPost(url, data); return res.ok; }, { keep: false }); else res = await serverPost(url, data);
+    fx.haptic(res && res.ok ? 'check' : 'reject'); toast(res && res.msg ? res.msg : (res && res.ok ? 'Berhasil.' : 'Gagal.'));
+    if (res && res.ok && kind !== 'cancel-pend' && kind !== 'cancel-prop' && kind !== 'reject') { fx.glow($('.skyhead')); fx.sheen($('#amount')); }
+  }
   async function act(kind, id, w, btn) {
     var key = kind + ':' + (id || w); if (busy[key]) return; busy[key] = true;
     try {
+      if (state.live) { await liveAct(kind, id, w, btn); return; }
       if (kind === 'approve') await approvePending(id, btn);
       else if (kind === 'reject') {
         var rc = $('.prop[data-pid="' + id + '"]'); fx.haptic('reject');
@@ -514,6 +536,7 @@
   $('#duesCard').addEventListener('click', function (e) {
     var more = e.target.closest('.dues-more'); if (more) { var on = !$('#duesCard').classList.contains('show-paid'); $('#duesCard').classList.toggle('show-paid', on); more.setAttribute('aria-expanded', on); more.textContent = on ? 'Sembunyikan' : 'Tampilkan ' + counts(state.week).paid; return; }
     var b = e.target.closest('button.stu'); if (!b) return;
+    if (state.live) { var li = +b.dataset.i; serverPost('/api/dues/pay', { cell: NIS[li] + '|' + dbWeek(state.week) }).then(function (r) { fx.haptic(r.ok ? 'check' : 'reject'); toast(r.msg || (r.ok ? NAMES[li] + ' ditandai lunas.' : 'Gagal.')); }); return; }
     var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
     toast(NAMES[i] + ' ditandai lunas. Menunggu Wali Kelas.', function () { state.dues[w][i] = 'todo'; renderAll(); });
   });
@@ -578,6 +601,7 @@
     if (!v) return fail('Isi nominalnya dulu.', nom);
     if (!d) return fail('Tulis buat apa uang ini.', desc);
     if (out && posSaldo(cat) - v < 0) return fail('Saldo pos ' + posName(cat) + ' tidak cukup (tersisa ' + rp(posSaldo(cat)) + ').');
+    if (state.live) { var lr = null; await fx.commit($('#txSubmit'), async function () { lr = await serverPost('/api/transaction/create', { type: out ? 'out' : 'in', nominal: String(v), category: FULLPOS[cat], description: d }); return lr.ok; }, { loading: 480 }); fx.closeSheet(dlg); toast(lr && lr.msg ? lr.msg : 'Selesai.'); return; }
     var amt = out ? -v : v, asProposal = out && v >= APPROVAL_MIN, item;
     await fx.commit($('#txSubmit'), null, { loading: 480 });
     fx.closeSheet(dlg); await fx.wait(fx.reduce ? 0 : 280);

@@ -43,11 +43,12 @@ def setup(app, web) -> None:
         for w in range(max(1, active - 3), active + 1):
             st = web.students_view(db, CLASS_ID, w)
             dues[str(w)] = {k: [s["nama"] for s in st[k]] for k in ("paid", "unpaid", "wait")}
-        names = sorted({s["nama_resmi"] for s in db.get_all_whitelist_students(CLASS_ID)})
+        studs = sorted(db.get_all_whitelist_students(CLASS_ID), key=lambda s: s["nama_resmi"])
+        names = [s["nama_resmi"] for s in studs]
         return JSONResponse({
             "class_id": CLASS_ID, "school": SCHOOL_NAME, "role": role_of(request),
             "guru_enabled": web.guru_enabled(), "admin_enabled": bool(web.WEB_ADMIN_PASSWORD),
-            "saldo": cls["saldo"], "nominal_iuran": cls["nominal_iuran"], "active_week": active, "names": names,
+            "saldo": cls["saldo"], "nominal_iuran": cls["nominal_iuran"], "active_week": active, "names": names, "nis": [s["nis"] for s in studs],
             "pockets": [{"key": POS_KEY.get(p["key"], p["key"][:2]), "name": p["short"], "value": p["value"]}
                         for p in pocket_view(cls)["rows"]],
             "ledger": [{"id": r["id"], "when": r["when"], "desc": r["desc"], "by": r["who"],
