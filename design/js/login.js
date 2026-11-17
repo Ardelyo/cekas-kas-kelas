@@ -68,18 +68,18 @@
   });
 
   function warnSky() { sky.classList.add('is-warn'); setTimeout(function () { sky.classList.remove('is-warn'); }, 900); }
-  function lockNow(ms) { store.set('cekas-lock-' + role, String(Date.now() + ms)); refreshLock(); }
+  function lockNow(ms) { fx.haptic('lock'); store.set('cekas-lock-' + role, String(Date.now() + ms)); refreshLock(); }
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault(); var v = pw.value;
-    if (v.length < 6) { setErr('Minimal 6 karakter.', true); fx.shake(panel); fx.buzz(30); pw.focus(); return; }
+    if (v.length < 6) { setErr('Minimal 6 karakter.', true); fx.shake(panel); fx.haptic('reject'); pw.focus(); return; }
     var ok = await fx.commit(submit, function () { return new Promise(function (r) { setTimeout(function () { r(v === ROLES[role].pass); }, 380); }); }, { keep: true, loading: 650, ok: 520 });
     if (!ok) {
-      var n = att(role) + 1; store.set('cekas-att-' + role, String(n)); pips(); warnSky(); fx.buzz([40, 60, 40]);
+      var n = att(role) + 1; store.set('cekas-att-' + role, String(n)); pips(); warnSky(); fx.haptic('reject');
       if (n >= MAX) { await fx.wait(reduce ? 0 : 400); lockNow(LOCK_MS); return; }
       setErr(ROLES[role].err + ' Sisa ' + (MAX - n) + ' percobaan.', true); fx.shake(box); pw.select(); return;
     }
-    store.del('cekas-att-' + role); store.set('cekas-role', role); fx.buzz(18);
+    store.del('cekas-att-' + role); store.set('cekas-role', role); fx.haptic('check');
     ascend();
   });
 

@@ -77,7 +77,7 @@
   function bump(el) { if (reduce || !el) return; el.classList.remove('fx-bump'); void el.offsetWidth; el.classList.add('fx-bump'); }
   function shake(el) { if (!el) return; el.classList.remove('fx-shake'); void el.offsetWidth; el.classList.add('fx-shake'); }
   function closeSheet(d) { if (!d.open) return; if (reduce) { d.close(); return; } d.classList.add('is-closing'); setTimeout(function () { d.close(); d.classList.remove('is-closing'); }, 260); }
-  function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+  function buzz(ms) { try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate(ms); } catch (e) {} }
 
   function veil(kind, o) {
     o = o || {}; var v = document.createElement('div'); v.className = 'veil veil--' + kind;
@@ -90,5 +90,8 @@
     document.body.appendChild(v); return v;
   }
 
-  window.fx = { veil: veil, commit: commit, burst: burst, stamp: stamp, fly: fly, sheen: sheen, glow: glow, bump: bump, shake: shake, closeSheet: closeSheet, buzz: buzz, wait: wait, reduce: reduce };
+  var HAPT = { check: [12], reject: [24, 50, 24], lock: [60], tick: [6] };
+  function haptic(name) { buzz(HAPT[name] || [10]); if (window.motion) window.motion.sound(name); }
+
+  window.fx = { haptic: haptic, veil: veil, commit: commit, burst: burst, stamp: stamp, fly: fly, sheen: sheen, glow: glow, bump: bump, shake: shake, closeSheet: closeSheet, buzz: buzz, wait: wait, reduce: reduce };
 })();

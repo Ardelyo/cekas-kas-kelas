@@ -153,7 +153,8 @@
       var frame = function (now) {
         raf = requestAnimationFrame(frame);
         var dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
-        if (!dragging) { speed += (targetSpeed - speed) * Math.min(1, dt * 4); t += speed * dt + vel; vel *= 0.92; }
+        var mo = window.motion, base = (mo && mo.state.paused) ? 0 : targetSpeed * (mo ? mo.state.speed : 1) * (mo && mo.isLite() ? 0.5 : 1);
+        if (!dragging) { speed += (base - speed) * Math.min(1, dt * 4); t += speed * dt + vel; vel *= 0.92; }
         layout();
       };
       var startLoop = function () { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } };

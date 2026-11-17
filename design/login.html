@@ -8,10 +8,12 @@
 <script>try{var __s=sessionStorage.getItem('cekas-scene');if(__s==='keluar'){sessionStorage.removeItem('cekas-scene');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scene-keluar');}}catch(e){}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/skyfx.css">
+<link rel="stylesheet" href="css/motion.css">
 <link rel="stylesheet" href="css/auth.css">
 </head>
 <body class="auth">
@@ -27,6 +29,7 @@
   <symbol id="i-caps" viewBox="0 0 24 24"><path d="M12 4l7 8h-4v4H9v-4H5zM9 20h6"/></symbol>
 </svg>
 
+<a class="skip-link" href="#isi">Langsung ke isi</a>
 <div class="authsky" id="sky" aria-hidden="true">
   <div class="sky">
     <picture><source media="(max-width: 699px)" srcset="assets/sky/sky-day-sm.jpg"><img class="sky__photo" src="assets/sky/sky-day.jpg" alt=""></picture>
@@ -45,7 +48,7 @@
     <div class="authbar__r"><span data-skyctl></span><a class="back" href="kas.html"><svg class="ic ic-sm"><use href="#i-back"/></svg>Lihat kas</a></div>
   </header>
 
-  <main class="gate">
+  <main class="gate" id="isi">
     <div class="gate__intro">
       <p class="eyebrow">Khusus pengurus kelas</p>
       <h1 id="introTitle">Masuk untuk <em>mencatat</em> kas kelas.</h1>
@@ -112,6 +115,7 @@
 </details>
 
 <script src="js/fx.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/skyfx.js"></script>
 <script src="js/login.js"></script>
 </body>

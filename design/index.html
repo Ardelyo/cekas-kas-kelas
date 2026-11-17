@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CEKAS — Kas kelas seterang langit</title>
 <meta name="description" content="Buku kas kelas yang terbuka untuk semua siswa dan tidak bisa diubah diam-diam. Diverifikasi Wali Kelas.">
-<meta name="theme-color" content="#1E6FE8">
+<meta name="theme-color" content="#1e6fe8">
 <script>
   (function () {
     var d = document.documentElement;
@@ -20,12 +20,14 @@
 <link rel="preload" href="assets/sky/sky-day.jpg" as="image" media="(min-width: 700px)">
 <link rel="preload" href="assets/sky/sky-day-sm.jpg" as="image" media="(max-width: 699px)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/landing-extra.css">
 <link rel="stylesheet" href="css/pages.css">
 <link rel="stylesheet" href="css/skyfx.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -74,7 +76,7 @@
     <a href="#faq">FAQ</a>
   </nav>
   <span class="skyctl-host" data-skyctl></span>
-  <a class="btn btn--dark btn--sm" href="kas.html">Masuk</a>
+  <a class="btn btn--dark btn--sm" data-leave href="login.html">Masuk</a>
 </header>
 
 <main id="isi">
@@ -100,7 +102,7 @@
     </h1>
     <p class="hero__sub" data-hero="in">Setiap rupiah tercatat, terbuka untuk semua siswa, dan tidak bisa diubah diam-diam. Wali Kelas yang mengesahkan.</p>
     <div class="hero__cta" data-hero="in">
-      <a class="btn btn--lime btn--lg magnetic" href="kas.html">Lihat kas kelas <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      <a class="btn btn--lime btn--lg magnetic" href="kas.html">Buka kas kelas <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       <a class="btn btn--glass btn--lg" href="#coba">Coba buktinya</a>
     </div>
   </div>
@@ -108,18 +110,18 @@
   <div class="arc" id="arc" aria-label="Contoh tampilan CEKAS">
     <article class="card card--bal">
       <p class="card__k">Saldo kas · contoh</p>
-      <p class="card__big"><small>Rp</small><span id="balNum" data-to="1284000">1.284.000</span></p>
+      <p class="card__big"><small>Rp</small><span id="balNum" data-to="1445000">1.445.000</span></p>
       <svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none" aria-hidden="true"><path id="sparkPath" d="M0 40 C20 38 30 30 50 32 S85 12 105 18 S140 30 160 14 S190 6 200 4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
     </article>
     <article class="card card--photo">
       <p class="card__k">Iuran minggu ke-3</p>
-      <p class="card__big"><span>31</span><small>/ 34 lunas</small></p>
-      <div class="bar"><i style="--w:91%"></i></div>
-      <p class="card__s">3 siswa belum bayar</p>
+      <p class="card__big"><span>24</span><small>/ 34 lunas</small></p>
+      <div class="bar"><i style="--w:71%"></i></div>
+      <p class="card__s">4 belum bayar, 6 menunggu</p>
     </article>
     <article class="card card--ink">
       <span class="badge badge--ok"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Terverifikasi</span>
-      <p class="card__t">Rantai 48 transaksi utuh</p>
+      <p class="card__t">Rantai 9 catatan utuh</p>
       <p class="card__mono">a91f·04c2·77de·b3a0</p>
     </article>
     <article class="card card--lime">
@@ -134,7 +136,7 @@
     </article>
     <article class="card card--sky">
       <p class="card__k">Cuaca kas</p>
-      <p class="card__t">Cerah, cukup ± 17 minggu</p>
+      <p class="card__t">Cerah, cukup ± 13 minggu</p>
       <svg class="cardcloud" width="52" height="36" viewBox="0 0 26 18" aria-hidden="true"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor"/></svg>
     </article>
     <article class="card card--vote">
@@ -145,7 +147,7 @@
     </article>
     <article class="card card--wa">
       <p class="card__k">Rekap WhatsApp</p>
-      <div class="cbubble"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.785.000 ✔</span></div>
+      <div class="cbubble"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.445.000 ✔</span></div>
     </article>
   </div>
   <button class="scrollcue" id="scrollCue" type="button" aria-label="Gulir ke bawah"><i></i></button>
@@ -204,18 +206,18 @@
     </article>
     <article class="tile tile--paper reveal">
       <h3>Disahkan Wali Kelas</h3>
-      <p>Pemasukan dan pengeluaran ditahan sampai guru menyetujui. Saldo baru berubah setelah itu.</p>
+      <p>Pemasukan dan pengeluaran ditahan sampai Wali Kelas menyetujui. Saldo baru berubah setelah itu.</p>
       <label class="toggle"><input type="checkbox" checked aria-label="Contoh: Wali Kelas menyetujui"><span class="toggle__t"></span><span class="toggle__l">Disetujui</span></label>
     </article>
     <article class="tile tile--lime reveal">
       <h3>Rekap siap tempel ke WhatsApp</h3>
       <p>Satu ketukan, satu pesan rapi untuk grup kelas.</p>
-      <div class="bubble"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.284.000 ✔</span></div>
+      <div class="bubble"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.445.000 ✔</span></div>
     </article>
     <article class="tile tile--ink reveal">
       <h3>Prakiraan saldo</h3>
-      <p>"Cukup sekitar 17 minggu." Dihitung dari kebiasaan belanja kelas, bukan tebakan.</p>
-      <p class="tile__num"><span data-count="17">17</span><small>minggu</small></p>
+      <p>"Cukup sekitar 13 minggu." Dihitung dari kebiasaan belanja kelas, bukan tebakan.</p>
+      <p class="tile__num"><span data-count="13">13</span><small>minggu</small></p>
     </article>
   </div>
 
@@ -240,7 +242,7 @@
     <div class="panels">
       <div class="panel2 on" role="tabpanel" id="pn-siswa" aria-labelledby="tab-siswa">
         <ul class="ticks"><li>Lihat saldo dan riwayat kapan saja, tanpa kata sandi.</li><li>Cek apakah iuranmu sudah tercatat minggu ini.</li><li>Beri suara untuk belanja besar lewat bot Telegram.</li></ul>
-        <div class="mock mock--siswa"><p class="mock__k">Saldo kas · contoh</p><p class="mock__big">Rp 1.785.000</p><span class="badge badge--ok"><svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><use href="#s-check"/></svg> Terverifikasi</span><div class="mock__chips"><span class="mchip ok">Aditya</span><span class="mchip ok">Bella</span><span class="mchip wait">Citra</span><span class="mchip ok">Dimas</span><span class="mchip todo">Eka</span></div></div>
+        <div class="mock mock--siswa"><p class="mock__k">Saldo kas · contoh</p><p class="mock__big">Rp 1.445.000</p><span class="badge badge--ok"><svg width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><use href="#s-check"/></svg> Terverifikasi</span><div class="mock__chips"><span class="mchip ok">Aditya</span><span class="mchip ok">Bella</span><span class="mchip wait">Citra</span><span class="mchip ok">Dimas</span><span class="mchip todo">Eka</span></div></div>
       </div>
       <div class="panel2" role="tabpanel" id="pn-bendahara" aria-labelledby="tab-bendahara" hidden>
         <ul class="ticks"><li>Catat uang masuk dan keluar dalam hitungan detik.</li><li>Tandai iuran per siswa dan per minggu.</li><li>Foto nota, jadi draf pengeluaran yang tinggal dikonfirmasi.</li></ul>
@@ -300,7 +302,7 @@
       <div class="fstep__txt">
         <span class="tag">Wali Kelas</span>
         <h3>Mengesahkan dengan satu geseran.</h3>
-        <p>Catatan menunggu persetujuan guru. Setelah disahkan, namanya ikut terkunci di sidik jari transaksi, dan baru saat itu saldo berubah.</p>
+        <p>Catatan menunggu persetujuan Wali Kelas. Setelah disahkan, namanya ikut terkunci di sidik jari transaksi, dan baru saat itu saldo berubah.</p>
         <div class="fstep__chips"><span>Setujui</span><span>Tolak</span><span>Sahkan per minggu</span></div>
       </div>
       <div class="fstep__vis"><div class="fm fm--q"><p class="fm__k">Menunggu Wali Kelas</p><p style="display:flex;justify-content:space-between;gap:10px;font-weight:600;letter-spacing:-.02em"><span>Beli kapur dan penghapus</span><span style="color:var(--bad)">−Rp 28.000</span></p><div class="fm__chips"><i>#40</i><i>Operasional</i></div><span class="qs">Disahkan</span><div class="fm__hash">a91f·04c2·77de·b3a0 · terkunci</div></div></div>
@@ -314,7 +316,7 @@
         <p>Dashboard publik dan kode QR untuk ditempel di kelas. Lencana hijau berarti rantai catatan masih utuh, dan siapa pun bisa memeriksanya.</p>
         <div class="fstep__chips"><span>Tanpa kata sandi</span><span>Kode QR</span><span>Lencana keaslian</span></div>
       </div>
-      <div class="fstep__vis"><div class="fm"><div class="fm__row"><span class="fm__ring"></span><div><p class="fm__k">Iuran minggu 3</p><p class="fm__big" style="font-size:24px">31 / 34 lunas</p></div></div><span class="fm__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Terverifikasi</span><p class="fm__k">Saldo kas · contoh</p><p class="fm__big">Rp 1.785.000</p><div class="fm__av" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
+      <div class="fstep__vis"><div class="fm"><div class="fm__row"><span class="fm__ring"></span><div><p class="fm__k">Iuran minggu 3</p><p class="fm__big" style="font-size:24px">24 / 34 lunas</p></div></div><span class="fm__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Terverifikasi</span><p class="fm__k">Saldo kas · contoh</p><p class="fm__big">Rp 1.445.000</p><div class="fm__av" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
     </article>
   </div>
   <div class="flowcta"><a class="btn btn--dark btn--lg magnetic" data-leave href="kas.html">Lihat langsung di dashboard <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div>
@@ -382,6 +384,7 @@
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
 <script src="js/main.js"></script>
 <script src="js/fx.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/landing-extra.js"></script>
 <script src="js/skyfx.js"></script>
 </body>

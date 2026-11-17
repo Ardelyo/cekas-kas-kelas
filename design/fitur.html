@@ -9,12 +9,14 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/landing-extra.css">
 <link rel="stylesheet" href="css/pages.css">
 <link rel="stylesheet" href="css/skyfx.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -31,7 +33,7 @@
     <a href="index.html">Beranda</a><a href="fitur.html" aria-current="page">Fitur</a><a href="tentang.html">Tentang</a><a href="index.html#coba">Coba</a><a href="index.html#faq">FAQ</a>
   </nav>
   <span class="skyctl-host" data-skyctl></span>
-  <a class="btn btn--dark btn--sm" data-leave href="kas.html">Masuk</a>
+  <a class="btn btn--dark btn--sm" data-leave href="login.html">Masuk</a>
 </header>
 <main id="isi">
 <section class="hero phero" id="top">
@@ -73,7 +75,7 @@
     <div class="ftxt">
       <p class="fnum">02</p>
       <h2 class="split">Disahkan <em>Wali Kelas,</em> baru berlaku.</h2>
-      <p class="plede reveal">Pemasukan, pengeluaran, iuran, dan koreksi ditahan sampai guru menyetujui. Saldo baru berubah setelah itu, dan nama guru ikut terkunci.</p>
+      <p class="plede reveal">Pemasukan, pengeluaran, iuran, dan koreksi ditahan sampai Wali Kelas menyetujui. Saldo baru berubah setelah itu, dan nama Wali Kelas ikut terkunci.</p>
       <ul class="fpoints"><li class="reveal">Setujui atau tolak dengan satu geseran atau tahan.</li><li class="reveal">Iuran diverifikasi per minggu dalam satu ketukan.</li><li class="reveal">Bendahara tidak bisa menyetujui pengajuannya sendiri.</li></ul>
     </div>
     <div class="fvis  reveal"><div class="queue"><div class="qcard qcard--anim"><div class="t"><span>Beli kapur dan penghapus</span><span class="neg">−Rp 28.000</span></div><div class="m">#40 · Operasional · diajukan Bendahara</div><span class="qstamp">Disahkan</span></div><div class="qcard"><div class="t"><span>Iuran minggu 3</span><span style="color:var(--ok)">+Rp 60.000</span></div><div class="m">6 siswa menunggu diverifikasi sekaligus</div></div></div></div>
@@ -106,10 +108,10 @@
     <div class="ftxt">
       <p class="fnum">05</p>
       <h2 class="split">Laporan dan rekap <em>siap pakai.</em></h2>
-      <p class="plede reveal">Rekap WhatsApp satu ketukan, prakiraan saldo "cukup sekitar 17 minggu", dan laporan SPJ siap cetak dengan kolom tanda tangan dan kode verifikasi.</p>
+      <p class="plede reveal">Rekap WhatsApp satu ketukan, prakiraan saldo "cukup sekitar 13 minggu", dan laporan SPJ siap cetak dengan kolom tanda tangan dan kode verifikasi.</p>
       <ul class="fpoints"><li class="reveal">Rekap rapi untuk grup kelas, plus pengingat iuran.</li><li class="reveal">Prakiraan saldo dari kebiasaan belanja kelas.</li><li class="reveal">SPJ cetak atau simpan sebagai PDF, dan ekspor Excel.</li></ul>
     </div>
-    <div class="fvis  reveal"><div class="docs"><div class="spj"><b>Laporan SPJ · Minggu 3</b><i></i><i></i><i></i><i></i><div class="sig"><span>Bendahara</span><span>Wali Kelas</span></div></div><div class="wa"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.785.000 ✔</span><span>Iuran 24/34 lunas</span></div></div></div>
+    <div class="fvis  reveal"><div class="docs"><div class="spj"><b>Laporan SPJ · Minggu 3</b><i></i><i></i><i></i><i></i><div class="sig"><span>Bendahara</span><span>Wali Kelas</span></div></div><div class="wa"><span>Kas XI-F2 · Minggu 3</span><span>Saldo Rp 1.445.000 ✔</span><span>Iuran 24/34 lunas</span></div></div></div>
   </div>
 </section>
 <section class="fsec" id="nota">
@@ -160,6 +162,7 @@
 </section>
 </main>
 <script src="js/fx.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/sha256.js"></script>
 <script src="js/page.js"></script>
 <script src="js/landing-extra.js"></script>

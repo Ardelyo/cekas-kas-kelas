@@ -58,7 +58,7 @@
 .allfeat__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(1, 1fr); }
 @media (min-width: 620px) { .allfeat__grid { grid-template-columns: repeat(2, 1fr); } } @media (min-width: 980px) { .allfeat__grid { grid-template-columns: repeat(4, 1fr); } }
 .feat { position: relative; padding: 20px; border-radius: var(--r-m); background: #fff; box-shadow: inset 0 0 0 1px rgba(11, 27, 58, .07); display: grid; gap: 10px; align-content: start; overflow: hidden; transition: transform .5s var(--ease), box-shadow .4s; }
-.feat::before, .tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(77, 155, 240, .18), transparent 70%); opacity: 0; transition: opacity .35s; pointer-events: none; }
+.feat::before, .tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(77, 155, 240, .18), transparent 70%); opacity: 0; transition: opacity var(--dur-2); pointer-events: none; }
 .feat:hover::before, .tile:hover::before { opacity: 1; } .feat:hover { transform: translateY(-5px); box-shadow: inset 0 0 0 1px rgba(30, 111, 232, .4), 0 26px 40px -30px rgba(30, 111, 232, .6); }
 .tile--ink::before, .tile--sky::before { background: radial-gradient(300px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .2), transparent 70%); }
 .feat b { font-size: 17px; letter-spacing: -.025em; line-height: 1.15; } .feat p { color: var(--ink-2); font-size: 14.5px; }
@@ -67,7 +67,7 @@
 .roles { padding: clamp(90px, 13vw, 170px) var(--gutter) 0; }
 .roles__wrap { max-width: 960px; margin: 0 auto; }
 .tabs { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); width: min(100%, 460px); margin: 0 auto 28px; padding: 5px; border-radius: 999px; background: var(--paper-2); }
-.tabs__ink { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc((100% - 10px) / 3); border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(11, 27, 58, .08), 0 8px 18px -10px rgba(10, 42, 120, .6); transition: transform .6s var(--spring); }
+.tabs__ink { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc((100% - 10px) / 3); border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(11, 27, 58, .08), 0 8px 18px -10px rgba(10, 42, 120, .6); transition: transform var(--dur-3) var(--spring); }
 .tabs[data-i="1"] .tabs__ink { transform: translateX(100%); } .tabs[data-i="2"] .tabs__ink { transform: translateX(200%); }
 .tab { position: relative; z-index: 1; height: 46px; border-radius: 999px; font-weight: 600; font-size: 15px; color: var(--ink-3); transition: color .3s; } .tab.on { color: var(--ink); }
 .panels { position: relative; }
@@ -76,8 +76,8 @@
 @media (min-width: 760px) { .panel2 { grid-template-columns: 1fr 1fr; } }
 .ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; font-size: clamp(18px, 2.4vw, 22px); letter-spacing: -.02em; line-height: 1.25; }
 .ticks li { position: relative; padding-left: 38px; } .ticks li::before { content: ""; position: absolute; left: 0; top: 2px; width: 26px; height: 26px; border-radius: 50%; background: var(--lime) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b2400' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center / 15px no-repeat; }
-.panel2.on .ticks li { animation: tickin .6s var(--ease) both; } .panel2.on .ticks li:nth-child(2) { animation-delay: .1s; } .panel2.on .ticks li:nth-child(3) { animation-delay: .2s; } @keyframes tickin { from { opacity: 0; transform: translateX(-16px); } }
-.mock { background: #fff; color: var(--ink); border-radius: 26px; padding: 22px; display: grid; gap: 10px; box-shadow: 0 34px 60px -30px rgba(6, 23, 63, .7); transform: rotate(1.5deg); transition: transform .6s var(--spring); } .panel2:hover .mock { transform: rotate(0) translateY(-4px); }
+.panel2.on .ticks li { animation: tickin var(--dur-3) var(--ease) both; } .panel2.on .ticks li:nth-child(2) { animation-delay: .1s; } .panel2.on .ticks li:nth-child(3) { animation-delay: var(--dur-1); } @keyframes tickin { from { opacity: 0; transform: translateX(-16px); } }
+.mock { background: #fff; color: var(--ink); border-radius: 26px; padding: 22px; display: grid; gap: 10px; box-shadow: 0 34px 60px -30px rgba(6, 23, 63, .7); transform: rotate(1.5deg); transition: transform var(--dur-3) var(--spring); } .panel2:hover .mock { transform: rotate(0) translateY(-4px); }
 .mock__k { font-size: 13px; font-weight: 600; color: var(--ink-3); } .mock__big { font-size: clamp(30px, 4.4vw, 42px); font-weight: 600; letter-spacing: -.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .mock__chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .mchip { padding: 6px 12px; border-radius: 999px; font-size: 13.5px; font-weight: 600; background: var(--paper-2); color: var(--ink-2); } .mchip.ok { background: rgba(18, 154, 69, .13); color: #0b6b30; } .mchip.wait { background: #e8edf6; color: #5a6b8c; } .mchip.todo { background: #fff; box-shadow: inset 0 0 0 1.5px #dfe6f1; } .mchip.on { background: var(--ink); color: #fff; }
@@ -126,13 +126,13 @@
 .outro__row { display: grid; gap: 22px; padding: 28px 0 8px; border-top: 1px solid rgba(255, 255, 255, .25); margin-top: 4px; text-align: left; }
 @media (min-width: 860px) { .outro__row { grid-template-columns: 1.4fr 1fr auto; align-items: center; } }
 .outro__brand p { max-width: 40ch; } .outro__small { opacity: .75; font-size: 13.5px; margin-top: 4px; }
-.outro__nav { display: flex; gap: 6px 18px; flex-wrap: wrap; } .outro__nav a { text-decoration: none; font-weight: 500; opacity: .9; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; padding-bottom: 2px; transition: background-size .45s var(--ease), opacity .2s; } .outro__nav a:hover { background-size: 100% 1.5px; opacity: 1; }
-.totop { display: inline-flex; align-items: center; gap: 12px; height: 52px; padding: 0 8px 0 22px; border-radius: 999px; background: #fff; color: var(--ink); font-weight: 600; transition: transform .4s var(--spring); } .totop i { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--lime); color: var(--lime-ink); transition: transform .6s var(--spring); } .totop:hover i { transform: translateY(-4px) rotate(-12deg); } .totop:active { transform: scale(.95); }
+.outro__nav { display: flex; gap: 6px 18px; flex-wrap: wrap; } .outro__nav a { text-decoration: none; font-weight: 500; opacity: .9; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1.5px no-repeat; padding-bottom: 2px; transition: background-size .45s var(--ease), opacity var(--dur-1); } .outro__nav a:hover { background-size: 100% 1.5px; opacity: 1; }
+.totop { display: inline-flex; align-items: center; gap: 12px; height: 52px; padding: 0 8px 0 22px; border-radius: 999px; background: #fff; color: var(--ink); font-weight: 600; transition: transform .4s var(--spring); } .totop i { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--lime); color: var(--lime-ink); transition: transform var(--dur-3) var(--spring); } .totop:hover i { transform: translateY(-4px) rotate(-12deg); } .totop:active { transform: scale(.95); }
 .dusk .foot__credit { opacity: .75; font-size: 12.5px; max-width: 78ch; margin: 18px 0 0; padding-bottom: max(20px, env(safe-area-inset-bottom)); text-shadow: 0 1px 14px rgba(6, 23, 63, .85); } .dusk .foot__credit a { color: inherit; }
 
 /* keluar halaman (CTA): langit naik */
 body.is-leaving .hero__sky { transform: scale(1.35); filter: brightness(1.25); transition: transform 1.3s cubic-bezier(.55, 0, .25, 1), filter 1.3s; }
-body.is-leaving > main, body.is-leaving > .nav { transition: opacity .6s, transform .8s var(--ease); opacity: 0; transform: translateY(-20px); }
+body.is-leaving > main, body.is-leaving > .nav { transition: opacity var(--dur-3), transform .8s var(--ease); opacity: 0; transform: translateY(-20px); }
 
 @media (prefers-reduced-motion: reduce) { .mq__track, .mock__stamp, .dusk__stars i { animation: none !important; } .split .w > span, .outro__word span { transform: none !important; } .acc__a, .acc__a p { transition: none; } }
 

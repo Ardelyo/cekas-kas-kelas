@@ -1,0 +1,60 @@
+/* CEKAS "Langit" — jeda gerak, mode hemat, transisi halaman, odometer saldo, skeleton langit, tarik-untuk-muat, pengingat hari batas. */
+
+/* jeda gerak: semua animasi CSS berhenti */
+html.motion-paused *, html.motion-paused *::before, html.motion-paused *::after { animation-play-state: paused !important; }
+
+/* mode hemat: efek berat dimatikan */
+html.lite .sx-rain, html.lite .sx-flash, html.lite .sx-stars, html.lite .sx-orb { display: none; }
+html.lite .hero__photo, html.lite .sky__photo { animation: none; }
+html.lite .cloud, html.lite .sky__cloud, html.lite .veil__stars i { animation: none; filter: none; }
+html.lite .mq__track { animation-duration: 120s; } html.lite .cardcloud { animation: none; }
+
+/* tema UI ikut cuaca dan waktu: kertas sedikit lebih teduh */
+html[data-sky-wx="mendung"], html[data-sky-wx="hujan"], html[data-sky-wx="badai"], html[data-sky-wx="kabut"] { --paper: #eef1f6; --paper-2: #e4e9f1; --paper-3: #d9e0ec; }
+html[data-sky-phase="malam"] { --paper: #edf1f8; }
+body { transition: background-color 1.6s ease; }
+
+/* transisi antar halaman */
+body.route-out > *:not(.veil):not(.route-cloud):not(.skypop):not(.toast) { opacity: 0; filter: blur(3px); transition: opacity .3s ease, filter .3s ease; }
+.route-cloud { position: fixed; z-index: 650; top: 38%; left: -40vw; width: 36vw; min-width: 220px; max-width: 520px; pointer-events: none; opacity: .9; animation: routecloud .34s cubic-bezier(.55, 0, .25, 1) forwards; }
+@keyframes routecloud { to { left: 110vw; } }
+html.route-in body > *:not(.veil):not(.skypop) { animation: routein .55s var(--ease, ease) both; }
+@keyframes routein { from { opacity: 0; filter: blur(4px); } }
+
+/* saldo bergulir digit */
+.odo { display: inline-flex; align-items: baseline; }
+.od { position: relative; display: inline-block; width: .62em; height: 1em; line-height: 1; overflow: hidden; text-align: center; vertical-align: bottom; }
+.od__s { display: block; transform: translateY(calc(var(--d, 0) * -1em)); transition: transform 1.25s cubic-bezier(.2, .7, .1, 1); transition-delay: calc(var(--i, 0) * 70ms); will-change: transform; }
+.od__s i { display: block; height: 1em; line-height: 1; font-style: normal; }
+.od__p { display: inline-block; width: .3em; text-align: center; }
+
+/* skeleton langit */
+.is-skel { position: relative; }
+.is-skel > * { opacity: 0 !important; }
+.is-skel::after { content: ""; position: absolute; inset: 0; border-radius: var(--r-m, 24px); background: linear-gradient(100deg, var(--paper-2, #eef2f8) 30%, rgba(255, 255, 255, .95) 50%, var(--paper-2, #eef2f8) 70%) 0 0 / 260% 100%; animation: skelmove 1.3s linear infinite; }
+@keyframes skelmove { to { background-position: -160% 0; } }
+
+/* tarik untuk memuat: awan terbelah */
+.ptr { position: fixed; z-index: 120; left: 50%; top: 0; width: 120px; height: 64px; margin-left: -60px; pointer-events: none; opacity: 0; transform: translateY(calc(-60px + var(--pull, 0) * 90px)); transition: opacity .2s; }
+.ptr.on { opacity: 1; } .ptr.is-busy { transition: transform .5s var(--spring, ease), opacity .3s; transform: translateY(26px); opacity: 1; }
+.ptr__sun { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 5px rgba(30, 111, 232, .35), 0 0 24px 6px rgba(255, 255, 255, .8); transform: scale(calc(.4 + var(--pull, 0) * .8)); }
+.ptr.is-busy .ptr__sun { animation: ptrspin 1s linear infinite; border-radius: 40%; }
+@keyframes ptrspin { to { rotate: 360deg; } }
+.ptr__c { position: absolute; top: 50%; width: 52px; height: 36px; margin-top: -18px; color: #fff; filter: drop-shadow(0 6px 10px rgba(10, 42, 120, .45)); transition: transform .12s linear; }
+.ptr__c--l { left: 50%; margin-left: -52px; transform: translateX(calc(var(--pull, 0) * -30px)) rotate(calc(var(--pull, 0) * -8deg)); }
+.ptr__c--r { left: 50%; transform: translateX(calc(var(--pull, 0) * 30px)) rotate(calc(var(--pull, 0) * 8deg)); }
+.ptr.is-busy .ptr__c--l { transform: translateX(-34px); } .ptr.is-busy .ptr__c--r { transform: translateX(34px); }
+html.kas-page { overscroll-behavior-y: contain; }
+
+/* pengingat hari batas */
+.sched__alert { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px 16px 12px 14px; border-radius: var(--r-m, 24px); background: linear-gradient(90deg, var(--lime, #d6ff3f), #eaffa0); color: var(--lime-ink, #1b2400); overflow: hidden; animation: alertin .7s var(--spring, ease) both; }
+@keyframes alertin { from { opacity: 0; transform: translateY(-10px) scale(.97); } }
+.sched__alert b { font-size: 15px; letter-spacing: -.02em; display: block; } .sched__alert span { font-size: 13px; opacity: .8; }
+.sched__alert svg { flex: none; width: 34px; height: 24px; color: #fff; filter: drop-shadow(0 4px 6px rgba(27, 36, 0, .25)); animation: alertcloud 6s linear infinite; }
+@keyframes alertcloud { 0% { transform: translateX(-6px); } 50% { transform: translateX(8px); } 100% { transform: translateX(-6px); } }
+.sched__alert.late { background: linear-gradient(90deg, #ffe1e1, #fff1f1); color: #8a1216; }
+
+/* panel gerak di popover langit */
+.skyrange { width: 100%; accent-color: #1e6fe8; margin: 6px 0 2px; } .skyrange__l { display: flex; justify-content: space-between; font-size: 11.5px; color: #6b7893; }
+
+@media (prefers-reduced-motion: reduce) { .od__s { transition: none; } .is-skel::after, .sched__alert, .sched__alert svg, .route-cloud { animation: none !important; } }

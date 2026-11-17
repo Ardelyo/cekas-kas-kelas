@@ -8,10 +8,12 @@
 <script>try{var __s=sessionStorage.getItem('cekas-scene');if(__s==='masuk'){sessionStorage.removeItem('cekas-scene');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scene-masuk');}}catch(e){}</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/skyfx.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body class="wx-cerah" data-sky-kasmode>
 
@@ -38,6 +40,7 @@
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4"/></symbol>
 </svg>
 
+<a class="skip-link" href="#isi">Langsung ke isi</a>
 <!-- ============ HEADER LANGIT ============ -->
 <header class="skyhead" id="ringkasan">
   <div class="sky" aria-hidden="true" id="sky">
@@ -68,7 +71,7 @@
     <div class="hero__row">
       <span class="delta" id="delta"><svg class="ic ic-sm"><use href="#i-in"/></svg><span>+Rp 340.000 minggu ini</span></span>
       <button class="badge badge--busy" id="badge" type="button" aria-live="polite"><svg class="ic ic-sm"><use href="#i-clock"/></svg><span>Memeriksa…</span></button>
-      <span class="chip chip--glass" id="forecastChip">Cukup ± 17 minggu</span>
+      <span class="chip chip--glass" id="forecastChip">Cukup ± 13 minggu</span>
     </div>
   </div>
   <div class="sparkcard" id="spark" aria-label="Saldo akhir tiap minggu">
@@ -81,7 +84,8 @@
 </header>
 
 <!-- ============ KONTEN ============ -->
-<main class="page">
+<main class="page" id="isi">
+  <h1 class="sr">Kas kelas XI-F2</h1>
   <div class="col-l">
     <section class="reveal" aria-labelledby="h-pos">
       <h2 class="sec-h" id="h-pos">Uangnya dipakai buat apa?</h2>
@@ -187,7 +191,7 @@
   <summary>Alat desain</summary>
   <div class="demo__body">
     <div><b>Peran</b><div class="demo__row" id="demoRole"><button data-v="siswa" class="on">Siswa</button><button data-v="bendahara">Bendahara</button><button data-v="guru">Wali Kelas</button></div></div>
-    <div><b>Tanggal</b><div class="demo__row" id="demoDate"><button data-d="0" class="on">Hari ini</button><button data-d="1">Mgg 1</button><button data-d="2">Mgg 2</button><button data-d="3">Mgg 3</button><button data-d="4">Mgg 4</button></div></div>
+    <div><b>Tanggal</b><div class="demo__row" id="demoDate"><button data-d="0" class="on">Hari ini</button><button data-d="1">Mgg 1</button><button data-d="2">Mgg 2</button><button data-d="3">Mgg 3</button><button data-d="4">Mgg 4</button><button data-d="9">Hari batas</button></div></div>
     <div><b>Cuaca kas</b><div class="demo__row" id="demoWx"><button data-v="auto" class="on">Otomatis</button><button data-v="cerah">Cerah</button><button data-v="berawan">Berawan</button><button data-v="mendung">Mendung</button></div></div>
     <p class="note">Data fiktif. Panel ini hanya untuk menguji desain.</p>
   </div>
@@ -196,6 +200,7 @@
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="js/sha256.js"></script>
 <script src="js/fx.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/skyfx.js"></script>
 <script src="js/kas.js"></script>
 </body>

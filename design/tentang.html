@@ -9,12 +9,14 @@
 <script>document.documentElement.classList.add('js');</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231e6fe8'/%3E%3Cpath d='M10 23a4.5 4.5 0 0 1-.6-8.96A6.2 6.2 0 0 1 21.4 13a5 5 0 0 1-.4 10z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preload" href="assets/fonts/inter-tight-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/landing-extra.css">
 <link rel="stylesheet" href="css/pages.css">
 <link rel="stylesheet" href="css/skyfx.css">
+<link rel="stylesheet" href="css/motion.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -31,7 +33,7 @@
     <a href="index.html">Beranda</a><a href="fitur.html">Fitur</a><a href="tentang.html" aria-current="page">Tentang</a><a href="index.html#coba">Coba</a><a href="index.html#faq">FAQ</a>
   </nav>
   <span class="skyctl-host" data-skyctl></span>
-  <a class="btn btn--dark btn--sm" data-leave href="kas.html">Masuk</a>
+  <a class="btn btn--dark btn--sm" data-leave href="login.html">Masuk</a>
 </header>
 <main id="isi">
 <section class="hero phero" id="top">
@@ -73,7 +75,7 @@
   <div class="pwrap">
     <p class="eyebrow">Perjalanan</p>
     <h2 class="ptitle split">Dibangun selangkah demi selangkah.</h2>
-    <ol class="tl" id="tl"><span class="tl__fill" id="tlFill" aria-hidden="true"></span><li class="reveal"><span class="tl__dot">1</span><h3>Buku kas yang terbuka dan bisa diverifikasi</h3><p>Fondasi pertama: dashboard publik, kode QR, dan rantai hash SHA-256 supaya perubahan diam-diam langsung ketahuan.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">2</span><h3>Verifikasi Wali Kelas untuk semua transaksi</h3><p>Setiap catatan menunggu persetujuan guru. Iuran diverifikasi per minggu, dan nama guru ikut terkunci di hash.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">3</span><h3>Etalase Colab dan login Wali Kelas di web</h3><p>Notebook demo untuk presentasi, dan Wali Kelas bisa menyetujui langsung dari dashboard tanpa Telegram.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">4</span><h3>Desain "Langit"</h3><p>Antarmuka baru: langit yang hidup, gerak yang halus, dan alur masuk sampai keluar. Prototipe statis sedang diuji.</p><small class="now">Sedang dikerjakan</small></li><li class="reveal"><span class="tl__dot">5</span><h3>Pasang ke aplikasi</h3><p>Desain yang disetujui dipindahkan ke template aplikasi, lalu diuji bersama kelas.</p><small>Berikutnya</small></li></ol>
+    <ol class="tl" id="tl"><span class="tl__fill" id="tlFill" aria-hidden="true"></span><li class="reveal"><span class="tl__dot">1</span><h3>Buku kas yang terbuka dan bisa diverifikasi</h3><p>Fondasi pertama: dashboard publik, kode QR, dan rantai hash SHA-256 supaya perubahan diam-diam langsung ketahuan.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">2</span><h3>Verifikasi Wali Kelas untuk semua transaksi</h3><p>Setiap catatan menunggu persetujuan Wali Kelas. Iuran diverifikasi per minggu, dan nama Wali Kelas ikut terkunci di hash.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">3</span><h3>Etalase Colab dan login Wali Kelas di web</h3><p>Notebook demo untuk presentasi, dan Wali Kelas bisa menyetujui langsung dari dashboard tanpa Telegram.</p><small>Selesai</small></li><li class="reveal"><span class="tl__dot">4</span><h3>Desain "Langit"</h3><p>Antarmuka baru: langit yang hidup, gerak yang halus, dan alur masuk sampai keluar. Prototipe statis sedang diuji.</p><small class="now">Sedang dikerjakan</small></li><li class="reveal"><span class="tl__dot">5</span><h3>Pasang ke aplikasi</h3><p>Desain yang disetujui dipindahkan ke template aplikasi, lalu diuji bersama kelas.</p><small>Berikutnya</small></li></ol>
   </div>
 </section>
 
@@ -123,6 +125,7 @@
 </section>
 </main>
 <script src="js/fx.js"></script>
+<script src="js/motion.js"></script>
 <script src="js/sha256.js"></script>
 <script src="js/page.js"></script>
 <script src="js/landing-extra.js"></script>

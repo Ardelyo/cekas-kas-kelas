@@ -8,12 +8,12 @@
 /* tombol: mesin status  idle → loading → ok / fail */
 .btn { position: relative; }
 .btn[data-state] { pointer-events: none; }
-.btn .fx-lbl { display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: opacity .2s, transform .3s var(--ease); }
+.btn .fx-lbl { display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: opacity var(--dur-1), transform .3s var(--ease); }
 .btn .fx-spin, .btn .fx-check, .btn .fx-x { position: absolute; left: 50%; top: 50%; margin: -11px 0 0 -11px; width: 22px; height: 22px; opacity: 0; pointer-events: none; }
 .btn .fx-spin { border-radius: 50%; border: 2.6px solid currentColor; border-right-color: transparent; transform: scale(.4); }
 .btn .fx-check, .btn .fx-x { stroke-dasharray: 26; stroke-dashoffset: 26; }
 .btn[data-state="loading"] .fx-lbl, .btn[data-state="ok"] .fx-lbl, .btn[data-state="fail"] .fx-lbl { opacity: 0; transform: translateY(-8px) scale(.96); }
-.btn[data-state="loading"] .fx-spin { opacity: 1; transform: scale(1); animation: fxspin .7s linear infinite; transition: opacity .2s, transform .35s var(--spring); }
+.btn[data-state="loading"] .fx-spin { opacity: 1; transform: scale(1); animation: fxspin .7s linear infinite; transition: opacity var(--dur-1), transform var(--dur-2) var(--spring); }
 @keyframes fxspin { to { rotate: 360deg; } }
 .btn[data-state="ok"] { background: var(--ok); color: #fff; box-shadow: 0 10px 26px -10px rgba(18, 154, 69, .8); animation: fxpop .5s var(--spring); }
 .btn[data-state="ok"] .fx-check { opacity: 1; animation: fxdraw .38s .06s var(--ease) forwards; }
@@ -67,11 +67,11 @@ dialog.is-closing::backdrop { animation: fadeout .26s forwards; }
 
 /* state kosong yang hidup */
 .empty--ok .seal { display: inline-grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: var(--ok-bg); color: var(--ok); margin-bottom: 10px; }
-.empty--ok .seal svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 26; stroke-dashoffset: 26; animation: fxdraw .5s .2s var(--ease) forwards; }
-.empty--ok .seal { animation: fxpop .6s var(--spring); }
+.empty--ok .seal svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 26; stroke-dashoffset: 26; animation: fxdraw .5s var(--dur-1) var(--ease) forwards; }
+.empty--ok .seal { animation: fxpop var(--dur-3) var(--spring); }
 
 /* chip iuran */
-.stu.just { animation: fxpop .6s var(--spring); }
+.stu.just { animation: fxpop var(--dur-3) var(--spring); }
 .stu.wait .st { animation: fxtick 2.4s ease-in-out infinite; transform-origin: center; } @keyframes fxtick { 50% { transform: rotate(18deg); } }
 
 @media (prefers-reduced-motion: reduce) { .fx-rip, .fx-dot, .fx-ring, .fx-fly { display: none !important; } .toast__bar { display: none; } }
