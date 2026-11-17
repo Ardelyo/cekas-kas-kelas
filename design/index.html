@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/landing-extra.css">
+<link rel="stylesheet" href="css/pages.css">
 <link rel="stylesheet" href="css/skyfx.css">
 </head>
 <body>
@@ -66,8 +67,8 @@
     <span>cekas</span>
   </a>
   <nav class="nav__links" aria-label="Utama">
-    <a href="#tentang">Tentang</a>
-    <a href="#fitur">Fitur</a>
+    <a href="tentang.html">Tentang</a>
+    <a href="fitur.html">Fitur</a>
     <a href="#coba">Coba</a>
     <a href="#testimoni">Testimoni</a>
     <a href="#faq">FAQ</a>
@@ -158,32 +159,19 @@
   </div>
 </section>
 
-<!-- ============ TENTANG KITA ============ -->
-<section class="about" id="tentang">
+<!-- ============ TENTANG KITA (ringkas) ============ -->
+<section class="about about--teaser" id="tentang">
   <div class="about__grid">
     <div class="about__text">
       <p class="eyebrow">Tentang kita</p>
       <h2 class="split">Dibuat oleh satu kelas, untuk <em>semua kelas.</em></h2>
-      <p class="lede lede--left reveal">CEKAS lahir dari satu pertanyaan sederhana: ke mana uang kas kelas pergi? Biasanya jawabannya ada di satu buku yang hanya dipegang satu orang. Kami, Kelompok 5 kelas XI-F2 SMA Kartika XIX-1 Bandung, membuat catatan itu terbuka untuk semua dan terkunci dari perubahan diam-diam.</p>
-      <ul class="values">
-        <li class="reveal"><span class="values__ic"><svg class="ico" aria-hidden="true"><use href="#s-lock"/></svg></span><div><b>Percaya lewat bukti</b><p>Bukan "percaya saja". Setiap catatan bisa diperiksa siapa pun.</p></div></li>
-        <li class="reveal"><span class="values__ic"><svg class="ico" aria-hidden="true"><use href="#s-vote"/></svg></span><div><b>Adil dan terbuka</b><p>Belanja besar diputuskan bersama, bukan oleh satu orang.</p></div></li>
-        <li class="reveal"><span class="values__ic"><svg class="ico" aria-hidden="true"><use href="#s-off"/></svg></span><div><b>Ringan untuk semua HP</b><p>Offline-first, tanpa CDN, hemat kuota dan baterai.</p></div></li>
-      </ul>
+      <p class="lede lede--left reveal">CEKAS lahir dari satu pertanyaan sederhana: ke mana uang kas kelas pergi? Kami, Kelompok 5 kelas XI-F2 SMA Kartika XIX-1 Bandung, membuat catatan itu terbuka untuk semua dan terkunci dari perubahan diam-diam.</p>
+      <a class="more-link reveal" href="tentang.html">Kenali kami <span aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
     </div>
-    <div class="about__side">
-      <figure class="about__photo reveal" aria-label="Langit sebagai identitas CEKAS">
-        <img src="assets/sky/sky-day-sm.jpg" alt="" loading="lazy" data-parallax=".08">
-        <figcaption><span class="chip chip--glass"><span class="dot"></span> Kelompok 5 · XI-F2</span><b>Transparan seperti langit cerah.</b></figcaption>
-      </figure>
-      <div class="team">
-        <article class="member reveal"><span class="member__av" style="--h:0">?</span><div><b>Nama anggota</b><small>Perancang produk</small></div></article>
-        <article class="member reveal"><span class="member__av" style="--h:1">?</span><div><b>Nama anggota</b><small>Pengembang</small></div></article>
-        <article class="member reveal"><span class="member__av" style="--h:2">?</span><div><b>Nama anggota</b><small>Desain dan antarmuka</small></div></article>
-        <article class="member reveal"><span class="member__av" style="--h:3">?</span><div><b>Nama anggota</b><small>Riset dan uji coba</small></div></article>
-      </div>
-      <p class="note-small">Isi nama dan peran tim di bagian ini.</p>
-    </div>
+    <figure class="about__photo reveal" aria-label="Langit sebagai identitas CEKAS">
+      <img src="assets/sky/sky-day-sm.jpg" alt="" loading="lazy" data-parallax=".08">
+      <figcaption><span class="chip chip--glass"><span class="dot"></span> Kelompok 5 · XI-F2</span><b>Transparan seperti langit cerah.</b></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -216,9 +204,8 @@
     </article>
   </div>
 
-  <div class="allfeat">
-    <h3 class="allfeat__h reveal">Dan semua yang ada di dalamnya</h3>
-    <ul class="allfeat__grid"><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-lock"/></svg></span><b>Buku kas anti-manipulasi</b><p>Ubah satu baris, rantainya putus dan lencana berubah.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-vote"/></svg></span><b>Usulan belanja</b><p>Belanja besar menunggu 3 teman setuju sebelum ke guru.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-cal"/></svg></span><b>Iuran per minggu</b><p>Kisi siswa dan minggu, tandai lunas dengan satu ketukan.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-chat"/></svg></span><b>Rekap WhatsApp</b><p>Pesan rapi dan pengingat iuran yang sopan, siap tempel.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-trend"/></svg></span><b>Prakiraan saldo</b><p>"Cukup sekitar 17 minggu", dari kebiasaan belanja kelas.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-file"/></svg></span><b>Laporan SPJ</b><p>Siap cetak dengan kolom tanda tangan dan kode verifikasi.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-cam"/></svg></span><b>Foto nota jadi draf</b><p>Model lokal membaca nota, Bendahara tinggal konfirmasi.</p></li><li class="feat reveal"><span class="feat__ic"><svg class="ico" aria-hidden="true"><use href="#s-off"/></svg></span><b>Offline-first</b><p>Data dan font tersimpan sendiri, tetap terbuka tanpa sinyal.</p></li></ul>
+  <div class="allfeat allfeat--link reveal">
+    <a class="more-link" href="fitur.html">Lihat semua fitur, termasuk SPJ, usulan belanja, foto nota, dan mode offline <span aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
   </div>
 </section>
 
@@ -272,19 +259,51 @@
   </div>
 </section>
 
-<!-- ============ CARA KERJA ============ -->
-<section class="steps" id="cara">
-  <header class="sec-head">
+<!-- ============ TIGA LANGKAH ============ -->
+<section class="flow" id="cara">
+  <header class="sec-head sec-head--center">
     <p class="eyebrow">Cara kerja</p>
-    <h2>Tiga langkah, <em>semua terlihat.</em></h2>
+    <h2 class="split">Tiga langkah, <em>semua terlihat.</em></h2>
+    <p class="lede">Dari catatan sampai bukti, setiap langkah punya pemilik dan jejak yang jelas.</p>
   </header>
-  <ol class="steps__list">
-    <li class="step reveal"><span class="step__n">01</span><h3>Bendahara mencatat</h3><p>Lewat bot Telegram atau web. Iuran dicentang per minggu, pengeluaran besar jadi usulan yang dipilih siswa.</p></li>
-    <li class="step reveal"><span class="step__n">02</span><h3>Wali Kelas mengesahkan</h3><p>Satu ketukan untuk menyetujui atau menolak. Nama guru ikut terkunci di sidik jari transaksi.</p></li>
-    <li class="step reveal"><span class="step__n">03</span><h3>Semua siswa melihat</h3><p>Dashboard publik dan kode QR untuk ditempel di kelas. Lencana hijau tanda rantai masih utuh.</p></li>
-  </ol>
-</section>
+  <div class="flow__list" id="flowList">
+    <div class="flow__rail" aria-hidden="true"><i id="flowFill"></i></div>
 
+    <article class="fstep">
+      <span class="fstep__n">1</span>
+      <div class="fstep__txt">
+        <span class="tag">Bendahara</span>
+        <h3>Mencatat dalam hitungan detik.</h3>
+        <p>Uang masuk, keluar, atau iuran, semuanya dicatat lewat bot Telegram atau web. Belanja besar otomatis jadi usulan untuk disuarakan teman-teman.</p>
+        <div class="fstep__chips"><span>Bot Telegram</span><span>Web</span><span>Foto nota</span></div>
+      </div>
+      <div class="fstep__vis"><div class="fm"><span class="fm__sent">Terkirim ke Wali Kelas</span><p class="fm__k">Catat uang keluar</p><p class="fm__big">Rp <span class="type">35.000</span></p><div class="fm__chips"><i class="on">Operasional</i><i>Sosial</i><i>Event</i></div><div class="fm__btn"><span class="go">Ajukan</span><span class="ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Diajukan</span></div></div></div>
+    </article>
+
+    <article class="fstep">
+      <span class="fstep__n">2</span>
+      <div class="fstep__txt">
+        <span class="tag">Wali Kelas</span>
+        <h3>Mengesahkan dengan satu geseran.</h3>
+        <p>Catatan menunggu persetujuan guru. Setelah disahkan, namanya ikut terkunci di sidik jari transaksi, dan baru saat itu saldo berubah.</p>
+        <div class="fstep__chips"><span>Setujui</span><span>Tolak</span><span>Sahkan per minggu</span></div>
+      </div>
+      <div class="fstep__vis"><div class="fm fm--q"><p class="fm__k">Menunggu Wali Kelas</p><p style="display:flex;justify-content:space-between;gap:10px;font-weight:600;letter-spacing:-.02em"><span>Beli kapur dan penghapus</span><span style="color:var(--bad)">−Rp 28.000</span></p><div class="fm__chips"><i>#40</i><i>Operasional</i></div><span class="qs">Disahkan</span><div class="fm__hash">a91f·04c2·77de·b3a0 · terkunci</div></div></div>
+    </article>
+
+    <article class="fstep">
+      <span class="fstep__n">3</span>
+      <div class="fstep__txt">
+        <span class="tag">Semua siswa</span>
+        <h3>Melihat buktinya sendiri.</h3>
+        <p>Dashboard publik dan kode QR untuk ditempel di kelas. Lencana hijau berarti rantai catatan masih utuh, dan siapa pun bisa memeriksanya.</p>
+        <div class="fstep__chips"><span>Tanpa kata sandi</span><span>Kode QR</span><span>Lencana keaslian</span></div>
+      </div>
+      <div class="fstep__vis"><div class="fm"><div class="fm__row"><span class="fm__ring"></span><div><p class="fm__k">Iuran minggu 12</p><p class="fm__big" style="font-size:24px">31 / 34 lunas</p></div></div><span class="fm__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> Terverifikasi</span><p class="fm__k">Saldo kas · contoh</p><p class="fm__big">Rp 1.785.000</p><div class="fm__av" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
+    </article>
+  </div>
+  <div class="flowcta"><a class="btn btn--dark btn--lg magnetic" data-leave href="kas.html">Lihat langsung di dashboard <span class="btn__arrow" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div>
+</section>
 
 <!-- ============ TESTIMONI ============ -->
 <section class="testi" id="testimoni">
@@ -336,10 +355,10 @@
     <div class="outro__word" id="outroWord" aria-hidden="true"><span>c</span><span>e</span><span>k</span><span>a</span><span>s</span></div>
     <div class="outro__row">
       <div class="outro__brand"><p><b>CEKAS</b> · buku kas kelas yang terbuka dan bisa diverifikasi.</p><p class="outro__small">Kelompok 5 · Kelas XI-F2 SMA Kartika XIX-1 Bandung</p></div>
-      <nav class="outro__nav" aria-label="Tautan"><a href="#tentang">Tentang</a><a href="#fitur">Fitur</a><a href="#testimoni">Testimoni</a><a href="#faq">FAQ</a></nav>
+      <nav class="outro__nav" aria-label="Tautan"><a href="tentang.html">Tentang</a><a href="fitur.html">Fitur</a><a href="#testimoni">Testimoni</a><a href="#faq">FAQ</a></nav>
       <button class="totop" id="toTop" type="button"><span>Naik ke langit</span><i aria-hidden="true"><svg class="ico"><use href="#s-arrow-up"/></svg></i></button>
     </div>
-    <p class="foot__credit">Foto langit: Lance Vanlewen via Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC BY-SA 4.0</a>, diubah ukuran dan dipotong jadi lapisan awan. Font: Inter Tight dan Bricolage Grotesque (SIL OFL).</p>
+    <p class="foot__credit">Foto langit: Lance Vanlewen. Foto cuaca: Ranjithsiji (mendung), Muhammadphoto (petir), Kulish Kateryna (bintang), semuanya via Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener">CC BY-SA 4.0</a> dan <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>, diubah ukuran dan warnanya. Font: Inter Tight dan Bricolage Grotesque (SIL OFL).</p>
   </div>
 </section>
 </main>

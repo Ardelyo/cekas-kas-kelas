@@ -133,6 +133,18 @@
   var top = $('#toTop');
   if (top) top.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
 
+  /* ---------- tiga langkah: garis mengisi saat digulir ---------- */
+  var flow = $('#flowList'), flowFill = $('#flowFill');
+  if (flow && flowFill) {
+    var steps = $$('.fstep', flow), ft = false;
+    var upd = function () {
+      ft = false; var r = flow.getBoundingClientRect(), mid = window.innerHeight * 0.55, p = Math.min(1, Math.max(0, (mid - r.top) / r.height));
+      flow.style.setProperty('--p', p.toFixed(3)); flowFill.parentNode.style.setProperty('--p', p.toFixed(3));
+    };
+    window.addEventListener('scroll', function () { if (!ft) { ft = true; requestAnimationFrame(upd); } }, { passive: true }); upd();
+    once(steps, function (s) { s.classList.add('is-in'); }, '0px 0px -30% 0px');
+  }
+
   /* ---------- keluar ke aplikasi: langit naik lalu putih terang ---------- */
   $$('a[href="kas.html"], a[href="login.html"]').forEach(function (a) {
     a.addEventListener('click', function (e) {

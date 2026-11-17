@@ -142,3 +142,5 @@ body.is-leaving > main, body.is-leaving > .nav { transition: opacity .6s, transf
 .btn--glass { border: 0; }
 .dusk::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46%; background: linear-gradient(180deg, rgba(4, 14, 44, 0), rgba(4, 14, 44, .88)); z-index: 0; pointer-events: none; }
 .dusk__inner, .outro { position: relative; z-index: 1; }
+.allfeat--link { margin-top: 28px; text-align: center; } .allfeat--link .more-link { font-size: 17px; }
+.about--teaser .about__photo { aspect-ratio: 4 / 3.2; }

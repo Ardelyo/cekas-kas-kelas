@@ -61,15 +61,20 @@
     s.setProperty('--sx-cb', ((p ? CB[p] : 1) * WB[w]).toFixed(3)); s.setProperty('--sx-cs', ((p ? CS[p] : 1) * WS[w]).toFixed(3));
     s.setProperty('--sx-stars', ((p ? ST[p] : 0) * WSTAR[w]).toFixed(3));
     if (orb) { s.setProperty('--ox', orb[0]); s.setProperty('--oy', orb[1]); s.setProperty('--os', orb[2]); s.setProperty('--oc', orb[3]); s.setProperty('--oo', (orb[4] * WORB[w]).toFixed(3)); } else s.setProperty('--oo', 0);
-    updateUI(e);
+    ensureImgs(e); updateUI(e);
     listeners.forEach(function (f) { try { f(e); } catch (x) {} });
   }
 
   /* ---------- suntik lapisan ---------- */
   function inject(host) {
-    if (host.querySelector('.sx')) return;
+    if (host.querySelector('.sx-base')) return;
+    var base = document.createElement('div'); base.className = 'sx-base'; base.setAttribute('aria-hidden', 'true');
+    base.innerHTML = ['malam', 'mendung', 'badai'].map(function (k) { return '<img class="sx-img sx-img--' + k + '" data-src="assets/weather/sky-' + k + '.webp" alt="" decoding="async">'; }).join('') +
+      PH.filter(function (x) { return x !== 'siang'; }).map(function (x) { return '<div class="sx-ph sx-ph--' + x + '"></div>'; }).join('') + '<div class="sx-wx sx-wx--mendung"></div><div class="sx-wx sx-wx--storm"></div>';
+    var photo = host.querySelector('picture') || host.querySelector('.hero__photo, .sky__photo');
+    if (photo && photo.parentNode === host) host.insertBefore(base, photo.nextSibling); else host.insertBefore(base, host.firstChild);
     var a = document.createElement('div'); a.className = 'sx'; a.setAttribute('aria-hidden', 'true');
-    a.innerHTML = PH.filter(function (x) { return x !== 'siang'; }).map(function (x) { return '<div class="sx-ph sx-ph--' + x + '"></div>'; }).join('') + '<div class="sx-wx sx-wx--mendung"></div><div class="sx-wx sx-wx--storm"></div><div class="sx-orb"></div><div class="sx-stars"></div>';
+    a.innerHTML = '<div class="sx-orb"></div><div class="sx-stars"></div>';
     var st = $('.sx-stars', a);
     for (var i = 0; i < 70; i++) { var d = document.createElement('i'), z = 1 + Math.random() * 2; d.style.cssText = 'left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;width:' + z + 'px;height:' + z + 'px;opacity:' + (.35 + Math.random() * .6) + ';animation-delay:' + (-Math.random() * 3) + 's;animation-duration:' + (2.4 + Math.random() * 2.4) + 's'; st.appendChild(d); }
     var firstCloud = host.querySelector('.cloud, .sky__cloud');
@@ -77,6 +82,12 @@
     var b = document.createElement('div'); b.className = 'sx-top'; b.setAttribute('aria-hidden', 'true');
     b.innerHTML = '<div class="sx-wx sx-wx--kabut"></div><div class="sx-rain"></div><div class="sx-rain sx-rain--b"></div><div class="sx-flash"></div>';
     host.appendChild(b);
+  }
+  /* foto cuaca dimuat hanya saat dibutuhkan (hemat kuota) */
+  function ensureImgs(e) {
+    var w = e.wx, n = e.phase === 'malam' && (!w || w === 'cerah' || w === 'berawan');
+    var need = { malam: n, mendung: w === 'mendung' || w === 'hujan' || w === 'kabut' || w === 'badai', badai: w === 'badai' };
+    $$('.sx-img').forEach(function (img) { var k = /sx-img--(\w+)/.exec(img.className)[1]; if (need[k] && !img.getAttribute('src')) img.src = img.dataset.src; });
   }
   $$('.hero__sky, .sky').forEach(inject);
 
