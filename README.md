@@ -1,5 +1,7 @@
 # CEKAS — Buku Kas Kelas yang Terbuka dan Bisa Diverifikasi
 *Kelompok 5 — Kelas XI-F2 SMA Kartika XIX-1 Bandung · Pure Python 3.11+*
+> **Transparansi:** Python adalah inti sistem; folder `design/` hanya tampilan. Siapa membuat apa, lisensi, batasan, dan cara mundur ada di [TANGGUNG_JAWAB.md](TANGGUNG_JAWAB.md).
+
 
 Uang kas kelas biasanya dicatat di satu buku yang hanya dipegang Bendahara. CEKAS membuat catatan itu **terbuka untuk semua siswa** dan **tidak bisa diubah diam-diam**.
 
