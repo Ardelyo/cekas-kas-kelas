@@ -18,37 +18,70 @@
   ];
   var POSNOTE = { op: 'Spidol, fotokopi, kebersihan', so: 'Jenguk dan sumbangan', ev: 'Lomba dan acara kelas', ca: 'Dana darurat' };
   var posName = function (k) { return POS.filter(function (p) { return p.k === k; })[0].name; };
-  var AVG_SPEND = 105000, NOMINAL = 10000, TODAY = 'Selasa, 17 Nov', APPROVAL_MIN = 50000;
+  var AVG_SPEND = 105000, NOMINAL = 10000, APPROVAL_MIN = 50000;
   var NAMES = ['Aditya', 'Bella', 'Citra', 'Dimas', 'Eka', 'Farhan', 'Gita', 'Hana', 'Indra', 'Jihan', 'Kevin', 'Laila', 'Mario', 'Nadia', 'Okta', 'Putri', 'Qori', 'Rafi', 'Salsa', 'Tegar', 'Umar', 'Vina', 'Wulan', 'Yusuf', 'Zahra', 'Alya', 'Bima', 'Cakra', 'Dwi', 'Elsa', 'Fikri', 'Galih', 'Hafiz', 'Ilham'];
   var TOTAL = NAMES.length;
 
   var state = {
-    role: (function () { var q = (location.search.match(/peran=([a-z]+)/) || [])[1], r = q || (function () { try { return sessionStorage.getItem('cekas-role'); } catch (e) { return null; } })(); return ['bendahara', 'guru'].indexOf(r) >= 0 ? r : 'siswa'; })(), wx: 'auto', flash: null, week: 12, activeWeek: 12, hidden: false,
+    role: (function () { var q = (location.search.match(/peran=([a-z]+)/) || [])[1], r = q || (function () { try { return sessionStorage.getItem('cekas-role'); } catch (e) { return null; } })(); return ['bendahara', 'guru'].indexOf(r) >= 0 ? r : 'siswa'; })(), wx: 'auto', flash: null, week: 1, activeWeek: 1, hidden: false, now: new Date(), dateMode: 0, weeks: [],
     nextId: 1, nextPid: 41,
-    tx: [], pending: [], proposals: [{ id: 7, desc: 'Fotokopi modul 12 minggu', cat: 'op', amt: -85000, by: 'Bendahara', yes: 2, needed: 3 }],
+    tx: [], pending: [], proposals: [{ id: 7, desc: 'Fotokopi modul bulan ini', cat: 'op', amt: -85000, by: 'Bendahara', yes: 2, needed: 3 }],
     dues: {}
   };
-  (function seed() {
-    var rows = [
-      ['Jumat, 31 Okt', '07:10', 'Saldo awal kas', 'ca', 400000, 8], ['Jumat, 31 Okt', '07:12', 'Iuran sosial semester', 'so', 390000, 8],
-      ['Jumat, 31 Okt', '15:40', 'Iuran minggu 9 (34 siswa)', 'op', 340000, 9],
-      ['Senin, 3 Nov', '09:05', 'Beli spidol dan penghapus', 'op', -45000, 10],
-      ['Jumat, 7 Nov', '15:30', 'Iuran minggu 10 (34 siswa)', 'op', 340000, 10], ['Jumat, 7 Nov', '16:02', 'Pemasukan lomba kebersihan', 'ev', 300000, 10],
-      ['Senin, 10 Nov', '10:20', 'Konsumsi lomba kebersihan', 'ev', -120000, 11],
-      ['Rabu, 12 Nov', '13:15', 'Sumbangan jenguk teman sakit', 'so', -150000, 11],
-      ['Jumat, 14 Nov', '15:35', 'Iuran minggu 11 (33 siswa)', 'op', 330000, 11]
-    ];
-    rows.forEach(function (r) { state.tx.push({ id: state.nextId++, day: r[0], time: r[1], desc: r[2], cat: r[3], amt: r[4], w: r[5], by: 'Bendahara', ok: 'Wali Kelas (contoh)' }); });
-    state.pending.push({ id: 40, desc: 'Beli kapur dan penghapus', cat: 'op', amt: -28000, by: 'Bendahara' });
-    for (var w = 1; w <= 12; w++) {
-      var a = [], i;
-      for (i = 0; i < TOTAL; i++) a.push('paid');
-      if (w === 11) a[7] = 'todo';
-      if (w === 12) { for (i = 24; i < 30; i++) a[i] = 'wait'; for (i = 30; i < TOTAL; i++) a[i] = 'todo'; }
-      state.dues[w] = a;
+  /* ---------- kalender iuran: 4 minggu per bulan ---------- */
+  var DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], DS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+  var MONF = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  var DAY_MS = 864e5, HOUR_MS = 36e5, MIN_MS = 6e4;
+  var pad2 = function (n) { return String(n).padStart(2, '0'); };
+  var dayLabel = function (d) { return DAYS[d.getDay()] + ', ' + d.getDate() + ' ' + MON[d.getMonth()]; };
+  var todayLabel = function () { return dayLabel(state.now); };
+  var clock = function (d) { return pad2(d.getHours()) + '.' + pad2(d.getMinutes()); };
+  function mkWeeks(now) {
+    var y = now.getFullYear(), m = now.getMonth(), first = new Date(y, m, 1), off = (1 - first.getDay() + 7) % 7, ws = [];
+    for (var k = 0; k < 4; k++) {
+      var s = new Date(y, m, 1 + off + 7 * k), e = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 6, 23, 59), due = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 4, 15, 0);
+      ws.push({ n: k + 1, start: s, end: e, due: due });
     }
+    return ws;
+  }
+  function weekStatus(w) { return state.now > w.end ? 'selesai' : state.now >= w.start ? 'berjalan' : 'akan'; }
+  function rangeLabel(w) { var s = w.start, e = new Date(w.end.getFullYear(), w.end.getMonth(), w.end.getDate()); return s.getMonth() === e.getMonth() ? s.getDate() + '\u2013' + e.getDate() + ' ' + MON[e.getMonth()] : s.getDate() + ' ' + MON[s.getMonth()] + ' \u2013 ' + e.getDate() + ' ' + MON[e.getMonth()]; }
+  function dur(ms) {
+    var d = Math.floor(ms / DAY_MS), h = Math.floor((ms % DAY_MS) / HOUR_MS), m = Math.floor((ms % HOUR_MS) / MIN_MS);
+    if (d > 0) return d + ' hari ' + h + ' jam'; if (h > 0) return h + ' jam ' + m + ' menit'; return Math.max(1, m) + ' menit';
+  }
+
+  function seed() {
+    state.tx = []; state.nextId = 1; state.pending = []; state.dues = {};
+    state.proposals = [{ id: 7, desc: 'Fotokopi modul bulan ini', cat: 'op', amt: -85000, by: 'Bendahara', yes: 2, needed: 3 }];
+    state.weeks = mkWeeks(state.now);
+    var cw = 1; state.weeks.forEach(function (w) { if (state.now >= w.start) cw = w.n; });
+    state.activeWeek = cw; state.week = cw;
+    var rows = [
+      [1, 0, '07:10', 'Saldo awal operasional', 'op', 100000], [1, 0, '07:11', 'Dana cadangan awal', 'ca', 300000], [1, 0, '07:12', 'Iuran sosial semester', 'so', 390000],
+      [1, 1, '09:05', 'Beli spidol dan penghapus', 'op', -45000],
+      [1, 4, '15:30', 'Iuran minggu 1 (34 siswa)', 'op', 340000, 1], [1, 4, '16:02', 'Pemasukan lomba kebersihan', 'ev', 300000],
+      [2, 0, '10:20', 'Konsumsi lomba kebersihan', 'ev', -120000], [2, 2, '13:15', 'Sumbangan jenguk teman sakit', 'so', -150000],
+      [2, 4, '15:35', 'Iuran minggu 2 (33 siswa)', 'op', 330000, 1], [3, 4, '15:40', 'Iuran minggu 3 (34 siswa)', 'op', 340000, 1]
+    ];
+    rows.forEach(function (r) {
+      if (r[6] && r[0] >= cw) return;
+      var wk = state.weeks[r[0] - 1], d = new Date(wk.start.getFullYear(), wk.start.getMonth(), wk.start.getDate() + r[1]), hm = r[2].split(':'); d.setHours(+hm[0], +hm[1]);
+      if (d > state.now) return;
+      state.tx.push({ id: state.nextId++, date: d, day: dayLabel(d), time: r[2], desc: r[3], cat: r[4], amt: r[5], w: r[0], by: 'Bendahara', ok: 'Wali Kelas (contoh)' });
+    });
+    state.pending.push({ id: 40, desc: 'Beli kapur dan penghapus', cat: 'op', amt: -28000, by: 'Bendahara' });
+    state.weeks.forEach(function (w) {
+      var a = [], i, st = weekStatus(w); for (i = 0; i < TOTAL; i++) a.push(st === 'akan' ? 'todo' : 'paid');
+      if (st === 'selesai' && w.n === cw - 1) a[7] = 'todo';
+      if (st === 'berjalan') { for (i = 24; i < 30; i++) a[i] = 'wait'; for (i = 30; i < TOTAL; i++) a[i] = 'todo'; }
+      state.dues[w.n] = a;
+    });
     rehash();
-  })();
+  }
+  (function () { var m = location.search.match(/tanggal=(\d{4})-(\d\d)-(\d\d)/); if (m) state.now = new Date(+m[1], +m[2] - 1, +m[3], 10, 30); })();
+  seed();
 
   function rehash() {
     var prev = 'GENESIS';
@@ -244,7 +277,7 @@
   /* ---------- aksi ---------- */
   function addTx(t) {
     var id = state.nextId++; var now = new Date();
-    var tx = { id: id, day: TODAY, time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), desc: t.desc, cat: t.cat, amt: t.amt, w: state.activeWeek, by: t.by || 'Bendahara', ok: 'Wali Kelas (contoh)', isNew: true };
+    var tx = { id: id, date: new Date(state.now), day: todayLabel(), time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), desc: t.desc, cat: t.cat, amt: t.amt, w: state.activeWeek, by: t.by || 'Bendahara', ok: 'Wali Kelas (contoh)', isNew: true };
     state.tx.push(tx); rehash(); return tx;
   }
   function removeCard(sel, cb, cls) {
@@ -315,27 +348,73 @@
   /* ---------- iuran ---------- */
   var ini = function (n) { return n.slice(0, 2).toUpperCase(); };
   function counts(w) { var a = state.dues[w]; return { paid: a.filter(function (s) { return s === 'paid'; }).length, wait: a.filter(function (s) { return s === 'wait'; }).length, todo: a.filter(function (s) { return s === 'todo'; }).length }; }
-  function renderWeeks() {
-    var html = ''; for (var w = 1; w <= 12; w++) html += '<button class="wk ' + (w === state.week ? 'on' : '') + '" type="button" data-w="' + w + '" ' + (w === state.week ? 'aria-current="true"' : '') + '><b>' + w + '</b><small>' + counts(w).paid + '/' + TOTAL + '</small></button>';
-    $('#weeks').innerHTML = html;
-    var on = $('#weeks .on'); if (on && on.scrollIntoView) { var box = $('#weeks'); box.scrollLeft = on.offsetLeft - box.clientWidth / 2 + on.clientWidth / 2; }
+  var CHK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  var LOCK_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var FLAG_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></svg>';
+  function progressF() {
+    var s0 = state.weeks[0].start.getTime(), s3 = state.weeks[3].start.getTime();
+    return Math.max(0, Math.min(1, (state.now.getTime() - s0) / (s3 - s0)));
+  }
+  function countHtml(w) {
+    var st = weekStatus(w), c = counts(w.n), n = state.now;
+    if (st === 'akan') return { cls: '', big: dur(w.start - n), tail: 'lagi dibuka' };
+    if (st === 'selesai') return c.todo ? { cls: 'late', big: c.todo + ' teman', tail: 'belum bayar sampai minggu ini berakhir' } : { cls: 'ok', big: 'Selesai', tail: 'semua teman sudah lunas' };
+    if (n <= w.due) return { cls: '', big: dur(w.due - n), tail: 'lagi batas bayar' };
+    return c.todo ? { cls: 'late', big: dur(n - w.due), tail: 'lewat batas \u00b7 ' + c.todo + ' belum bayar' } : { cls: 'ok', big: 'Lunas', tail: 'semua sudah bayar' };
+  }
+  function weekProgress(w) { var n = state.now.getTime(), s = w.start.getTime(), e = w.end.getTime(); return Math.max(0, Math.min(1, (n - s) / (e - s))); }
+  function renderWeeks(animate) {
+    var ws = state.weeks, sel = ws[state.week - 1], f = progressF(), n = state.now;
+    var cols = ws.map(function (w) {
+      var st = weekStatus(w), c = counts(w.n), pct = st === 'akan' ? 0 : Math.round(c.paid / TOTAL * 100);
+      var chip = { selesai: '<span class="swk__chip ok">Selesai</span>', berjalan: '<span class="swk__chip now"><i></i>Minggu ini</span>', akan: '<span class="swk__chip">Segera</span>' }[st];
+      return '<button class="swk ' + st + (w.n === state.week ? ' on' : '') + '" type="button" role="tab" aria-selected="' + (w.n === state.week) + '" data-w="' + w.n + '"><span class="swk__n">' + (st === 'selesai' && !c.todo ? CHK_ICON : st === 'akan' ? LOCK_ICON : w.n) + '</span><b>Minggu ' + w.n + '</b><span class="swk__r">' + rangeLabel(w) + '</span>' + chip + '<span class="swk__bar"><i style="--p:' + (animate ? 0 : pct) + '" data-p="' + pct + '"></i></span><small>' + (st === 'akan' ? 'Belum dibuka' : c.paid + '/' + TOTAL + ' lunas') + '</small></button>';
+    }).join('');
+    var days = '';
+    for (var k = 0; k < 7; k++) {
+      var d = new Date(sel.start.getFullYear(), sel.start.getMonth(), sel.start.getDate() + k), isToday = d.toDateString() === n.toDateString(), isDue = k === 4, past = d < new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      days += '<span class="dp' + (isToday ? ' today' : '') + (isDue ? ' due' : '') + (past ? ' past' : '') + '" style="--k:' + k + '"><small>' + DS[d.getDay()] + '</small><b>' + d.getDate() + '</b>' + (isDue ? '<i title="Batas bayar">' + FLAG_ICON + '</i>' : '') + '</span>';
+    }
+    var cd = countHtml(sel), wp = weekProgress(sel);
+    $('#sched').innerHTML =
+      '<div class="sched__head"><div><p class="sched__k">Jadwal iuran</p><h3 class="sched__m">' + MONF[sel.start.getMonth()] + ' ' + sel.start.getFullYear() + '</h3></div><div class="sched__now"><i></i><span id="schedClock">' + dayLabel(n) + ' \u00b7 ' + clock(n) + '</span></div></div>' +
+      '<div class="sched__cols" id="weeks" role="tablist" aria-label="Pilih minggu"><div class="sched__line" aria-hidden="true"><i class="sched__fill" id="schedFill" style="--f:' + (animate ? 0 : f) + '" data-f="' + f + '"></i><b class="sched__today" id="schedToday" style="--f:' + (animate ? 0 : f) + '" data-f="' + f + '"><span>Hari ini</span></b></div>' + cols + '</div>' +
+      '<div class="sched__detail ' + (animate ? 'is-swap' : '') + '"><div class="sd__l"><p class="sd__k">Batas bayar \u00b7 Minggu ' + sel.n + '</p><p class="sd__due">' + dayLabel(sel.due) + ' \u00b7 ' + clock(sel.due) + '</p><p class="sd__count ' + cd.cls + '" id="sdCount"><span class="sd__num">' + cd.big + '</span> <span class="sd__tail">' + cd.tail + '</span></p><div class="sd__bar" title="Waktu berjalan di minggu ini"><i style="--p:' + (animate ? 0 : wp) + '" data-p="' + wp + '"></i></div></div><div class="sd__days" aria-label="Hari dalam minggu ' + sel.n + '">' + days + '</div></div>';
+    if (animate) requestAnimationFrame(function () { requestAnimationFrame(function () {
+      $$('#sched [data-p]').forEach(function (el) { el.style.setProperty('--p', el.dataset.p); });
+      $$('#sched [data-f]').forEach(function (el) { el.style.setProperty('--f', el.dataset.f); });
+    }); });
+  }
+  function tickSched() {
+    var c = $('#schedClock'); if (!c) return; state.now = state.dateMode ? state.now : new Date();
+    c.textContent = dayLabel(state.now) + ' \u00b7 ' + clock(state.now);
+    var sel = state.weeks[state.week - 1], cd = countHtml(sel), el = $('#sdCount');
+    if (el) { var num = $('.sd__num', el); if (num && num.textContent !== cd.big) { num.textContent = cd.big; fx.bump(num); } }
+    var f = progressF(); $('#schedFill').style.setProperty('--f', f); $('#schedToday').style.setProperty('--f', f);
   }
   function chip(i, s, as) {
     var inner = '<span class="av" data-t="' + (i % 4) + '">' + ini(NAMES[i]) + '</span><span>' + NAMES[i] + '</span>' + (s === 'paid' ? ic('check', 'st') : s === 'wait' ? ic('clock', 'st') : '');
-    return as === 'button' ? '<button class="stu todo" type="button" data-i="' + i + '" aria-label="Tandai ' + NAMES[i] + ' lunas minggu ' + state.week + '">' + inner + ic('plus', 'st') + '</button>' : '<span class="stu ' + s + '" data-i="' + i + '">' + inner + '</span>';
+    return as === 'button' ? '<button class="stu todo" type="button" data-i="' + i + '" style="--k:' + i + '" aria-label="Tandai ' + NAMES[i] + ' lunas minggu ' + state.week + '">' + inner + ic('plus', 'st') + '</button>' : '<span class="stu ' + s + '" data-i="' + i + '" style="--k:' + i + '">' + inner + '</span>';
   }
   var lastPct = 0;
   function renderDues(animate) {
-    var a = state.dues[state.week], c = counts(state.week), pct = Math.round(c.paid / TOTAL * 100), card = $('#duesCard'), html = '';
-    html += '<div class="dues-top"><div class="ring" id="ring" style="--p:' + (animate ? lastPct : pct) + '" role="img" aria-label="' + pct + ' persen lunas"><b>' + pct + '%</b></div><div><div class="t">Minggu ke-' + state.week + (state.week === state.activeWeek ? ' · minggu ini' : '') + '</div><p>' + c.paid + ' dari ' + TOTAL + ' teman sudah bayar.' + (c.todo ? ' Tinggal ' + c.todo + ' lagi.' : '') + '</p></div></div>';
+    var w = state.weeks[state.week - 1], st = weekStatus(w), a = state.dues[state.week], c = counts(state.week), pct = Math.round(c.paid / TOTAL * 100), card = $('#duesCard'), html = '';
+    if (st === 'akan') {
+      card.className = 'card is-locked';
+      card.innerHTML = '<div class="locked"><span class="locked__ic">' + LOCK_ICON + '</span><div><b>Minggu ' + w.n + ' dibuka ' + dayLabel(w.start) + '</b><p>Iuran Rp ' + fmt(NOMINAL) + ' per siswa bisa dibayar mulai ' + clock(w.start) + ' hari itu, dengan batas ' + dayLabel(w.due) + ' pukul ' + clock(w.due) + '.</p></div></div>';
+      lastPct = 0; return;
+    }
+    card.className = 'card' + (animate ? ' is-swap' : '');
+    var tag = st === 'berjalan' ? ' \u00b7 minggu ini' : ' \u00b7 selesai';
+    html += '<div class="dues-top"><div class="ring" id="ring" style="--p:' + (animate ? lastPct : pct) + '" role="img" aria-label="' + pct + ' persen lunas"><b>' + pct + '%</b></div><div><div class="t">Minggu ke-' + w.n + ' \u00b7 ' + rangeLabel(w) + tag + '</div><p>' + c.paid + ' dari ' + TOTAL + ' teman sudah bayar.' + (c.todo ? ' Tinggal ' + c.todo + ' lagi.' : '') + '</p></div></div>';
     if (!c.todo && !c.wait) html += '<div class="done">Semua sudah lunas<small>Terima kasih ya, XI-F2.</small></div>';
-    if (c.todo) { html += '<div class="sub-h"><span>Belum bayar</span>' + (isAdmin() ? '<span class="note">ketuk nama untuk menandai</span>' : '') + '</div><div class="who">'; a.forEach(function (s, i) { if (s === 'todo') html += isAdmin() ? chip(i, s, 'button') : '<span class="stu todo">' + '<span class="av" data-t="' + (i % 4) + '">' + ini(NAMES[i]) + '</span><span>' + NAMES[i] + '</span></span>'; }); html += '</div>'; }
+    if (c.todo) { html += '<div class="sub-h"><span>Belum bayar</span>' + (isAdmin() ? '<span class="note">ketuk nama untuk menandai</span>' : '') + '</div><div class="who">'; a.forEach(function (s, i) { if (s === 'todo') html += isAdmin() ? chip(i, s, 'button') : '<span class="stu todo" style="--k:' + i + '"><span class="av" data-t="' + (i % 4) + '">' + ini(NAMES[i]) + '</span><span>' + NAMES[i] + '</span></span>'; }); html += '</div>'; }
     if (c.wait) { html += '<div class="sub-h"><span>Menunggu Wali Kelas</span></div><div class="who">'; a.forEach(function (s, i) { if (s === 'wait') html += chip(i, s); }); html += '</div>'; }
     if (c.paid) { html += '<div class="sub-h"><span>Sudah lunas</span></div><div class="who">'; a.forEach(function (s, i) { if (s === 'paid') html += chip(i, s); }); html += '</div>'; }
     card.innerHTML = html; lastPct = pct;
     if (animate) requestAnimationFrame(function () { var r = $('#ring'); if (r) r.style.setProperty('--p', pct); });
   }
-  $('#weeks').addEventListener('click', function (e) { var b = e.target.closest('.wk'); if (!b) return; state.week = +b.dataset.w; renderWeeks(); renderDues(true); renderTips(); });
+  $('#sched').addEventListener('click', function (e) { var b = e.target.closest('.swk'); if (!b) return; var w = +b.dataset.w; if (w === state.week) return; state.week = w; renderWeeks(true); renderDues(true); renderTips(); fx.buzz(8); });
   $('#duesCard').addEventListener('click', function (e) {
     var b = e.target.closest('button.stu'); if (!b) return;
     var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
@@ -364,8 +443,8 @@
   $('#dCopy').addEventListener('click', function () { copy(curHash); toast('Hash disalin.'); });
 
   /* ---------- bagikan ---------- */
-  function waText() { return 'Kas XI-F2 · minggu ' + state.activeWeek + '\nSaldo ' + rp(saldo()) + ' ✔\nIuran minggu ini: ' + counts(state.activeWeek).paid + '/' + TOTAL + ' lunas\nCek: kas.xi-f2.example (contoh)'; }
-  function remText() { var c = counts(state.activeWeek); return 'Halo teman-teman, ada ' + c.todo + ' orang yang belum bayar iuran minggu ' + state.activeWeek + ' (Rp 10.000). Terima kasih ya. Kalau sudah, kabari Bendahara.'; }
+  function waText() { var w = state.weeks[state.activeWeek - 1]; return 'Kas XI-F2 \u00b7 minggu ' + w.n + ' (' + rangeLabel(w) + ')\nSaldo ' + rp(saldo()) + ' \u2714\nIuran: ' + counts(w.n).paid + '/' + TOTAL + ' lunas, batas ' + dayLabel(w.due) + ' ' + clock(w.due) + '\nCek: kas.xi-f2.example (contoh)'; }
+  function remText() { var w = state.weeks[state.activeWeek - 1], c = counts(w.n); return 'Halo teman-teman, ada ' + c.todo + ' orang yang belum bayar iuran minggu ' + w.n + ' (Rp 10.000), batas ' + dayLabel(w.due) + ' pukul ' + clock(w.due) + '. Terima kasih ya. Kalau sudah, kabari Bendahara.'; }
   function copy(text) { try { if (navigator.clipboard) return navigator.clipboard.writeText(text); } catch (e) {} var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); }
   function flash(btn, label) { var s = $('span', btn), old = s.textContent; s.textContent = label; btn.querySelector('use').setAttribute('href', '#i-check'); setTimeout(function () { s.textContent = old; btn.querySelector('use').setAttribute('href', btn.id === 'copyWa' ? '#i-copy' : '#i-bell'); }, 1600); }
   $('#copyWa').addEventListener('click', function () { var tx = waText(); copy(tx); flash(this, 'Tersalin'); var p = $('#waPreview'); p.hidden = false; p.innerHTML = tx.split('\n').map(function (l) { return '<span>' + esc(l) + '</span>'; }).join(''); });
@@ -440,6 +519,11 @@
     msg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }); await fx.wait(500); go();
   }
   $('#demoRole').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { state.role = b.dataset.v; applyRole(); } });
+  $('#demoDate').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; var k = +b.dataset.d; state.dateMode = k;
+    var ref = new Date(); if (k) { var ws = mkWeeks(ref); state.now = new Date(ws[k - 1].start.getFullYear(), ws[k - 1].start.getMonth(), ws[k - 1].start.getDate() + 2, 10, 30); } else state.now = new Date();
+    $$('#demoDate button').forEach(function (x) { x.classList.toggle('on', x === b); }); seed(); renderAll(true); renderWeeks(true); renderDues(true); toast(k ? 'Tanggal contoh: ' + dayLabel(state.now) : 'Memakai tanggal hari ini.');
+  });
   $('#demoWx').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.wx = b.dataset.v; $$('#demoWx button').forEach(function (x) { x.classList.toggle('on', x === b); }); applyWeather(); });
 
   /* ---------- render semua ---------- */
@@ -472,7 +556,8 @@
   }
 
   /* ---------- mulai ---------- */
-  renderPosChips(); syncForm(); applyRole(); onScroll();
+  renderPosChips(); syncForm(); applyRole(); onScroll(); setInterval(tickSched, 30000);
+  if ('IntersectionObserver' in window) { var so = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { so.disconnect(); renderWeeks(true); renderDues(true); } }, { threshold: 0.25 }); so.observe($('#sched')); }
   setAmount(0, false); setAmount(saldo(), true);
   verify();
   if (hasGsap && !reduce) {
