@@ -146,6 +146,7 @@
     var d = state.tx.reduce(function (s, t) { return t.w === maxW ? s + t.amt : s; }, 0);
     var el = $('#delta'); el.className = 'delta' + (d < 0 ? ' neg' : '');
     el.innerHTML = ic(d < 0 ? 'out' : 'in', 'ic-sm') + '<span>' + (d < 0 ? '−' : '+') + 'Rp ' + fmt(Math.abs(d)) + ' minggu ' + maxW + '</span>';
+    var ma = $('#miniAmt'); if (ma) ma.textContent = rp(saldo());
     applyWeather(); renderSpark();
   }
   $('#eyeBtn').addEventListener('click', function () {
@@ -187,6 +188,7 @@
   /* ---------- verifikasi rantai ---------- */
   var badge = $('#badge'), vRun = 0;
   function setBadge(kind, text, anim) {
+    var mb = $('#miniBadge'); if (mb) { mb.className = 'minibar__b' + (kind === 'bad' ? ' bad' : ''); var mt = $('#miniBadgeT'); if (mt) mt.textContent = kind === 'ok' ? 'Terverifikasi' : kind === 'bad' ? 'Perlu diperiksa' : 'Memeriksa\u2026'; }
     badge.className = 'badge badge--' + kind;
     badge.innerHTML = ic(kind === 'ok' ? 'check' : kind === 'bad' ? 'alert' : 'clock', 'ic-sm') + '<span>' + text + '</span>';
     if (anim) { void badge.offsetWidth; badge.classList.add(kind === 'ok' ? 'is-pulse' : 'is-shake'); }
@@ -481,12 +483,13 @@
     if (!c.todo && !c.wait) html += '<div class="done">Semua sudah lunas<small>Terima kasih ya, XI-F2.</small></div>';
     if (c.todo) { html += '<div class="sub-h"><span>Belum bayar</span>' + (isAdmin() ? '<span class="note">ketuk nama untuk menandai</span>' : '') + '</div><div class="who">'; a.forEach(function (s, i) { if (s === 'todo') html += isAdmin() ? chip(i, s, 'button') : '<span class="stu todo" style="--k:' + i + '"><span class="av" data-t="' + (i % 4) + '">' + ini(NAMES[i]) + '</span><span>' + NAMES[i] + '</span></span>'; }); html += '</div>'; }
     if (c.wait) { html += '<div class="sub-h"><span>Menunggu Wali Kelas</span></div><div class="who">'; a.forEach(function (s, i) { if (s === 'wait') html += chip(i, s); }); html += '</div>'; }
-    if (c.paid) { html += '<div class="sub-h"><span>Sudah lunas</span></div><div class="who">'; a.forEach(function (s, i) { if (s === 'paid') html += chip(i, s); }); html += '</div>'; }
-    card.innerHTML = html; lastPct = pct;
+    if (c.paid) { html += '<div class="sub-h"><span>Sudah lunas</span><button class="dues-more" type="button" aria-expanded="' + (card.classList.contains('show-paid') ? 'true' : 'false') + '">' + (card.classList.contains('show-paid') ? 'Sembunyikan' : 'Tampilkan ' + c.paid) + '</button></div><div class="who who--paid">'; a.forEach(function (s, i) { if (s === 'paid') html += chip(i, s); }); html += '</div>'; }
+    var keep = card.classList.contains('show-paid'); card.innerHTML = html; if (keep) card.classList.add('show-paid'); lastPct = pct;
     if (animate) requestAnimationFrame(function () { var r = $('#ring'); if (r) r.style.setProperty('--p', pct); });
   }
   $('#sched').addEventListener('click', function (e) { var b = e.target.closest('.swk'); if (!b) return; var w = +b.dataset.w; if (w === state.week) return; dirSel = w > state.week ? 'r' : 'l'; state.week = w; renderWeeks(true); renderDues(true); renderTips(); fx.buzz(8); });
   $('#duesCard').addEventListener('click', function (e) {
+    var more = e.target.closest('.dues-more'); if (more) { var on = !$('#duesCard').classList.contains('show-paid'); $('#duesCard').classList.toggle('show-paid', on); more.setAttribute('aria-expanded', on); more.textContent = on ? 'Sembunyikan' : 'Tampilkan ' + counts(state.week).paid; return; }
     var b = e.target.closest('button.stu'); if (!b) return;
     var i = +b.dataset.i, w = state.week; var from = b.getBoundingClientRect(); state.dues[w][i] = 'wait'; fx.buzz(10); renderAll(); var el = $('#duesCard .stu.wait[data-i="' + i + '"]'); if (el) el.classList.add('just'); fx.burst(from.left + from.width / 2, from.top + from.height / 2, 8);
     toast(NAMES[i] + ' ditandai lunas. Menunggu Wali Kelas.', function () { state.dues[w][i] = 'todo'; renderAll(); });
@@ -496,13 +499,13 @@
   function renderHistory() {
     var list = state.tx.slice().reverse().slice(0, 12), day = '', html = '';
     $('#txCount').textContent = list.length + ' terakhir';
-    list.forEach(function (t) {
-      if (t.day !== day) { if (day) html += '</div>'; html += '<div class="day">' + t.day + '</div><div class="txlist">'; day = t.day; }
+    list.forEach(function (t, ti) {
+      if (t.day !== day) { if (day) html += '</div>'; html += '<div class="day' + (ti >= 6 ? ' day--extra' : '') + '">' + t.day + '</div><div class="txlist">'; day = t.day; }
       var inn = t.amt > 0;
-      html += '<button class="tx ' + (t.isNew ? 'is-new' : '') + '" type="button" data-id="' + t.id + '"><span class="ico ' + (inn ? '' : 'out') + '">' + ic(inn ? 'in' : 'out') + '</span><span><span class="ds">' + esc(t.desc) + '</span><span class="mt" style="display:block">' + posName(t.cat) + ' · ' + esc(t.by) + ' · ' + t.time + '<span class="vf">' + ic('check', 'ic-sm') + '</span></span></span><span class="am num ' + (inn ? 'in' : 'out') + '">' + (inn ? '+' : '−') + 'Rp ' + fmt(Math.abs(t.amt)) + '<small>#' + t.id + '</small></span></button>';
+      html += '<button class="tx ' + (t.isNew ? 'is-new' : '') + (ti >= 6 ? ' tx--extra' : '') + '" type="button" data-id="' + t.id + '"><span class="ico ' + (inn ? '' : 'out') + '">' + ic(inn ? 'in' : 'out') + '</span><span><span class="ds">' + esc(t.desc) + '</span><span class="mt" style="display:block">' + posName(t.cat) + ' · ' + esc(t.by) + ' · ' + t.time + '<span class="vf">' + ic('check', 'ic-sm') + '</span></span></span><span class="am num ' + (inn ? 'in' : 'out') + '">' + (inn ? '+' : '−') + 'Rp ' + fmt(Math.abs(t.amt)) + '<small>#' + t.id + '</small></span></button>';
     });
     if (day) html += '</div>';
-    $('#history').innerHTML = html;
+    $('#history').innerHTML = html + (list.length > 6 ? '<button class="btn btn--tonal btn--sm hist-more" type="button" id="histMore">Lihat semua ' + list.length + ' catatan</button>' : '');
   }
   function skeleton(ms) {
     if (reduce) return Promise.resolve();
@@ -512,6 +515,7 @@
   }
   var detailDlg = $('#detailDialog'), curHash = '';
   $('#history').addEventListener('click', function (e) {
+    var hm = e.target.closest('#histMore'); if (hm) { $('#history').classList.toggle('show-all'); hm.textContent = $('#history').classList.contains('show-all') ? 'Tampilkan lebih sedikit' : 'Lihat semua ' + $$('#history .tx').length + ' catatan'; return; }
     var b = e.target.closest('.tx'); if (!b) return;
     var t = state.tx.filter(function (x) { return x.id === +b.dataset.id; })[0]; if (!t) return; curHash = t.hash;
     $('#dBody').innerHTML = '<div><dt>Keterangan</dt><dd>' + esc(t.desc) + '</dd></div><div><dt>Jumlah</dt><dd class="num">' + (t.amt < 0 ? '−' : '+') + 'Rp ' + fmt(Math.abs(t.amt)) + '</dd></div><div><dt>Pos</dt><dd>' + posName(t.cat) + '</dd></div><div><dt>Dicatat oleh</dt><dd>' + esc(t.by) + ' · ' + t.day + ', ' + t.time + '</dd></div><div><dt>Disahkan oleh</dt><dd>' + esc(t.ok) + '</dd></div><div><dt>Sidik jari (hash)</dt><dd class="mono">' + t.hash + '</dd></div><div class="linkchain">terkunci ke catatan sebelumnya</div><div><dt>Hash sebelumnya</dt><dd class="mono">' + t.prev + '</dd></div>';
@@ -617,7 +621,7 @@
   function onScroll() {
     tick = false; var y = window.scrollY, idx = 0;
     secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.45) idx = i; });
-    navLinks.forEach(function (a, i) { a.classList.toggle('on', i === idx); }); pill.style.transform = 'translateX(' + idx * 100 + '%)';
+    if (!document.body.dataset.screen) { navLinks.forEach(function (a, i) { a.classList.toggle('on', i === idx); }); pill.style.transform = 'translateX(' + idx * 100 + '%)'; }
     topLinks.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + secs[idx].id || (idx === 0 && a.getAttribute('href') === '#ringkasan')); });
     if (!reduce && y < head.offsetHeight + 100) clouds.forEach(function (c) { c.style.transform = 'translate3d(0,' + (y * parseFloat(c.dataset.depth || .3) * 0.45).toFixed(1) + 'px,0)'; });
   }

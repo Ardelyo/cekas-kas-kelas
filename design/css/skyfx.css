@@ -66,3 +66,9 @@ html[data-sky-wx="badai"] .sx-flash { animation: sxflash 11s ease-out infinite; 
 .skypop__note { margin-top: 10px; color: #6b7893; font-size: 11.5px; line-height: 1.4; }
 
 @media (prefers-reduced-motion: reduce) { .sx-rain, .sx-flash, .sx-stars i { animation: none !important; } .sx-ph, .sx-wx, .sx-orb, .sx-stars { transition-duration: .01ms; } .skypop { animation: none; } }
+
+@media (max-width: 759px) { .skypop { max-height: calc(100dvh - 90px); overflow: auto; overscroll-behavior: contain; } }
+.skypop .demo__body { width: auto; margin: 0; padding: 8px 0 0; box-shadow: none; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; display: grid; gap: 10px; }
+.skypop .demo__body b { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: #6b7893; } .skypop .demo__row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+.skypop .demo__row button { padding: 7px 12px; border-radius: 999px; background: #eef2f8; font: 600 12.5px "Inter Tight", system-ui, sans-serif; } .skypop .demo__row button.on { background: #0b1b3a; color: #fff; }
+@media (pointer: coarse) { .skypop .demo__row button, .skychips button, .skyseg button { min-height: 40px; } }

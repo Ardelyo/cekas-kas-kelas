@@ -19,6 +19,8 @@
   --sans: "Inter Tight", "Segoe UI", system-ui, -apple-system, sans-serif; --mark: "Bricolage", var(--sans);
   --gutter: clamp(16px, 4.5vw, 64px); --maxw: 1200px;
   --shadow-card: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 14px 34px -22px rgba(10, 42, 120, .35);
+  /* ruang: skala jarak untuk tata letak lega */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 72px;
   /* lapisan (z-index) */
   --z-sheet: 50; --z-fab: 55; --z-nav: 60; --z-popover: 700; --z-veil: 610;
 }

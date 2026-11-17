@@ -76,7 +76,8 @@
     var a = document.createElement('div'); a.className = 'sx'; a.setAttribute('aria-hidden', 'true');
     a.innerHTML = '<div class="sx-orb"></div><div class="sx-stars"></div>';
     var st = $('.sx-stars', a);
-    for (var i = 0; i < 70; i++) { var d = document.createElement('i'), z = 1 + Math.random() * 2; d.style.cssText = 'left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;width:' + z + 'px;height:' + z + 'px;opacity:' + (.35 + Math.random() * .6) + ';animation-delay:' + (-Math.random() * 3) + 's;animation-duration:' + (2.4 + Math.random() * 2.4) + 's'; st.appendChild(d); }
+    var NSTAR = window.matchMedia('(pointer: coarse)').matches ? 34 : 70;
+    for (var i = 0; i < NSTAR; i++) { var d = document.createElement('i'), z = 1 + Math.random() * 2; d.style.cssText = 'left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;width:' + z + 'px;height:' + z + 'px;opacity:' + (.35 + Math.random() * .6) + ';animation-delay:' + (-Math.random() * 3) + 's;animation-duration:' + (2.4 + Math.random() * 2.4) + 's'; st.appendChild(d); }
     var firstCloud = host.querySelector('.cloud, .sky__cloud');
     if (firstCloud) host.insertBefore(a, firstCloud); else host.appendChild(a);
     var b = document.createElement('div'); b.className = 'sx-top'; b.setAttribute('aria-hidden', 'true');
@@ -178,6 +179,8 @@
       '<details><summary>Pratinjau langit</summary><span class="skychips__l">Waktu</span><div class="skychips">' + PH.map(function (p) { return '<button type="button" data-ph="' + p + '">' + PH_L[p] + '</button>'; }).join('') + '</div><span class="skychips__l">Cuaca</span><div class="skychips">' + WX.map(function (w) { return '<button type="button" data-wx="' + w + '">' + WX_L[w] + '</button>'; }).join('') + '</div><div class="skychips"><button type="button" id="sxReset">Atur ulang pratinjau</button></div></details>' +
       '<p class="skypop__note">Cuaca memakai Open-Meteo. Hanya koordinat yang dibulatkan (±11 km) yang dikirim, tanpa identitas. Hasilnya disimpan di perangkatmu saja.</p>';
     document.body.appendChild(pop);
+    var demo = window.matchMedia('(max-width: 759px)').matches ? document.querySelector('.demo') : null;
+    if (demo) { var db = demo.querySelector('.demo__body'), dd = document.createElement('details'); dd.className = 'skydemo'; dd.innerHTML = '<summary>Alat desain (uji)</summary>'; dd.appendChild(db); pop.insertBefore(dd, $('.skypop__note', pop)); demo.remove(); }
     $('#sxTime', pop).addEventListener('change', function () { state.time = this.checked; ls.set(KEY, state); apply(); });
     $('#sxWx', pop).addEventListener('change', function () { state.wx = this.checked; ls.set(KEY, state); if (state.wx) startWx(true); else { clearInterval(wxTimer); live.status = 'idle'; apply(); } });
     $('#sxWxS', pop).addEventListener('click', function (e) { if (state.wx && (live.status === 'stale' || live.status === 'error')) { e.preventDefault(); refresh(true); } });
@@ -206,6 +209,7 @@
     openBtn = b; b.setAttribute('aria-expanded', 'true'); pop.hidden = false; updateUI(effective()); place();
     var f = $('#sxTime', pop); if (f) f.focus({ preventScroll: true });
   }
+  if (window.matchMedia('(max-width: 759px)').matches && document.querySelector('.demo')) build();
   $$('[data-skyctl]').forEach(function (host) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'skybtn'; b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-expanded', 'false');
     b.addEventListener('click', function (e) { e.stopPropagation(); toggle(b); }); host.appendChild(b); btns.push(b);

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Kas XI-F2 — CEKAS</title>
 <meta name="theme-color" content="#1e6fe8">
 <script>try{var __s=sessionStorage.getItem('cekas-scene');if(__s==='masuk'){sessionStorage.removeItem('cekas-scene');if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scene-masuk');}}catch(e){}</script>
@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="css/scene.css">
 <link rel="stylesheet" href="css/skyfx.css">
 <link rel="stylesheet" href="css/motion.css">
+<link rel="stylesheet" href="css/mobile.css">
+<link rel="stylesheet" href="css/mobile-v2.css">
 </head>
 <body class="wx-cerah" data-sky-kasmode>
 
@@ -84,37 +86,39 @@
 </header>
 
 <!-- ============ KONTEN ============ -->
+<div class="minibar" id="minibar" role="button" tabindex="0" aria-label="Saldo kas, ketuk untuk ke atas"><span class="minibar__v"><small>Saldo</small><span id="miniAmt">Rp 0</span></span><span class="minibar__b" id="miniBadge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span id="miniBadgeT">Terverifikasi</span></span></div>
+
 <main class="page" id="isi">
   <h1 class="sr">Kas kelas XI-F2</h1>
   <div class="col-l">
-    <section class="reveal" aria-labelledby="h-pos">
+    <section class="reveal" data-screen="kas" aria-labelledby="h-pos">
       <h2 class="sec-h" id="h-pos">Uangnya dipakai buat apa?</h2>
       <div class="pos-grid" id="posGrid"></div>
     </section>
-    <section class="reveal" aria-labelledby="h-tips">
+    <section class="reveal" data-screen="beranda" aria-labelledby="h-tips">
       <h2 class="sec-h" id="h-tips">Tahu nggak?</h2>
       <div class="tips" id="tips"></div>
     </section>
-    <section class="reveal" aria-labelledby="h-usul">
+    <section class="reveal" data-screen="lainnya" aria-labelledby="h-usul">
       <h2 class="sec-h" id="h-usul">Usulan belanja <span class="note">Belanja ≥ Rp 50.000 butuh 3 teman setuju.</span></h2>
       <div class="props" id="proposals"></div>
     </section>
   </div>
 
   <div class="col-r">
-    <section class="reveal" id="guru" aria-labelledby="h-guru">
+    <section class="reveal" data-screen="beranda" id="guru" aria-labelledby="h-guru">
       <h2 class="sec-h" id="h-guru">Menunggu Wali Kelas <small id="queueCount"></small></h2>
       <p class="note" style="margin:-6px 0 12px">Catatan baru berlaku setelah Wali Kelas menyetujui. Saldo belum berubah sebelum itu.</p>
       <div class="props" id="queue"></div>
     </section>
 
-    <section class="reveal" id="iuran" aria-labelledby="h-iuran">
+    <section class="reveal" data-screen="iuran" id="iuran" aria-labelledby="h-iuran">
       <h2 class="sec-h" id="h-iuran">Iuran kas <small>Rp 10.000 / minggu</small></h2>
       <div class="sched" id="sched"></div>
       <div class="card" id="duesCard"></div>
     </section>
 
-    <section class="reveal" id="riwayat" aria-labelledby="h-kas">
+    <section class="reveal" data-screen="kas" id="riwayat" aria-labelledby="h-kas">
       <h2 class="sec-h" id="h-kas">Riwayat kas <small id="txCount"></small></h2>
       <div id="history"></div>
       <div class="more">
@@ -123,7 +127,7 @@
       </div>
     </section>
 
-    <section class="reveal" id="bagikan" aria-labelledby="h-share">
+    <section class="reveal" data-screen="lainnya" id="bagikan" aria-labelledby="h-share">
       <h2 class="sec-h" id="h-share">Ajak teman-teman</h2>
       <div class="card share">
         <div class="qr" role="img" aria-label="Kode QR menuju halaman ini (contoh)"></div>
@@ -142,14 +146,14 @@
 </main>
 
 <!-- bawah -->
-<button class="fab" id="fab" type="button" hidden><svg class="ic"><use href="#i-plus"/></svg>Catat</button>
+<button class="fab" id="fab" type="button" hidden aria-label="Catat kas"><svg class="ic"><use href="#i-plus"/></svg><span class="fab__t">Catat</span></button>
 <nav class="bottomnav" aria-label="Navigasi bagian">
   <ul id="bnav">
     <span class="pillx" id="pillx" aria-hidden="true"></span>
-    <li><a href="#ringkasan" class="on"><svg class="ic"><use href="#i-home"/></svg>Ringkasan</a></li>
-    <li><a href="#iuran"><svg class="ic"><use href="#i-users"/></svg>Iuran</a></li>
-    <li><a href="#riwayat"><svg class="ic"><use href="#i-receipt"/></svg>Riwayat</a></li>
-    <li><a href="#bagikan"><svg class="ic"><use href="#i-share"/></svg>Bagikan</a></li>
+    <li><a href="#ringkasan" data-screen="beranda" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Beranda</span></a></li>
+    <li><a href="#iuran" data-screen="iuran"><svg class="ic"><use href="#i-users"/></svg><span>Iuran</span></a></li>
+    <li><a href="#riwayat" data-screen="kas"><svg class="ic"><use href="#i-receipt"/></svg><span>Kas</span></a></li>
+    <li><a href="#bagikan" data-screen="lainnya"><svg class="ic"><use href="#i-share"/></svg><span>Lainnya</span></a></li>
   </ul>
 </nav>
 
@@ -203,5 +207,6 @@
 <script src="js/motion.js"></script>
 <script src="js/skyfx.js"></script>
 <script src="js/kas.js"></script>
+<script src="js/mobile.js"></script>
 </body>
 </html>

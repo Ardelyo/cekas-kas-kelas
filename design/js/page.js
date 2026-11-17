@@ -13,6 +13,7 @@
     ticking = false; var y = window.scrollY, h = hero ? hero.offsetHeight : 500;
     nav.classList.toggle('is-solid', y > h - 120);
     if (y > 260 && y > lastY + 4) nav.classList.add('is-hidden'); else if (y < lastY - 4 || y < 260) nav.classList.remove('is-hidden');
+    document.body.classList.toggle('nav-hidden', nav.classList.contains('is-hidden'));
     lastY = y;
   }
   window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true }); onScroll();
@@ -43,13 +44,26 @@
   /* nav fitur: sorot bagian aktif */
   var fnav = $('#fnav');
   if (fnav) {
-    var links = $$('a', fnav), secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    var links = $$('a', fnav).filter(function (a) { return a.offsetParent !== null; }), secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
     var t3 = false, spy = function () {
       t3 = false; var idx = 0; secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.4) idx = i; });
       links.forEach(function (a, i) { a.classList.toggle('on', i === idx); });
       var on = links[idx]; if (on && fnav.scrollWidth > fnav.clientWidth) fnav.scrollLeft = on.offsetLeft - fnav.clientWidth / 2 + on.clientWidth / 2;
     };
     window.addEventListener('scroll', function () { if (!t3) { t3 = true; requestAnimationFrame(spy); } }, { passive: true }); spy();
+  }
+
+  /* fitur di mobile: satu bagian per layar */
+  if (fnav && window.matchMedia('(max-width: 759px)').matches) {
+    var fl = $$('a', fnav), fs = fl.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+    function fshow(i, scroll) {
+      fs.forEach(function (s, k) { if (s) s.classList.toggle('is-fshown', k === i); }); fl.forEach(function (a, k) { a.classList.toggle('on', k === i); });
+      document.body.classList.add('fitur-tabs'); if (scroll) window.scrollTo({ top: Math.max(0, (hero ? hero.offsetHeight : 300) - 20), behavior: reduce ? 'auto' : 'smooth' });
+      $$('.reveal', fs[i]).forEach(function (r) { r.classList.add('is-in'); }); $$('.split', fs[i]).forEach(function (r) { r.classList.add('is-in'); });
+      var ch = $('#hchain'); if (ch && i === 0 && window.__hcCheck) window.__hcCheck();
+    }
+    fl.forEach(function (a, i) { a.addEventListener('click', function (e) { e.preventDefault(); fshow(i, true); }, true); });
+    var start = Math.max(0, fl.findIndex(function (a) { return a.getAttribute('href') === location.hash; })); fshow(start, false);
   }
 
   /* rantai hash sungguhan */

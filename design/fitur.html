@@ -17,11 +17,17 @@
 <link rel="stylesheet" href="css/pages.css">
 <link rel="stylesheet" href="css/skyfx.css">
 <link rel="stylesheet" href="css/motion.css">
+<link rel="stylesheet" href="css/mobile.css">
+<link rel="stylesheet" href="css/mobile-v2.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="s-cloud" viewBox="0 0 26 18"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor"/></symbol>
   <symbol id="s-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="s-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="s-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="s-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="s-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>
 <div class="progress-top" id="progressTop" aria-hidden="true"><i></i></div>
 <a class="skip-link" href="#isi">Langsung ke isi</a>
@@ -52,7 +58,7 @@
   </div>
 </section>
 
-<nav class="fnav" id="fnav" aria-label="Loncat ke fitur"><a href="#keaslian" class="on">Keaslian</a><a href="#sahkan">Pengesahan</a><a href="#iuran">Iuran</a><a href="#usulan">Usulan</a><a href="#laporan">Laporan</a><a href="#nota">Foto nota</a><a href="#offline">Offline</a></nav>
+<nav class="fnav" id="fnav" aria-label="Loncat ke fitur"><a href="#keaslian" class="on">Keaslian</a><a href="#sahkan">Pengesahan</a><a href="#iuran">Iuran</a><a href="#usulan">Usulan</a><a href="#laporan">Laporan</a><a href="#nota">Foto nota</a><a href="#offline">Offline</a><a href="#banding">Banding</a><a href="#peran">Peran</a></nav>
 <section class="fsec" id="keaslian">
   <div class="pwrap fgrid">
     <div class="ftxt">
@@ -137,14 +143,14 @@
   </div>
 </section>
 
-<section class="psec">
+<section class="psec" id="banding">
   <div class="pwrap">
     <p class="eyebrow">Dibanding cara lama</p>
     <h2 class="ptitle split">Buku kas biasa <em>vs</em> CEKAS.</h2>
     <div class="cmp reveal"><div class="cmp__r"><span></span><span>Buku kas biasa</span><span>CEKAS</span></div><div class="cmp__r"><b>Siapa yang bisa melihat</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Hanya pemegang buku</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Semua siswa</span></div><div class="cmp__r"><b>Perubahan diam-diam</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Tidak ketahuan</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Langsung ketahuan</span></div><div class="cmp__r"><b>Persetujuan belanja</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Keputusan satu orang</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Suara teman, lalu Wali Kelas</span></div><div class="cmp__r"><b>Laporan akhir</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Disusun manual</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>SPJ siap cetak</span></div><div class="cmp__r"><b>Rekap ke grup</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Diketik ulang</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Satu ketukan salin</span></div><div class="cmp__r"><b>Tanpa internet</b><span><span class="no"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Buku fisik saja</span><span><span class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>Data terakhir tetap terbuka</span></div></div>
   </div>
 </section>
-<section class="psec">
+<section class="psec" id="peran">
   <div class="pwrap">
     <p class="eyebrow">Siapa bisa apa</p>
     <h2 class="ptitle split">Tiga peran, <em>tugas yang jelas.</em></h2>
@@ -167,5 +173,6 @@
 <script src="js/page.js"></script>
 <script src="js/landing-extra.js"></script>
 <script src="js/skyfx.js"></script>
+<script src="js/mobile.js"></script>
 </body>
 </html>
