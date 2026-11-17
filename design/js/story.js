@@ -13,7 +13,7 @@
   gsap.set(Q('.say'), { scale: 0, transformOrigin: '20% 100%' });
   gsap.set(Q('.actor'), { y: 120, autoAlpha: 0 }); gsap.set(Q('.narr > *'), { y: 24, autoAlpha: 0 });
   gsap.set(Q('.links2 span'), { autoAlpha: 0, scale: .6 }); gsap.set(Q('.ping'), { autoAlpha: 0, y: -20, scale: .8 }); gsap.set(Q('.glow'), { autoAlpha: 0 });
-  gsap.set(Q('.line'), { y: 150, autoAlpha: 0 });
+  gsap.set(Q('.lu'), { y: 150, autoAlpha: 0 });
 
   var tl = gsap.timeline({ defaults: { ease: 'power2.out' }, scrollTrigger: { trigger: st, start: 'top top', end: 'bottom bottom', scrub: 0.7,
     onUpdate: function (s) { var i = Math.min(N - 1, Math.floor(s.progress * N)); dots.forEach(function (d, k) { d.classList.toggle('on', k === i); }); } } });
@@ -32,10 +32,10 @@
     });
     if (i === 2) tl.to(Q('.glow', sc), { autoAlpha: 1, duration: .6 }, t0 + .3).to(Q('.links2 span', sc), { autoAlpha: 1, scale: 1, duration: .4, stagger: .2, ease: 'back.out(2)' }, t0 + 1.2);
     if (i === 3) tl.to(Q('.ping', sc), { autoAlpha: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(2)' }, t0 + 1.4);
-    if (last) tl.to(Q('.line', sc), { y: 0, autoAlpha: 1, duration: .6, stagger: .14, ease: 'back.out(1.2)' }, t0 + .6);
+    if (last) tl.to(Q('.lu', sc), { y: 0, autoAlpha: 1, duration: .6, stagger: .14, ease: 'back.out(1.2)' }, t0 + .6);
     if (!last) tl.to(sc, { autoAlpha: 0, duration: .3, ease: 'none' }, t0 + D - .3);
   });
   tl.to({}, { duration: .8 });
 
-  Q('.actor__in, .line img').forEach(function (c, i) { gsap.to(c, { y: -8 - (i % 3) * 3, duration: 2.2 + (i % 4) * .3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * .15 }); });
+  Q('.actor__in, .lu img').forEach(function (c, i) { gsap.to(c, { y: -8 - (i % 3) * 3, duration: 2.2 + (i % 4) * .3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * .15 }); });
 })();
