@@ -247,3 +247,17 @@
 .scene--5 .actor:nth-child(odd) .say { margin-bottom: 0; } .scene--5 .actor:nth-child(even) .say { margin-bottom: 38px; }
 .scene--3 .say { left: 80%; }
 @media (max-width: 759px) { .actor, .actor--big { width: 44vw; } .scene--5 .actor { width: 30vw; } .scene--5 .actor:nth-child(even) .say { margin-bottom: 44px; } .scene--5 .say { max-width: 34vw; } }
+
+/* ---------- cerita 3D (blok) ---------- */
+.s3d { height: 1000vh; margin-top: -40px; } .s3d__stage { background: #bfdcff; } #s3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.s3d__flash { position: absolute; inset: 0; z-index: 6; background: #fff; opacity: 0; pointer-events: none; }
+.cap { position: absolute; z-index: 5; left: 50%; bottom: 6vh; transform: translateX(-50%) translateY(14px); width: min(92vw, 720px); padding: 18px 22px 20px; border-radius: 26px; background: rgba(8, 24, 70, .62); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), 0 30px 50px -24px rgba(6, 23, 63, .8); color: #fff; display: grid; gap: 10px; opacity: 0; visibility: hidden; transition: opacity .5s var(--ease), transform .5s var(--ease), visibility .5s; pointer-events: none; }
+.cap.on { opacity: 1; visibility: visible; transform: translateX(-50%); }
+.cap__when { justify-self: start; font-size: 12.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--lime); }
+.cap h2 { font-size: clamp(24px, 3.6vw, 44px); line-height: 1.04; letter-spacing: -.045em; font-weight: 600; } .cap p:not(.cap__when) { font-size: clamp(15px, 1.6vw, 19px); opacity: .95; }
+.talk { display: grid; gap: 2px; opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease), transform .5s var(--ease); } .talk.on, .cap__note.on { opacity: 1; transform: none; } .talk b { font-size: 13px; color: #bcd7ff; letter-spacing: .02em; } .talk span { font-size: clamp(19px, 2.4vw, 28px); line-height: 1.2; letter-spacing: -.03em; font-weight: 600; }
+.cap__note { opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease), transform .5s var(--ease); color: #dbe9ff; }
+.cap--hero { bottom: auto; top: 11vh; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; text-align: center; justify-items: center; width: min(92vw, 880px); text-shadow: 0 4px 40px rgba(6, 23, 63, .7); }
+.cap--hero h2 { font-size: clamp(34px, 6vw, 80px); } .cap--hero .cap__when { justify-self: center; background: rgba(8, 24, 70, .5); padding: 5px 14px; border-radius: 999px; } .cap--end.on { pointer-events: auto; } .cap--end .btn { margin-top: 6px; }
+.s3d.is-static { height: auto; margin-top: 0; } .s3d.is-static .s3d__stage { position: relative; height: auto; padding: 110px 0 50px; display: grid; gap: 14px; justify-items: center; background: linear-gradient(180deg, var(--sky-deep), var(--sky-1)); } .s3d.is-static #s3d, .s3d.is-static .s3d__flash { display: none; } .s3d.is-static .cap { position: relative; left: auto; bottom: auto; top: auto; transform: none; opacity: 1; visibility: visible; } .s3d.is-static .talk, .s3d.is-static .cap__note { opacity: 1; transform: none; }
+@media (max-width: 759px) { .cap { bottom: 100px; padding: 14px 16px 16px; border-radius: 22px; } .cap--hero { top: 9vh; bottom: auto; } .s3d { height: 900vh; } .cap--end { top: 8vh; } }
