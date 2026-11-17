@@ -20,7 +20,7 @@
   /* ---------- ruang lega dan permukaan rata ---------- */
   .page { gap: var(--space-7); padding-bottom: var(--space-6); }
   .sec-h { font-size: 26px; letter-spacing: -.04em; margin-bottom: var(--space-4); } .sec-h small, .note { font-size: 14px; }
-  .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+  .page .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
   .tip { background: none; box-shadow: none; border-radius: 0; padding: 14px 0; border-top: 1px solid var(--line); } .tips { gap: 0; } .tip:first-child { border-top: 0; }
   .prop { padding: 22px; border-radius: 28px; box-shadow: 0 0 0 1px var(--line); background: #fff; } .props { gap: var(--space-4); }
   .pos { background: var(--paper-2); box-shadow: none; padding: 18px; border-radius: 26px; } .pos__v { font-size: 22px; }
