@@ -1,0 +1,62 @@
+/* CEKAS "Langit" — langit hidup: waktu (fajar, pagi, siang, sore, senja, malam) + cuaca sekitar (opsional).
+   Semua warna tetap keluarga biru. Tidak ada pink, oranye, atau ungu. */
+
+/* lapisan yang disuntik ke tiap .sky / .hero__sky */
+.sx, .sx-top { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.sx-ph, .sx-wx, .sx-orb, .sx-stars, .sx-rain, .sx-flash { position: absolute; inset: 0; opacity: 0; transition: opacity 2.6s ease; }
+.sx-ph--fajar { background: linear-gradient(180deg, rgba(10, 28, 92, .55) 0%, rgba(40, 86, 170, .25) 55%, rgba(190, 215, 250, .3) 100%); }
+.sx-ph--pagi { background: linear-gradient(180deg, rgba(20, 70, 170, .14), rgba(190, 222, 255, .1)); }
+.sx-ph--sore { background: linear-gradient(180deg, rgba(14, 44, 120, .28) 0%, rgba(70, 110, 180, .22) 60%, rgba(180, 196, 225, .22) 100%); }
+.sx-ph--senja { background: linear-gradient(180deg, rgba(6, 22, 70, .62) 0%, rgba(30, 62, 140, .45) 55%, rgba(110, 140, 200, .32) 100%); }
+.sx-ph--malam { background: linear-gradient(180deg, rgba(2, 8, 31, .86) 0%, rgba(5, 20, 60, .72) 55%, rgba(10, 42, 120, .5) 100%); }
+.sx-wx--mendung { background: linear-gradient(180deg, rgba(88, 102, 130, .5), rgba(120, 134, 160, .45)); }
+.sx-wx--storm { background: linear-gradient(180deg, rgba(14, 22, 48, .5), rgba(30, 44, 80, .3)); }
+.sx-wx--kabut { background: linear-gradient(180deg, rgba(150, 166, 192, .5), rgba(176, 190, 212, .5)); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+html[data-sky-phase="fajar"] .sx-ph--fajar, html[data-sky-phase="pagi"] .sx-ph--pagi, html[data-sky-phase="sore"] .sx-ph--sore, html[data-sky-phase="senja"] .sx-ph--senja, html[data-sky-phase="malam"] .sx-ph--malam { opacity: 1; }
+html[data-sky-wx="mendung"] .sx-wx--mendung, html[data-sky-wx="hujan"] .sx-wx--mendung, html[data-sky-wx="badai"] .sx-wx--mendung, html[data-sky-wx="badai"] .sx-wx--storm, html[data-sky-wx="kabut"] .sx-wx--kabut { opacity: 1; }
+html[data-sky-wx="berawan"] .sx-wx--mendung { opacity: .38; }
+
+/* matahari / bulan */
+.sx-orb { inset: auto; left: calc(var(--ox, 70) * 1%); top: calc(var(--oy, 20) * 1%); width: calc(var(--os, 30) * 1vmin); height: calc(var(--os, 30) * 1vmin); margin: calc(var(--os, 30) * -.5vmin) 0 0 calc(var(--os, 30) * -.5vmin); border-radius: 50%; background: radial-gradient(circle, rgba(var(--oc, 255, 255, 255), .95) 0%, rgba(var(--oc, 255, 255, 255), .32) 38%, transparent 68%); opacity: var(--oo, 0); transition: left 3s ease, top 3s ease, width 3s ease, height 3s ease, margin 3s ease, opacity 2.6s ease; }
+html[data-sky-phase="malam"] .sx-orb { background: radial-gradient(circle, #f4f9ff 0 30%, rgba(200, 222, 255, .6) 36%, rgba(140, 182, 245, .2) 54%, transparent 72%); }
+
+/* bintang */
+.sx-stars { opacity: var(--sx-stars, 0); inset: 0 0 35% 0; }
+.sx-stars i { position: absolute; border-radius: 50%; background: #fff; animation: sxtw 3.4s ease-in-out infinite; }
+@keyframes sxtw { 50% { opacity: .2; transform: scale(.7); } }
+
+/* hujan (dua lapis) + kilat lembut */
+.sx-rain { inset: -30% -10% 0 -10%; background-image: repeating-linear-gradient(102deg, transparent 0 13px, rgba(214, 232, 255, .6) 13px 14.2px, transparent 14.2px 27px); -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 42px, transparent 42px 96px); mask-image: repeating-linear-gradient(180deg, #000 0 42px, transparent 42px 96px); animation: sxrain .62s linear infinite; }
+.sx-rain--b { background-image: repeating-linear-gradient(102deg, transparent 0 21px, rgba(214, 232, 255, .45) 21px 22px, transparent 22px 41px); -webkit-mask-image: repeating-linear-gradient(180deg, #000 0 70px, transparent 70px 150px); mask-image: repeating-linear-gradient(180deg, #000 0 70px, transparent 70px 150px); animation-duration: .9s; }
+@keyframes sxrain { to { transform: translate3d(-28px, 96px, 0); } }
+html[data-sky-wx="hujan"] .sx-rain { opacity: .55; } html[data-sky-wx="badai"] .sx-rain { opacity: .8; } html[data-sky-wx="hujan"] .sx-rain--b, html[data-sky-wx="badai"] .sx-rain--b { opacity: .4; }
+.sx-flash { background: rgba(214, 232, 255, .9); transition: none; }
+html[data-sky-wx="badai"] .sx-flash { animation: sxflash 11s ease-out infinite; } @keyframes sxflash { 0%, 93% { opacity: 0; } 94.2% { opacity: .2; } 98% { opacity: 0; } }
+
+/* awan ikut waktu dan cuaca */
+.cloud, .sky__cloud, .veil__cloud { filter: brightness(var(--sx-cb, 1)) saturate(var(--sx-cs, 1)); transition: filter 2.6s ease, opacity 1.2s var(--ease, ease), transform 1.6s var(--ease, ease); }
+
+/* ---------- tombol + panel ---------- */
+.skybtn { position: relative; width: 38px; height: 38px; border-radius: 50%; display: inline-grid; place-items: center; color: inherit; background: rgba(255, 255, 255, .16); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .4); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .45s var(--spring, cubic-bezier(.34, 1.56, .64, 1)), background .25s; flex: none; }
+.skybtn:hover { background: rgba(255, 255, 255, .28); } .skybtn:active { transform: scale(.9); } .skybtn[aria-expanded="true"] { background: #fff; color: #0b1b3a; }
+.nav.is-solid .skybtn { background: rgba(11, 27, 58, .07); box-shadow: inset 0 0 0 1px rgba(11, 27, 58, .1); }
+.skybtn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; transition: transform .6s var(--spring, cubic-bezier(.34, 1.56, .64, 1)); } .skybtn:hover svg { transform: rotate(18deg); }
+.skybtn.is-off { opacity: .75; } .skybtn.is-off::after { content: ""; position: absolute; right: 4px; top: 4px; width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .7); }
+.skypop { position: fixed; z-index: 700; width: min(348px, calc(100vw - 24px)); padding: 18px; border-radius: 26px; background: rgba(255, 255, 255, .96); color: #0b1b3a; font-family: "Inter Tight", system-ui, sans-serif; box-shadow: 0 30px 70px -20px rgba(6, 23, 63, .65), 0 0 0 1px rgba(11, 27, 58, .08); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); transform-origin: 92% 0; animation: skypop .45s cubic-bezier(.2, .7, .1, 1) both; }
+@keyframes skypop { from { opacity: 0; transform: translateY(-10px) scale(.94); } }
+.skypop[hidden] { display: none; }
+.skypop__h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 12px; } .skypop__h b { font-size: 18px; letter-spacing: -.03em; } .skypop__now { font-size: 12.5px; font-weight: 600; color: #1e6fe8; background: #e8f1fd; padding: 3px 10px; border-radius: 999px; }
+.skysw { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid rgba(11, 27, 58, .07); cursor: pointer; }
+.skysw b { display: block; font-size: 15px; letter-spacing: -.02em; } .skysw small { display: block; color: #6b7893; font-size: 12.5px; line-height: 1.35; margin-top: 2px; }
+.skysw input { position: absolute; opacity: 0; } .skysw i { position: relative; width: 48px; height: 28px; border-radius: 28px; background: #d3dbe9; flex: none; transition: background .3s; }
+.skysw i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, .25); transition: transform .45s cubic-bezier(.34, 1.56, .64, 1), width .2s; }
+.skysw input:checked + i { background: #1e6fe8; } .skysw input:checked + i::after { transform: translateX(20px); } .skysw:active i::after { width: 28px; } .skysw input:checked:active + i::after { transform: translateX(14px); }
+.skysw input:focus-visible + i { outline: 3px solid #1e6fe8; outline-offset: 2px; }
+.skypop__mode { padding: 12px 0; border-top: 1px solid rgba(11, 27, 58, .07); font-size: 13px; color: #3b4a68; } .skypop__mode b { display: block; margin-bottom: 8px; font-size: 13.5px; color: #0b1b3a; }
+.skyseg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: #eef2f8; } .skyseg button { padding: 7px 14px; border-radius: 999px; font: 600 13px "Inter Tight", system-ui, sans-serif; color: #6b7893; transition: background .25s, color .25s; } .skyseg button.on { background: #fff; color: #0b1b3a; box-shadow: 0 0 0 1px rgba(11, 27, 58, .08), 0 6px 12px -8px rgba(10, 42, 120, .6); }
+.skypop details { border-top: 1px solid rgba(11, 27, 58, .07); padding-top: 10px; } .skypop summary { list-style: none; cursor: pointer; font-size: 13.5px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; } .skypop summary::-webkit-details-marker { display: none; } .skypop summary::after { content: "+"; font-size: 18px; color: #6b7893; transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); } .skypop details[open] summary::after { transform: rotate(45deg); }
+.skychips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 4px; } .skychips button { padding: 6px 12px; border-radius: 999px; background: #eef2f8; font: 600 12.5px "Inter Tight", system-ui, sans-serif; transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), background .2s, color .2s; } .skychips button:active { transform: scale(.92); } .skychips button.on { background: #0b1b3a; color: #fff; }
+.skychips__l { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: #6b7893; font-weight: 700; margin-top: 8px; display: block; }
+.skypop__note { margin-top: 10px; color: #6b7893; font-size: 11.5px; line-height: 1.4; }
+
+@media (prefers-reduced-motion: reduce) { .sx-rain, .sx-flash, .sx-stars i { animation: none !important; } .sx-ph, .sx-wx, .sx-orb, .sx-stars { transition-duration: .01ms; } .skypop { animation: none; } }

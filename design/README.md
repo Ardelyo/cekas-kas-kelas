@@ -5,7 +5,8 @@ Branch `design/sky-ui`. Tanpa Python, tanpa build. Buka dengan server statis apa
     cd design && python -m http.server 8765      # lalu buka http://127.0.0.1:8765
     # lewati intro: http://127.0.0.1:8765/#nointro
 
-- `index.html` — intro + landing page
+- `index.html` — intro + landing (tentang, fitur, peran, coba hash, testimoni, FAQ, outro). `css/landing-extra.css`, `js/landing-extra.js`
+- `css/skyfx.css`, `js/skyfx.js` — langit hidup: ikut waktu perangkat dan (opsional) cuaca sekitar via Open-Meteo; tombol cuaca di nav tiap halaman
 - `login.html` — masuk Bendahara / Wali Kelas (peran, percobaan 5x, kunci 15 menit, transisi sukses). Sandi contoh di panel Alat desain
 - `status.html` — 404 dan offline (`?s=offline`)
 - `kas.html` — dashboard publik (cuaca kas, antrean Wali Kelas, iuran, riwayat, catat kas). Panel "Alat desain" di pojok untuk ganti peran dan cuaca

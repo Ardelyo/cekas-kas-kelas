@@ -92,3 +92,4 @@ body.auth { padding: 0; min-height: 100svh; min-height: 100dvh; background: var(
 .gate__intro .eyebrow { color: #fff; text-shadow: 0 1px 16px rgba(6, 23, 63, .8); font-weight: 700; }
 .gate__intro p { text-shadow: 0 1px 18px rgba(6, 23, 63, .75); }
 @media (max-width: 979px) { body.auth .demo { bottom: auto; top: 66px; left: auto; right: 14px; } }
+.authbar__r { display: inline-flex; align-items: center; gap: 10px; }

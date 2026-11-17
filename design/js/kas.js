@@ -81,12 +81,14 @@
     var n = weeksLeft();
     var auto = n >= 12 ? 'cerah' : n >= 6 ? 'berawan' : 'mendung';
     wxNow = state.wx === 'auto' ? auto : state.wx;
-    var b = document.body;
+    var b = document.body, sx = window.skyfx ? skyfx.effective() : null, real = sx && !sx.kasMode && sx.wx;
+    if (real) wxNow = 'cerah';
     b.classList.remove('wx-cerah', 'wx-berawan', 'wx-mendung'); b.classList.add('wx-' + wxNow);
-    var h = new Date().getHours(); b.classList.toggle('wx-malam', h >= 18 || h < 5);
-    $('#wxText').textContent = { cerah: 'Cerah', berawan: 'Berawan', mendung: 'Mendung' }[wxNow];
+    $('#wxText').textContent = real ? 'Langit ' + skyfx.WX_L[sx.wx].toLowerCase() : { cerah: 'Cerah', berawan: 'Berawan', mendung: 'Mendung' }[wxNow];
     $('#forecastChip').textContent = 'Cukup ± ' + n + ' minggu';
   }
+
+  if (window.skyfx) skyfx.onchange(function () { applyWeather(); });
 
   /* ---------- hero ---------- */
   var shown = 0;

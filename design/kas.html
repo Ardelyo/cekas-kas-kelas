@@ -11,8 +11,9 @@
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/fx.css">
 <link rel="stylesheet" href="css/scene.css">
+<link rel="stylesheet" href="css/skyfx.css">
 </head>
-<body class="wx-cerah">
+<body class="wx-cerah" data-sky-kasmode>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-cloud" viewBox="0 0 26 18"><path d="M6.5 17.5a5.5 5.5 0 0 1-.7-10.96A7.5 7.5 0 0 1 20.3 5.7 6 6 0 0 1 19.5 17.5z" fill="currentColor" stroke="none"/></symbol>
@@ -54,6 +55,7 @@
   <div class="nav">
     <a class="nav__logo" href="index.html" aria-label="cekas, ke beranda"><svg width="26" height="18"><use href="#i-cloud"/></svg><span>cekas</span></a>
     <nav class="nav__links" aria-label="Bagian"><a href="#ringkasan" class="on">Ringkasan</a><a href="#guru">Verifikasi</a><a href="#iuran">Iuran</a><a href="#riwayat">Riwayat</a><a href="#bagikan">Bagikan</a></nav>
+    <span class="skyctl-host" data-skyctl></span>
     <a class="nav__role" id="roleLabel" href="login.html"><i></i><span>Masuk</span></a>
   </div>
 
@@ -193,6 +195,7 @@
 <script src="assets/vendor/gsap.min.js"></script>
 <script src="js/sha256.js"></script>
 <script src="js/fx.js"></script>
+<script src="js/skyfx.js"></script>
 <script src="js/kas.js"></script>
 </body>
 </html>
