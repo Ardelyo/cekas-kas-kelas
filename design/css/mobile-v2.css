@@ -1,5 +1,7 @@
 /* CEKAS "Langit" — MOBILE v2: layar terpisah, lega, permukaan rata (≤ 759px). Dimuat setelah mobile.css. */
 .mtabs { display: none; }
+/* judul layar dashboard hanya untuk mobile; di laptop tidak boleh menjadi sel grid */
+.scrhead { display: none; }
 @media (max-width: 759px) {
   /* ---------- tab bawah situs ---------- */
   .has-mtabs { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }

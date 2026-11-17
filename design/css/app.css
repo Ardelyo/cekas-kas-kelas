@@ -264,3 +264,8 @@ dialog::backdrop { background: rgba(6, 23, 63, .5); backdrop-filter: blur(4px); 
 @media (prefers-reduced-motion: reduce) { .sched__pin b, .swk__chip.now i, .sched__now i, .dp.due i, .locked__ic, .cdt > i, .dp.today { animation: none !important; } .sched__pin, .sched__fill { transition: none; } }
 
 .skip-link { position: fixed; left: 12px; top: -60px; z-index: 900; background: var(--ink); color: #fff; padding: 10px 16px; border-radius: var(--pill); transition: top var(--dur-1); } .skip-link:focus { top: 12px; }
+
+/* kepala dashboard: tanpa pil. Status verifikasi tetap ada sebagai teks biasa yang bisa diketuk. */
+.skyhead .wxchip, .skyhead #forecastChip, .skyhead .delta { display: none !important; }
+.skyhead #badge, .skyhead #badge.badge--ok, .skyhead #badge.badge--bad, .skyhead #badge.badge--busy { background: transparent !important; box-shadow: none !important; padding: 0 !important; height: auto !important; min-height: 0 !important; border-radius: 0 !important; color: #fff !important; font-size: 14.5px !important; font-weight: 650; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .45); text-underline-offset: 4px; }
+.skyhead #badge.badge--ok svg { color: var(--lime); } .skyhead #badge.badge--bad svg { color: #ff9a9a; }
