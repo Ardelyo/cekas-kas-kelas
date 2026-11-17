@@ -1,36 +1,41 @@
-/* CEKAS "Langit" — Tentang: cerita yang bergerak mengikuti gulir, tim berfoto sebagai karakter. */
+/* CEKAS "Langit" — Tentang: cerita beradegan yang berjalan mengikuti gulir. */
 (function () {
   'use strict';
   var st = document.querySelector('#cerita'); if (!st) return;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !window.gsap || !window.ScrollTrigger) { st.classList.add('is-static'); return; }
   gsap.registerPlugin(ScrollTrigger);
-  var $ = function (s) { return st.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(st.querySelectorAll(s)); };
-  var mobile = window.matchMedia('(max-width: 759px)').matches;
-  var chars = $$('.char'), dots = $$('.story2__dots i'), bg = $('.story2__bg > img'), tint = $('.story2__tint');
+  var Q = function (s, r) { return Array.prototype.slice.call((r || st).querySelectorAll(s)); };
+  var scenes = Q('.scene'), dots = Q('.story2__dots i'), bg = st.querySelector('.story2__bg > img'), tint = st.querySelector('.story2__tint');
+  var N = scenes.length, D = 3; // tiap adegan = 3 satuan waktu
 
-  gsap.set('.chap', { autoAlpha: 0, y: 40 }); gsap.set('.chap--1', { autoAlpha: 1, y: 0 });
-  gsap.set(chars, { autoAlpha: 0, y: 140, scale: .9 }); gsap.set('.bubble2', { scale: 0, transformOrigin: '50% 100%' });
-  gsap.set('.book i', { scaleX: 0, transformOrigin: 'left' }); gsap.set('.links span', { autoAlpha: 0, y: 24, scale: .6 });
+  gsap.set(scenes, { autoAlpha: 0 });
+  gsap.set(Q('.say'), { scale: 0, transformOrigin: '20% 100%' });
+  gsap.set(Q('.actor'), { y: 120, autoAlpha: 0 }); gsap.set(Q('.narr > *'), { y: 24, autoAlpha: 0 });
+  gsap.set(Q('.links2 span'), { autoAlpha: 0, scale: .6 }); gsap.set(Q('.ping'), { autoAlpha: 0, y: -20, scale: .8 }); gsap.set(Q('.glow'), { autoAlpha: 0 });
+  gsap.set(Q('.line'), { y: 150, autoAlpha: 0 });
 
-  var tl = gsap.timeline({ defaults: { ease: 'power2.inOut' }, scrollTrigger: { trigger: st, start: 'top top', end: 'bottom bottom', scrub: 0.7, onUpdate: function (s) { var i = Math.min(4, Math.floor(s.progress * 5 + 0.02)); dots.forEach(function (d, k) { d.classList.toggle('on', k === i); }); } } });
-  // awan melayang sepanjang cerita
-  tl.to('.sc--a', { xPercent: 60, duration: 10, ease: 'none' }, 0).to('.sc--b', { xPercent: -50, duration: 10, ease: 'none' }, 0).to('.sc--c', { yPercent: -10, duration: 10, ease: 'none' }, 0).fromTo(bg, { scale: 1.18 }, { scale: 1, duration: 10, ease: 'none' }, 0);
-  // bab 1 -> 2 (suasana redup, satu buku tertutup)
-  tl.to('.chap--1', { autoAlpha: 0, y: -50, duration: 1 }, 1.6).to(tint, { opacity: .82, duration: 1.4 }, 1.2)
-    .to('.chap--2', { autoAlpha: 1, y: 0, duration: 1 }, 2).to('.book i', { scaleX: 1, duration: .8, stagger: .2 }, 2.4);
-  // bab 2 -> 3 (dibuka, terang, rantai terhubung)
-  tl.to('.chap--2', { autoAlpha: 0, y: -50, duration: 1 }, 3.8).to(tint, { opacity: .1, duration: 1.6 }, 3.8)
-    .to('.chap--3', { autoAlpha: 1, y: 0, duration: 1 }, 4.4).to('.links span', { autoAlpha: 1, y: 0, scale: 1, duration: .7, stagger: .25, ease: 'back.out(1.8)' }, 4.8);
-  // bab 3 -> 4 (karakter masuk satu per satu)
-  tl.to('.chap--3', { autoAlpha: 0, y: -50, duration: 1 }, 6.4)
-    .to('.chap--4', { autoAlpha: 1, y: 0, duration: 1 }, 6.8)
-    .to(chars, { autoAlpha: 1, y: 0, scale: 1, duration: 1, stagger: .45, ease: 'back.out(1.3)' }, 7)
-    .to('.bubble2', { scale: 1, duration: .5, stagger: .45, ease: 'back.out(2.4)' }, 7.6);
-  // bab 5
-  tl.to('.chap--4', { autoAlpha: 0, y: -40, duration: .8 }, 9.4).to('.chap--5', { autoAlpha: 1, y: 0, duration: 1 }, 9.6).to(chars, { y: mobile ? -10 : -24, duration: 1 }, 9.6);
-  tl.to({}, { duration: 1.2 }); // jeda akhir
+  var tl = gsap.timeline({ defaults: { ease: 'power2.out' }, scrollTrigger: { trigger: st, start: 'top top', end: 'bottom bottom', scrub: 0.7,
+    onUpdate: function (s) { var i = Math.min(N - 1, Math.floor(s.progress * N)); dots.forEach(function (d, k) { d.classList.toggle('on', k === i); }); } } });
 
-  // gerak hidup karakter (tidak terikat gulir)
-  chars.forEach(function (c, i) { gsap.to(c.querySelector('.char__in'), { y: -10 - (i % 2) * 4, rotation: i % 2 ? 1.4 : -1.4, duration: 2.2 + i * .35, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * .2 }); });
+  tl.to('.sc--a', { xPercent: 60, duration: N * D, ease: 'none' }, 0).to('.sc--b', { xPercent: -50, duration: N * D, ease: 'none' }, 0).fromTo(bg, { scale: 1.16 }, { scale: 1, duration: N * D, ease: 'none' }, 0);
+  var tints = [0, .45, .88, .1, 0, 0]; // suasana per adegan: pagi, redup, malam, terang, cerah
+  scenes.forEach(function (sc, i) {
+    var t0 = i * D, last = i === N - 1;
+    var narr = Q('.narr > *', sc), actors = Q('.actor', sc), says = Q('.say', sc);
+    tl.to(tint, { opacity: tints[i], duration: .8, ease: 'none' }, t0)
+      .to(sc, { autoAlpha: 1, duration: .25, ease: 'none' }, t0)
+      .to(narr, { y: 0, autoAlpha: 1, duration: .55, stagger: .1 }, t0 + .05);
+    actors.forEach(function (a, k) {
+      tl.to(a, { y: 0, autoAlpha: 1, duration: .6, ease: 'back.out(1.3)' }, t0 + .35 + k * .3)
+        .to(a.querySelector('.say'), { scale: 1, duration: .4, ease: 'back.out(2.2)' }, t0 + .75 + k * .3);
+    });
+    if (i === 2) tl.to(Q('.glow', sc), { autoAlpha: 1, duration: .6 }, t0 + .3).to(Q('.links2 span', sc), { autoAlpha: 1, scale: 1, duration: .4, stagger: .2, ease: 'back.out(2)' }, t0 + 1.2);
+    if (i === 3) tl.to(Q('.ping', sc), { autoAlpha: 1, y: 0, scale: 1, duration: .5, ease: 'back.out(2)' }, t0 + 1.4);
+    if (last) tl.to(Q('.line', sc), { y: 0, autoAlpha: 1, duration: .6, stagger: .14, ease: 'back.out(1.2)' }, t0 + .6);
+    if (!last) tl.to(sc, { autoAlpha: 0, duration: .3, ease: 'none' }, t0 + D - .3);
+  });
+  tl.to({}, { duration: .8 });
+
+  Q('.actor__in, .line img').forEach(function (c, i) { gsap.to(c, { y: -8 - (i % 3) * 3, duration: 2.2 + (i % 4) * .3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * .15 }); });
 })();
