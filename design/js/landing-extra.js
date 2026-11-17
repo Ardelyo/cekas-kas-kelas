@@ -144,7 +144,7 @@
         var p = (((i - t) % N) + N) % N; if (p >= N / 2) p -= N;
         var d = Math.abs(p), o = Math.max(0, Math.min(1, (vis - d) / 0.85));
         c.style.setProperty('--px', p.toFixed(4)); c.style.setProperty('--o', o.toFixed(3)); c.style.zIndex = Math.round(100 - d * 12);
-        c.classList.toggle('is-front', d < 0.5);
+        var fr = d < 0.5; if (fr && !c.classList.contains('is-front') && window.motion && c.__seen) motion.sound('gear'); c.__seen = true; c.classList.toggle('is-front', fr);
         if (reduce) c.style.setProperty('transform', 'translate3d(' + (p * sp).toFixed(1) + 'px,' + (p * p * 9).toFixed(1) + 'px,0) rotateY(' + (-p * 12).toFixed(1) + 'deg)', 'important');
       });
     }

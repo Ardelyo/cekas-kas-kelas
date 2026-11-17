@@ -80,6 +80,7 @@
     async function check() {
       var my = ++run2, p = 'GENESIS', calc = [];
       data.forEach(function (x, i) { p = sha256(p + '|' + x.d + '|' + x.a); calc[i] = p; });
+      if (window.motion) motion.sound('chain', rows.length);
       var firstBad = -1; btn.disabled = true;
       for (var i = 0; i < rows.length; i++) {
         if (!reduce) await new Promise(function (r) { setTimeout(r, 140); });
@@ -87,7 +88,7 @@
         var ok = calc[i] === stored[i]; if (!ok && firstBad < 0) firstBad = i;
         rows[i].classList.toggle('bad', !ok); $('.hb__i', rows[i]).innerHTML = ok ? OK : BAD; $('small', rows[i]).textContent = calc[i].slice(0, 12).replace(/(.{4})(.{4})(.{4})/, '$1·$2·$3');
       }
-      btn.disabled = false;
+      btn.disabled = false; if (firstBad < 0 && window.motion) motion.sound('done');
       badge.className = 'badge ' + (firstBad < 0 ? 'badge--ok' : 'badge--bad'); badge.querySelector('svg').innerHTML = firstBad < 0 ? '<path d="M5 12.5l4.5 4.5L19 7.5"/>' : '<path d="M6 6l12 12M18 6L6 18"/>'; badge.querySelector('span').textContent = firstBad < 0 ? 'Terverifikasi · ' + rows.length + ' catatan' : 'Perlu diperiksa · mulai catatan ' + (firstBad + 1);
       badge.classList.remove('is-pulse', 'is-shake'); void badge.offsetWidth; badge.classList.add(firstBad < 0 ? 'is-pulse' : 'is-shake');
     }

@@ -72,20 +72,20 @@
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault(); var v = pw.value;
-    if (v.length < 6) { setErr('Minimal 6 karakter.', true); fx.shake(panel); fx.haptic('reject'); pw.focus(); return; }
+    if (v.length < 6) { setErr('Minimal 6 karakter.', true); fx.shake(panel); fx.haptic('loginBad'); pw.focus(); return; }
     var live = null;
     var work = window.CEKAS_LIVE_API
       ? async function () { try { var r = await fetch('/api/langit/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ role: role, secret: v }) }); live = await r.json(); return !!live.ok; } catch (e) { live = { error: 'Server tidak terjangkau.' }; return false; } }
       : function () { return new Promise(function (r) { setTimeout(function () { r(v === ROLES[role].pass); }, 380); }); };
     var ok = await fx.commit(submit, work, { keep: true, loading: 650, ok: 520 });
     if (!ok) {
-      if (live && live.locked) { store.set('cekas-att-' + role, String(MAX)); pips(); warnSky(); fx.haptic('reject'); await fx.wait(reduce ? 0 : 400); lockNow((live.retry_after || 900) * 1000); return; }
+      if (live && live.locked) { store.set('cekas-att-' + role, String(MAX)); pips(); warnSky(); fx.haptic('loginBad'); await fx.wait(reduce ? 0 : 400); lockNow((live.retry_after || 900) * 1000); return; }
       if (live && live.error && !live.remaining && live.remaining !== 0) { setErr(live.error, true); fx.shake(box); warnSky(); return; }
-      var n = live && typeof live.remaining === 'number' ? MAX - live.remaining : att(role) + 1; store.set('cekas-att-' + role, String(n)); pips(); warnSky(); fx.haptic('reject');
+      var n = live && typeof live.remaining === 'number' ? MAX - live.remaining : att(role) + 1; store.set('cekas-att-' + role, String(n)); pips(); warnSky(); fx.haptic('loginBad');
       if (n >= MAX) { await fx.wait(reduce ? 0 : 400); lockNow(LOCK_MS); return; }
       setErr(ROLES[role].err + ' Sisa ' + (MAX - n) + ' percobaan.', true); fx.shake(box); pw.select(); return;
     }
-    store.del('cekas-att-' + role); store.set('cekas-role', role); fx.haptic('check');
+    store.del('cekas-att-' + role); store.set('cekas-role', role); fx.haptic('loginOk');
     ascend();
   });
 

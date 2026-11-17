@@ -6,7 +6,7 @@
   var $ = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
   var root = document.documentElement, body = document.body;
-  var tick = function () { if (window.fx) fx.haptic('tick'); };
+  var tick = function () { if (window.fx) fx.buzz([6]); };
 
   /* ---------- tab bawah untuk halaman situs (mobile) ---------- */
   var nav = $('#nav'), isKas = body.hasAttribute('data-sky-kasmode');
@@ -102,7 +102,7 @@
     sheet.addEventListener('pointermove', function (e) { if (!drag) return; dy = Math.max(0, e.clientY - y0); sheet.style.transform = 'translate(-50%, ' + dy + 'px)'; d.style.setProperty('--dim', String(Math.max(0, 1 - dy / 320))); });
     function end(e) {
       if (!drag) return; drag = false; var v = dy / Math.max(1, e.timeStamp - t0); sheet.style.transition = '';
-      if (dy > 110 || v > 0.7) { if (window.fx) fx.haptic('tick'); sheet.style.transform = ''; fx.closeSheet(d); } else { sheet.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)'; sheet.style.transform = ''; setTimeout(function () { sheet.style.transition = ''; }, 520); }
+      if (dy > 110 || v > 0.7) { if (window.fx) fx.buzz([6]); sheet.style.transform = ''; fx.closeSheet(d); } else { sheet.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1)'; sheet.style.transform = ''; setTimeout(function () { sheet.style.transition = ''; }, 520); }
     }
     sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
     d.addEventListener('close', function () { sheet.style.transform = ''; sheet.style.transition = ''; });

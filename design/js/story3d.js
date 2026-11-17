@@ -421,8 +421,7 @@
   SKYC.forEach(function (c, i) { var k = c.userData.k, el = document.createElement('div'); el.className = 'lbl lbl--sky'; el.innerHTML = NAMES[k] + (k === 'cinta' ? '<small>foto menyusul</small>' : ''); lblLayer.appendChild(el); LBL.push({ k: k, t: 108.4 + i * 0.25, el: el, sky: true, c: c }); });
 
   /* ================= suara (disintesis, tanpa berkas) ================= */
-  var AC = null, master = null, noiseBuf = null, windG = null, soundOn = false;
-  try { soundOn = localStorage.getItem('cekas-sfx') === '1'; } catch (e) {}
+  var AC = null, master = null, noiseBuf = null, windG = null, soundOn = !!(window.motion && motion.state && motion.state.sound);
   function audioInit() {
     if (AC) return; var A = window.AudioContext || window.webkitAudioContext; if (!A) return;
     AC = new A(); master = AC.createGain(); master.gain.value = 0.55; var comp = AC.createDynamicsCompressor(); master.connect(comp); comp.connect(AC.destination);
@@ -468,7 +467,8 @@
 
   var sndBtn = document.getElementById('s3dSound'), sndBtn2 = document.getElementById('s3dSound2');
   function syncSound() { [sndBtn, sndBtn2].forEach(function (b) { if (!b) return; b.setAttribute('aria-pressed', soundOn ? 'true' : 'false'); b.classList.toggle('is-on', soundOn); var s = b.querySelector('.snd__t'); if (s) s.textContent = soundOn ? 'Suara nyala' : (b === sndBtn2 ? 'Nyalakan suara' : 'Suara mati'); }); }
-  function toggleSound() { soundOn = !soundOn; try { localStorage.setItem('cekas-sfx', soundOn ? '1' : '0'); } catch (e) {} if (soundOn) { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); play('chime'); } syncSound(); }
+  function toggleSound() { var v = !soundOn; if (window.motion) motion.set('sound', v); soundOn = v; if (soundOn) { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); play('chime'); } syncSound(); }
+  if (window.motion && motion.onchange) motion.onchange(function (s) { var v = !!s.sound; if (v !== soundOn) { soundOn = v; if (v) audioInit(); syncSound(); } });
   [sndBtn, sndBtn2].forEach(function (b) { if (b) b.addEventListener('click', toggleSound); });
   syncSound();
   document.addEventListener('pointerdown', function once() { if (soundOn) { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); } document.removeEventListener('pointerdown', once); });
