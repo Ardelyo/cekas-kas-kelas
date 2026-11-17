@@ -16,7 +16,7 @@
   var DAY = new T.Color(0xbfdcff), NIGHT = new T.Color(0x07122e), SKY = new T.Color(0x5ea3f4);
   scene.background = DAY.clone();
   var hemi = new T.HemisphereLight(0xffffff, 0x9bb8e8, 1.0), sun = new T.DirectionalLight(0xffffff, 1.1), lamp = new T.PointLight(0x9ad0ff, 0, 9);
-  sun.position.set(4, 9, 8); lamp.position.set(4.2, 2.4, 0.2); scene.add(hemi, sun, lamp);
+  sun.position.set(4, 9, 8); lamp.position.set(3.6, 2.4, 0.2); scene.add(hemi, sun, lamp);
 
   function lam(c) { return new T.MeshLambertMaterial({ color: c }); }
   function box(w, h, d, mat, x, y, z) { var m = new T.Mesh(new T.BoxGeometry(w, h, d), mat); m.position.set(x || 0, y || 0, z || 0); return m; }
@@ -30,7 +30,9 @@
     jahfal: { name: 'Jahfal', skin: 0xc9946b, hair: 0x211b18, top: 0xcdbb55, bot: 0x3b4a6b },
     ardellio: { name: 'Ardellio', skin: 0xd9a67f, hair: 0x16130f, top: 0xf0f3f9, bot: 0x72839f },
     nabila: { name: 'Nabila', skin: 0xe5b894, hair: 0xd8d9d6, top: 0x8b9097, bot: 0x40454f },
-    rafa: { name: 'Rafa', skin: 0xb98863, hair: 0x14110e, top: 0x1b1c20, bot: 0x3a3d46 }
+    rafa: { name: 'Rafa', skin: 0xb98863, hair: 0x14110e, top: 0x1b1c20, bot: 0x3a3d46 },
+    revalina: { name: 'Revalina', skin: 0xe0a98a, hair: 0x141414, top: 0x2a2158, bot: 0x3a3d52 },
+    tarina: { name: 'Tarina', skin: 0xe3b494, hair: 0x17120f, top: 0xbcd3ee, bot: 0x44546e }
   };
   Object.keys(PEOPLE).forEach(function (k) { PEOPLE[k].face = load('assets/team/face-' + k + '.webp'); });
   var QTEX = ctex(256, 256, function (x, w, h) { x.fillStyle = '#dbe8fb'; x.fillRect(0, 0, w, h); x.fillStyle = '#6f8fc4'; x.font = '700 170px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('?', w / 2, h / 2 + 8); x.strokeStyle = '#6f8fc4'; x.lineWidth = 8; x.setLineDash([22, 16]); x.strokeRect(10, 10, w - 20, h - 20); });
@@ -68,7 +70,7 @@
   var wbMat = new T.MeshBasicMaterial({ map: wbA }); var wb = new T.Mesh(new T.PlaneGeometry(7.4, 2.75), wbMat); wb.position.set(0, 3.3, -5.46); room.add(wb);
   room.add(box(7.7, 0.14, 0.16, lam(0x6b7fa3), 0, 1.9, -5.45));
 
-  var SEAT = [['jahfal', -4.2], ['nabila', -1.4], ['rafa', 1.4], ['ardellio', 4.2]], chars = {}, deskMat = lam(0xf2f6ff), legMat = lam(0x8aa0c9);
+  var SEAT = [['revalina', -6], ['jahfal', -3.6], ['nabila', -1.2], ['rafa', 1.2], ['ardellio', 3.6], ['tarina', 6]], chars = {}, deskMat = lam(0xf2f6ff), legMat = lam(0x8aa0c9);
   SEAT.forEach(function (s) {
     var k = s[0], x = s[1], c = mkChar(PEOPLE[k], true); c.position.set(x, 0, -1.6); room.add(c); chars[k] = c;
     room.add(box(0.9, 0.1, 0.9, legMat, x, 0.5, -1.62)); // bangku
@@ -77,7 +79,7 @@
     var sh = new T.Mesh(new T.CircleGeometry(0.75, 20), new T.MeshBasicMaterial({ color: 0x1a2a55, transparent: true, opacity: 0.18 })); sh.rotation.x = -Math.PI / 2; sh.position.set(x, 0.02, -1.0); sh.scale.set(1.3, 1, 1.1); room.add(sh);
   });
   // laptop Ardellio
-  var lapGlow = new T.MeshBasicMaterial({ color: 0x1b2a55 }), lap = new T.Group(); lap.position.set(4.2, 0.93, -0.7);
+  var lapGlow = new T.MeshBasicMaterial({ color: 0x1b2a55 }), lap = new T.Group(); lap.position.set(3.6, 0.93, -0.7);
   lap.add(box(0.95, 0.05, 0.65, lam(0x3b4660), 0, 0, 0)); var scr = box(0.95, 0.62, 0.05, [lam(0x3b4660), lam(0x3b4660), lam(0x3b4660), lam(0x3b4660), lam(0x3b4660), lapGlow]); scr.position.set(0, 0.33, -0.3); scr.rotation.x = -0.12; lap.add(scr); room.add(lap);
   var lapCode = ctex(256, 160, function (x, w, h) { x.fillStyle = '#0b1b3a'; x.fillRect(0, 0, w, h); var cols = ['#d6ff3f', '#7fb8ff', '#ffffff']; for (var i = 0; i < 9; i++) { x.fillStyle = cols[i % 3]; x.fillRect(16 + (i % 3) * 14, 14 + i * 15, 40 + ((i * 37) % 120), 7); } });
 
@@ -115,19 +117,19 @@
     var im = new Image(); im.onload = function () { m.scale.y = c[1] * im.height / im.width; }; im.src = 'assets/sky/cloud-' + c[0] + '.webp';
   });
   var slabMat = new T.MeshBasicMaterial({ color: 0xffffff }); [[16, 0.7, 5, 0, -0.35, 0], [12, 0.6, 4, 1, -0.7, -0.6], [9, 0.8, 3, -3, -0.55, 0.4], [7, 0.7, 3, 4, -0.5, 0.5]].forEach(function (s) { skyW.add(box(s[0], s[1], s[2], slabMat, s[3], s[4], s[5])); });
-  var SKYSEAT = [['ardellio', PEOPLE.ardellio], ['rafa', PEOPLE.rafa], ['nabila', PEOPLE.nabila], ['jahfal', PEOPLE.jahfal], ['s1', SLOT], ['s2', SLOT], ['s3', SLOT]], skyChars = [];
+  var SKYSEAT = [['ardellio', PEOPLE.ardellio], ['rafa', PEOPLE.rafa], ['nabila', PEOPLE.nabila], ['jahfal', PEOPLE.jahfal], ['revalina', PEOPLE.revalina], ['tarina', PEOPLE.tarina], ['s1', SLOT]], skyChars = [];
   SKYSEAT.forEach(function (s, i) { var c = mkChar(s[1], false); c.position.set((i - 3) * 1.75, 0, 0.2 + (i % 2) * 0.35); skyW.add(c); skyChars.push(c); });
 
   /* ---------- kamera ---------- */
   var KF = [
     [0.00, 0, 17, 10.5, 0, 0, -1],
-    [0.10, 0, 4.4, 9.5, 0, 1.5, -1.5],
-    [0.17, -2.8, 2.3, 3.6, -2.8, 1.45, -1.6],
-    [0.31, -2.8, 2.15, 3.3, -2.8, 1.5, -1.6],
-    [0.37, 1.4, 2.1, 3.2, 1.4, 1.5, -1.6],
-    [0.46, 1.4, 2.0, 3.0, 1.4, 1.5, -1.6],
-    [0.51, 4.2, 2.1, 2.6, 4.2, 1.35, -1.6],
-    [0.57, 4.2, 2.3, 3.0, 3.6, 1.6, -1.4],
+    [0.10, 0, 4.8, 11.2, 0, 1.5, -1.5],
+    [0.17, -2.4, 2.3, 3.6, -2.4, 1.45, -1.6],
+    [0.31, -2.4, 2.15, 3.3, -2.4, 1.5, -1.6],
+    [0.37, 1.2, 2.1, 3.2, 1.2, 1.5, -1.6],
+    [0.46, 1.2, 2.0, 3.0, 1.2, 1.5, -1.6],
+    [0.51, 3.6, 2.1, 2.6, 3.6, 1.35, -1.6],
+    [0.57, 3.6, 2.3, 3.0, 3.0, 1.6, -1.4],
     [0.62, 0, 5.4, 11.5, 0, 3.4, -2],
     [0.70, 0, 3.8, 9, 0, 2.4, -1],
     [0.78, 0, 2.3, 8.2, 0, 2.2, 2.2],
@@ -180,7 +182,7 @@
       });
     } else {
       scene.background.copy(SKY); hemi.intensity = 1.05; sun.intensity = 1.0; lamp.intensity = 0;
-      skyChars.forEach(function (c, i) { var u = c.userData, up = seg(p, 0.89 + i * 0.012, 0.94 + i * 0.012); c.position.y = (1 - sm(up)) * -3 + Math.abs(Math.sin(t * 2.2 + i * 0.8)) * 0.1; u.aL.rotation.x = -2.8 + Math.sin(t * 5 + i) * 0.35; u.aR.rotation.x = -2.8 + Math.sin(t * 5 + i + 1.3) * 0.35; u.head.rotation.y = Math.sin(t * 1.1 + i) * 0.3; c.visible = up > 0.001; if (i > 3) { u.aL.rotation.x = -0.2; u.aR.rotation.x = -0.2; } });
+      skyChars.forEach(function (c, i) { var u = c.userData, up = seg(p, 0.89 + i * 0.012, 0.94 + i * 0.012); c.position.y = (1 - sm(up)) * -3 + Math.abs(Math.sin(t * 2.2 + i * 0.8)) * 0.1; u.aL.rotation.x = -2.8 + Math.sin(t * 5 + i) * 0.35; u.aR.rotation.x = -2.8 + Math.sin(t * 5 + i + 1.3) * 0.35; u.head.rotation.y = Math.sin(t * 1.1 + i) * 0.3; c.visible = up > 0.001; if (i > 5) { u.aL.rotation.x = -0.2; u.aR.rotation.x = -0.2; } });
       clouds.forEach(function (m, i) { m.position.x += Math.sin(t * 0.2 + i) * 0.002; });
     }
     if (inSky) pathAt(SKYKF, p, P3, L3); else pathAt(KF, p, P3, L3);

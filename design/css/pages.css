@@ -261,3 +261,8 @@
 .cap--hero h2 { font-size: clamp(34px, 6vw, 80px); } .cap--hero .cap__when { justify-self: center; background: rgba(8, 24, 70, .5); padding: 5px 14px; border-radius: 999px; } .cap--end.on { pointer-events: auto; } .cap--end .btn { margin-top: 6px; }
 .s3d.is-static { height: auto; margin-top: 0; } .s3d.is-static .s3d__stage { position: relative; height: auto; padding: 110px 0 50px; display: grid; gap: 14px; justify-items: center; background: linear-gradient(180deg, var(--sky-deep), var(--sky-1)); } .s3d.is-static #s3d, .s3d.is-static .s3d__flash { display: none; } .s3d.is-static .cap { position: relative; left: auto; bottom: auto; top: auto; transform: none; opacity: 1; visibility: visible; } .s3d.is-static .talk, .s3d.is-static .cap__note { opacity: 1; transform: none; }
 @media (max-width: 759px) { .cap { bottom: 100px; padding: 14px 16px 16px; border-radius: 22px; } .cap--hero { top: 9vh; bottom: auto; } .s3d { height: 900vh; } .cap--end { top: 8vh; } }
+
+.qcard--mid blockquote { font-size: clamp(40px, 7vw, 64px); line-height: 1; letter-spacing: -.055em; font-weight: 600; }
+.qcard--word blockquote { font-size: clamp(30px, 4.6vw, 46px); line-height: 1.02; letter-spacing: -.04em; font-weight: 700; overflow-wrap: anywhere; }
+@media (min-width: 640px) { .cap--cols { grid-template-columns: 1fr 1fr; column-gap: 26px; } .cap--cols .cap__when { grid-column: 1 / -1; } }
+.cap--cols .talk span { font-size: clamp(16px, 1.9vw, 22px); }
