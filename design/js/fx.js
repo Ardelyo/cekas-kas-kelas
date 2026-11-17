@@ -13,7 +13,7 @@
     var el = e.target.closest('.btn, .fab, .wk, .tx, .pos, .quick button, .eye, .seg label'); if (!el || el.disabled || el.dataset.state) return;
     var r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, s = document.createElement('span');
     s.className = 'fx-rip'; s.style.cssText = 'width:' + d + 'px;height:' + d + 'px;left:' + (e.clientX - r.left - d / 2) + 'px;top:' + (e.clientY - r.top - d / 2) + 'px';
-    el.classList.add('fx-host'); el.appendChild(s); setTimeout(function () { s.remove(); }, 700);
+    if (getComputedStyle(el).position === 'static') el.classList.add('fx-rel'); el.classList.add('fx-host'); el.appendChild(s); setTimeout(function () { s.remove(); }, 700);
   }, { passive: true });
 
   /* tombol: idle → loading → ok/fail. work() opsional mengembalikan false untuk gagal. */
@@ -79,5 +79,16 @@
   function closeSheet(d) { if (!d.open) return; if (reduce) { d.close(); return; } d.classList.add('is-closing'); setTimeout(function () { d.close(); d.classList.remove('is-closing'); }, 260); }
   function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
 
-  window.fx = { commit: commit, burst: burst, stamp: stamp, fly: fly, sheen: sheen, glow: glow, bump: bump, shake: shake, closeSheet: closeSheet, buzz: buzz, wait: wait, reduce: reduce };
+  function veil(kind, o) {
+    o = o || {}; var v = document.createElement('div'); v.className = 'veil veil--' + kind;
+    if (kind === 'night') {
+      var st = document.createElement('div'); st.className = 'veil__stars';
+      for (var i = 0; i < 54; i++) { var s = document.createElement('i'), z = rand(1, 2.8); s.style.cssText = 'left:' + rand(0, 100) + '%;top:' + rand(0, 100) + '%;width:' + z + 'px;height:' + z + 'px;opacity:' + rand(.35, .95) + ';animation-delay:' + rand(-3, 0) + 's;animation-duration:' + rand(2.4, 4.6) + 's'; st.appendChild(s); }
+      v.appendChild(st);
+    }
+    if (o.msg) { var m = document.createElement('div'); m.className = 'veil__msg'; m.innerHTML = '<b>' + o.msg.title + '</b><span>' + o.msg.sub + '</span>'; v.appendChild(m); }
+    document.body.appendChild(v); return v;
+  }
+
+  window.fx = { veil: veil, commit: commit, burst: burst, stamp: stamp, fly: fly, sheen: sheen, glow: glow, bump: bump, shake: shake, closeSheet: closeSheet, buzz: buzz, wait: wait, reduce: reduce };
 })();

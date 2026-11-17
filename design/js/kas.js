@@ -418,10 +418,25 @@
     renderAll();
   }
   $('#roleLabel').addEventListener('click', function (e) {
-    if (state.role === 'siswa') return; e.preventDefault();
-    var was = state.role; state.role = 'siswa'; try { sessionStorage.removeItem('cekas-role'); } catch (x) {} applyRole();
-    toast('Kamu sudah keluar.', function () { state.role = was; try { sessionStorage.setItem('cekas-role', was); } catch (x) {} applyRole(); });
+    if (state.role === 'siswa') return; e.preventDefault(); leaveScene(state.role);
   });
+  var leaving = false;
+  async function leaveScene(was) {
+    if (leaving) return; leaving = true;
+    var name = { bendahara: 'Bendahara', guru: 'Wali Kelas' }[was] || '';
+    var go = function () { try { sessionStorage.removeItem('cekas-role'); sessionStorage.setItem('cekas-scene', 'keluar'); } catch (x) {} location.href = 'login.html'; };
+    if (fx.reduce) return go();
+    var ease = 'cubic-bezier(.2,.7,.1,1)';
+    document.body.classList.add('leaving'); toastEl.classList.remove('is-on');
+    var v = fx.veil('night', { msg: { title: 'Sampai jumpa', sub: 'Keluar dari sesi ' + name } }), msg = $('.veil__msg', v);
+    v.classList.add('veil--curtain'); msg.style.opacity = 0;
+    var cur = v.animate([{ maskPosition: '0 100%', webkitMaskPosition: '0 100%' }, { maskPosition: '0 0%', webkitMaskPosition: '0 0%' }], { duration: 1300, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
+    cur.finished.then(function () { v.classList.remove('veil--curtain'); });
+    await fx.wait(1150);
+    msg.animate([{ opacity: 0, transform: 'translateY(-44%)' }, { opacity: 1, transform: 'translateY(-50%)' }], { duration: 850, fill: 'forwards', easing: ease });
+    await fx.wait(1750);
+    msg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, fill: 'forwards' }); await fx.wait(500); go();
+  }
   $('#demoRole').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { state.role = b.dataset.v; applyRole(); } });
   $('#demoWx').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.wx = b.dataset.v; $$('#demoWx button').forEach(function (x) { x.classList.toggle('on', x === b); }); applyWeather(); });
 
@@ -447,12 +462,19 @@
     $$('.reveal').forEach(function (el) { io.observe(el); });
   } else { $$('.reveal').forEach(function (el) { el.classList.add('is-in'); }); }
 
+  /* ---------- scene tiba (setelah masuk) ---------- */
+  var arriving = document.documentElement.classList.contains('scene-masuk');
+  if (arriving) {
+    var dv = fx.veil('day'); document.documentElement.classList.remove('scene-masuk'); document.body.classList.add('arriving');
+    dv.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1500, delay: 300, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished.then(function () { dv.remove(); setTimeout(function () { document.body.classList.remove('arriving'); }, 1800); });
+  }
+
   /* ---------- mulai ---------- */
   renderPosChips(); syncForm(); applyRole(); onScroll();
   setAmount(0, false); setAmount(saldo(), true);
   verify();
   if (hasGsap && !reduce) {
-    gsap.from('.hero > *', { y: 18, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', clearProps: 'all' });
+    gsap.from('.hero > *', { y: 18, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', clearProps: 'all', delay: arriving ? 1.0 : 0 });
     var line = $('#sparkLine'); if (line.getTotalLength) { var L = line.getTotalLength(); gsap.fromTo(line, { strokeDasharray: L, strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut', delay: 0.3, onComplete: function () { line.style.strokeDasharray = 'none'; } }); }
   }
 })();

@@ -79,12 +79,37 @@
       if (n >= MAX) { await fx.wait(reduce ? 0 : 400); lockNow(LOCK_MS); return; }
       setErr(ROLES[role].err + ' Sisa ' + (MAX - n) + ' percobaan.', true); fx.shake(box); pw.select(); return;
     }
-    store.del('cekas-att-' + role); store.set('cekas-role', role);
-    $('#doneTitle').textContent = 'Selamat datang, ' + ROLES[role].name;
-    $('#doneSub').textContent = role === 'guru' ? 'Membuka antrean verifikasi…' : 'Membuka kas kelas…';
-    sky.classList.add('is-open'); show('vDone'); fx.buzz(18);
-    setTimeout(function () { location.href = 'kas.html'; }, reduce ? 300 : 1700);
+    store.del('cekas-att-' + role); store.set('cekas-role', role); fx.buzz(18);
+    ascend();
   });
+
+  /* ---- scene: naik menembus awan lalu putih terang ---- */
+  async function ascend() {
+    var go = function () { store.set('cekas-scene', 'masuk'); location.href = 'kas.html'; };
+    if (reduce) return go();
+    $('#bwName').textContent = ROLES[role].name;
+    var big = $('#bigWelcome'), ease = 'cubic-bezier(.2,.7,.1,1)';
+    document.body.style.overflow = 'hidden';
+    await fx.wait(250);
+    panel.classList.add('is-leaving'); $('.gate__intro').classList.add('is-leaving'); $('.authwrap').classList.add('is-leaving');
+    await fx.wait(400); sky.classList.add('is-ascend');
+    big.animate([{ opacity: 0, transform: 'translateY(-44%) scale(.92)' }, { opacity: 1, transform: 'translateY(-50%) scale(1)' }], { duration: 900, delay: 450, fill: 'forwards', easing: ease });
+    await fx.wait(1800);
+    var v = fx.veil('day'); v.style.opacity = 0; v.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 750, fill: 'forwards', easing: 'ease-in' });
+    big.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' });
+    await fx.wait(780); go();
+  }
+
+  /* ---- scene: fajar setelah keluar ---- */
+  function dawn() {
+    var wrap = $('.authwrap'), root = document.documentElement;
+    wrap.classList.add('dawnwait'); sky.classList.add('dawn');
+    var v = fx.veil('night'); root.classList.remove('scene-keluar');
+    v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 2000, delay: 450, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished.then(function () { v.remove(); });
+    setTimeout(function () { wrap.classList.remove('dawnwait'); }, 1500);
+    var pill = document.createElement('span'); pill.className = 'signedout'; pill.textContent = 'Kamu sudah keluar. Sampai jumpa lagi.';
+    $('#pTitle').parentNode.insertBefore(pill, $('.rs')); setTimeout(function () { pill.remove(); }, 7000);
+  }
 
   /* ---- alat desain ---- */
   $('#dFill').addEventListener('click', function () { show('vForm'); pw.value = ROLES[role].pass; meter(); pw.focus(); });
@@ -103,5 +128,6 @@
   /* ---- mulai ---- */
   if (/state=terkunci/.test(location.search)) { store.set('cekas-lock-' + role, String(Date.now() + LOCK_MS - 28000)); }
   setRole(role, false);
+  if (document.documentElement.classList.contains('scene-keluar')) dawn();
   if (!lockAt(role) || lockAt(role) <= Date.now()) setTimeout(function () { pw.focus({ preventScroll: true }); }, 400);
 })();
