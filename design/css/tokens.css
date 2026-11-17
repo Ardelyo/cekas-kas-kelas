@@ -1,0 +1,26 @@
+/* CEKAS "Langit" — token desain (satu sumber untuk semua halaman). Muat paling awal. */
+:root {
+  /* langit */
+  --sky-1: #1e6fe8; --sky-2: #4d9bf0; --sky-3: #8ccbf5; --sky-4: #cfe6fb; --sky-deep: #0a2a78; --sky-night: #06173f;
+  /* permukaan + tinta */
+  --paper: #f7f9fc; --paper-2: #eef2f8; --paper-3: #e3e9f3; --white: #fff;
+  --ink: #0b1b3a; --ink-2: #3b4a68; --ink-3: #5f6c88; --line: rgba(11, 27, 58, .08);
+  /* status + aksen (hanya keluarga biru + hijau/merah fungsional + lime sebagai satu-satunya aksen) */
+  --ok: #0f8a3e; --ok-bg: rgba(15, 138, 62, .12); --bad: #d93a40; --bad-bg: #ffe6e6; --wait: #5a6b8c; --wait-bg: #e8edf6;
+  --lime: #d6ff3f; --lime-ink: #1b2400;
+  /* pos anggaran */
+  --pos-op: #1e6fe8; --pos-so: #2fb1e6; --pos-ev: #0a2a78; --pos-ca: #7f8fb0;
+  /* bentuk */
+  --r-s: 14px; --r-m: 24px; --r-l: 32px; --r-xl: 44px; --pill: 999px;
+  /* gerak: kurva dan durasi baku */
+  --ease: cubic-bezier(.2, .7, .1, 1); --spring: cubic-bezier(.34, 1.56, .64, 1); --glide: cubic-bezier(.55, 0, .25, 1);
+  --dur-1: 200ms; --dur-2: 350ms; --dur-3: 600ms; --dur-4: 1200ms;
+  /* tipografi + tata letak */
+  --sans: "Inter Tight", "Segoe UI", system-ui, -apple-system, sans-serif; --mark: "Bricolage", var(--sans);
+  --gutter: clamp(16px, 4.5vw, 64px); --maxw: 1200px;
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 14px 34px -22px rgba(10, 42, 120, .35);
+  /* ruang: skala jarak untuk tata letak lega */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 72px;
+  /* lapisan (z-index) */
+  --z-sheet: 50; --z-fab: 55; --z-nav: 60; --z-popover: 700; --z-veil: 610;
+}

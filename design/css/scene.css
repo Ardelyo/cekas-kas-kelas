@@ -1,0 +1,55 @@
+/* CEKAS "Langit" — scene masuk (naik menembus awan) dan keluar (malam turun). */
+:root { --veil-day: radial-gradient(80% 60% at 50% 55%, #ffffff 0%, #eaf5ff 48%, #cfe6fb 100%); --veil-night: linear-gradient(180deg, #02081f 0%, #06173f 48%, #0a2a78 100%); }
+
+/* penutup pra-render supaya tidak ada kedip antar halaman */
+html.scene-masuk::after, html.scene-keluar::after { content: ""; position: fixed; inset: 0; z-index: 600; pointer-events: none; }
+html.scene-masuk::after { background: var(--veil-day); }
+html.scene-keluar::after { background: var(--veil-night); }
+
+.veil { position: fixed; inset: 0; z-index: 610; pointer-events: none; overflow: hidden; }
+.veil--day { background: var(--veil-day); }
+.veil--night { background: var(--veil-night); }
+.veil--curtain { -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, #000 42%, transparent 100%); -webkit-mask-size: 100% 300%; mask-size: 100% 300%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: 0 100%; mask-position: 0 100%; }
+.veil__stars { position: absolute; inset: 0 0 35% 0; }
+.veil__stars i { position: absolute; border-radius: 50%; background: #fff; animation: twinkle 3.2s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: .25; transform: scale(.7); } }
+.veil__msg { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; color: #fff; display: grid; gap: 8px; justify-items: center; }
+.veil__msg b { font-size: clamp(38px, 8vw, 84px); letter-spacing: -.05em; font-weight: 600; line-height: 1; }
+.veil__msg span { font-size: clamp(14px, 2.4vw, 18px); color: rgba(255, 255, 255, .75); letter-spacing: .06em; }
+.veil__cloud { position: absolute; width: 22vw; min-width: 150px; left: -25vw; top: 62%; opacity: .55; filter: blur(.4px); animation: veilcloud 5s linear forwards; }
+@keyframes veilcloud { to { left: 110vw; } }
+
+/* ---- keluar: halaman turun ---- */
+body.leaving > *:not(.veil):not(.toast):not(.demo):not(svg) { transition: transform 1.2s var(--ease), filter 1.2s var(--ease); transform: translateY(22px) scale(.97); filter: blur(3px) saturate(.6) brightness(.85); }
+
+/* ---- masuk (tiba di dashboard): langit mendarat ---- */
+body.arriving .skyhead .sky { animation: arrivesky 2.4s var(--ease) .15s both; transform-origin: 50% 80%; }
+@keyframes arrivesky { from { transform: scale(1.6); filter: blur(10px) brightness(1.5); } to { transform: none; filter: none; } }
+body.arriving .skyhead .sky__cloud--a { animation: arrivecloud 2.6s var(--ease) .1s both; }
+@keyframes arrivecloud { from { transform: translateY(30%) scale(1.5); opacity: 0; } to { transform: none; } }
+body.arriving .nav { animation: arrivenav 1s var(--ease) .9s both; }
+@keyframes arrivenav { from { opacity: 0; transform: translateY(-14px); } }
+
+/* ---- masuk (meninggalkan login): naik menembus awan ---- */
+.authsky.is-ascend .sky__photo { animation: none; transform: scale(2.3) translateY(10%); filter: brightness(1.3) saturate(1.1); transition: transform 2.3s cubic-bezier(.55, 0, .25, 1), filter 2.3s ease-in; }
+.authsky.is-ascend .sky__tint { background: linear-gradient(180deg, rgba(120, 190, 255, .25), rgba(234, 245, 255, .55)); transition: background 2s ease-in; }
+.authsky.is-ascend .sky__cloud--a { transform: scale(3.2) translateY(22%); transition: transform 2.2s cubic-bezier(.55, 0, .25, 1), opacity 1.6s ease-in 0.7s; opacity: 0; }
+.authsky.is-ascend .sky__cloud--b { transform: translate(-60vw, 10vh) scale(2.6); transition: transform 2.2s cubic-bezier(.55, 0, .25, 1), opacity 1.4s ease-in var(--dur-3); opacity: 0; }
+.authsky.is-ascend .sky__cloud--d { transform: translate(60vw, 14vh) scale(2.6); transition: transform 2.2s cubic-bezier(.55, 0, .25, 1), opacity 1.4s ease-in var(--dur-3); opacity: 0; }
+.panel.is-leaving { transition: transform .7s var(--ease), opacity .55s; transform: translateY(40px) scale(.97); opacity: 0; pointer-events: none; }
+.gate__intro.is-leaving { transition: opacity .5s, transform .7s var(--ease); opacity: 0; transform: translateY(-20px); }
+.authwrap.is-leaving .authbar { transition: opacity .5s; opacity: 0; }
+.bigwelcome { position: fixed; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 8; text-align: center; color: #fff; display: grid; gap: 6px; justify-items: center; opacity: 0; pointer-events: none; text-shadow: 0 4px 40px rgba(6, 23, 63, .5); }
+.bigwelcome span { font-size: clamp(15px, 2.6vw, 20px); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; opacity: .9; }
+.bigwelcome b { font-size: clamp(44px, 10vw, 120px); letter-spacing: -.055em; font-weight: 600; line-height: .95; }
+
+/* ---- fajar di halaman masuk setelah keluar ---- */
+.authsky.dawn .sky__photo { animation: dawnphoto 3.4s var(--ease) both, drift 70s ease-in-out infinite alternate; }
+@keyframes dawnphoto { from { filter: brightness(.22) saturate(.6); } to { filter: none; } }
+.authsky.dawn .sky__tint { animation: dawntint 3.2s var(--ease) both; }
+@keyframes dawntint { from { opacity: 1; background: linear-gradient(180deg, rgba(2, 8, 31, .95), rgba(6, 23, 63, .9)); } to { opacity: 1; } }
+.authwrap.dawnwait .panel, .authwrap.dawnwait .gate__intro { opacity: 0; transform: translateY(30px); }
+.authwrap .panel, .authwrap .gate__intro { transition: opacity 1s var(--ease), transform 1.1s var(--ease); }
+.signedout { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--ok-bg); color: #0b6b30; font-size: 13.5px; font-weight: 600; margin-bottom: 12px; }
+
+@media (prefers-reduced-motion: reduce) { .veil__stars i, .veil__cloud { animation: none !important; } body.arriving .skyhead .sky, body.arriving .sky__cloud--a, body.arriving .nav, .authsky.dawn .sky__photo, .authsky.dawn .sky__tint { animation: none !important; } }

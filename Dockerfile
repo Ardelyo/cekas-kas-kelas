@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY cekas_app/ ./cekas_app/
 COPY cekas_core/ ./cekas_core/
+COPY design/ ./design/
 COPY run.py .
 
 # Jalankan sebagai pengguna biasa; /tmp tetap bisa ditulis (database diganti dari Cloud Storage saat boot).

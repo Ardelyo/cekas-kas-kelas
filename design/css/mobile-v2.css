@@ -1,0 +1,66 @@
+/* CEKAS "Langit" — MOBILE v2: layar terpisah, lega, permukaan rata (≤ 759px). Dimuat setelah mobile.css. */
+.mtabs { display: none; }
+@media (max-width: 759px) {
+  /* ---------- tab bawah situs ---------- */
+  .has-mtabs { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .mtabs { position: fixed; z-index: 80; left: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(calc(100% - 24px), 460px); display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px; border-radius: 999px; background: rgba(247, 249, 252, .88); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6); box-shadow: 0 0 0 1px var(--line), 0 22px 44px -18px rgba(10, 42, 120, .5); }
+  .mtabs__pill { position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc((100% - 12px) / 5); border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px var(--line), 0 8px 16px -10px rgba(10, 42, 120, .6); transform: translateX(calc(var(--i, 0) * 100%)); transition: transform .6s var(--spring); }
+  .mtabs a { position: relative; z-index: 1; display: grid; justify-items: center; gap: 2px; padding: 9px 2px 8px; min-height: 56px; text-decoration: none; color: var(--ink-3); font-size: 11.5px; font-weight: 600; transition: color var(--dur-2); } .mtabs a.on { color: var(--ink); }
+  .mtabs .ic { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; transition: transform .5s var(--spring); } .mtabs a.on .ic { transform: translateY(-1px) scale(1.08); }
+  .nav__burger, .stickycta { display: none !important; }
+  .nav { padding-right: 8px; }
+
+  /* ---------- landing: hanya inti, sisanya jadi halaman sendiri ---------- */
+  .mq, .stats, .about, .bento, .roles, .try, .flow, .testi, .faq { display: none; }
+  .statement { padding: 72px var(--gutter) 24px; } .statement__text { font-size: clamp(26px, 8vw, 34px); max-width: none; }
+  .dusk { margin-top: 24px; padding-top: 72px; } .outro__row { display: none; } .outro { margin-top: 56px; } .dusk .foot__credit { margin-top: 28px; }
+  /* di halaman Cara: bagian yang tadinya disembunyikan di landing harus tampil */
+  body.page-cara .flow, body.page-cara .roles, body.page-tanya .testi, body.page-tanya .faq { display: block; }
+
+  /* ---------- ruang lega dan permukaan rata ---------- */
+  .page { gap: var(--space-7); padding-bottom: var(--space-6); }
+  .sec-h { font-size: 26px; letter-spacing: -.04em; margin-bottom: var(--space-4); } .sec-h small, .note { font-size: 14px; }
+  .card { background: transparent; box-shadow: none; padding: 0; border-radius: 0; }
+  .tip { background: none; box-shadow: none; border-radius: 0; padding: 14px 0; border-top: 1px solid var(--line); } .tips { gap: 0; } .tip:first-child { border-top: 0; }
+  .prop { padding: 22px; border-radius: 28px; box-shadow: 0 0 0 1px var(--line); background: #fff; } .props { gap: var(--space-4); }
+  .pos { background: var(--paper-2); box-shadow: none; padding: 18px; border-radius: 26px; } .pos__v { font-size: 22px; }
+  .tx { background: none; box-shadow: none; border-radius: 0; padding: 16px 0; border-top: 1px solid var(--line); } .txlist { gap: 0; } .txlist .tx:first-child { border-top: 0; } .tx:active { transform: none; background: var(--paper-2); }
+  .tx { grid-template-columns: 40px 1fr auto; gap: 14px; } .tx .ico { width: 40px; height: 40px; }
+  .empty { background: none; padding: 32px 0; }
+  .share { grid-template-columns: 1fr; gap: var(--space-5); } .qr { width: 148px; height: 148px; margin: 0 auto; }
+  .hist-more { width: 100%; margin-top: var(--space-4); } .tx--extra, .day--extra { display: none; } #history.show-all .day--extra { display: block; } #history.show-all .tx--extra { display: grid; }
+  .dues-more { height: 36px; padding: 0 14px; border-radius: 999px; background: var(--paper-2); font-weight: 600; font-size: 13px; text-transform: none; letter-spacing: 0; color: var(--ink); } .who--paid { display: none; } #duesCard.show-paid .who--paid { display: flex; }
+  .sub-h { margin: var(--space-5) 0 var(--space-3); }
+
+  /* ---------- dashboard: satu layar satu fokus ---------- */
+  body[data-screen="beranda"] section[data-screen]:not([data-screen="beranda"]),
+  body[data-screen="iuran"] section[data-screen]:not([data-screen="iuran"]),
+  body[data-screen="kas"] section[data-screen]:not([data-screen="kas"]),
+  body[data-screen="lainnya"] section[data-screen]:not([data-screen="lainnya"]) { display: none; }
+  body[data-screen]:not([data-screen="beranda"]) .skyhead { display: none; }
+  body[data-screen="beranda"] .page { margin-top: var(--space-6); }
+  body[data-screen]:not([data-screen="beranda"]) .page { margin-top: 0; padding-top: calc(76px + env(safe-area-inset-top)); }
+  .scrhead { display: none; } body[data-screen]:not([data-screen="beranda"]) .scrhead { display: block; margin-bottom: calc(var(--space-2) * -1); }
+  .scrhead h2 { font-size: 38px; letter-spacing: -.05em; line-height: 1; font-weight: 600; } .scrhead p { margin-top: var(--space-2); color: var(--ink-3); font-size: 16px; }
+  body.scr-r .page > section[data-screen], body.scr-r .page > .scrhead, body.scr-r .col-l > section, body.scr-r .col-r > section { animation: scrr .6s var(--ease) both; } body.scr-l .page > section[data-screen], body.scr-l .page > .scrhead { animation: scrl .6s var(--ease) both; }
+  @keyframes scrr { from { opacity: 0; transform: translateX(36px); } } @keyframes scrl { from { opacity: 0; transform: translateX(-36px); } }
+  .skyhead { padding-bottom: 52px; min-height: 0; border-radius: 0 0 40px 40px; } .skyhead .hero__row { margin-top: var(--space-4); } #forecastChip, .wxchip { display: none; } .sparkcard { margin-top: var(--space-5); height: 72px; }
+  .minibar { padding-bottom: 12px; }
+
+  /* ---------- iuran: tenang dan fokus ---------- */
+  .sched { background: transparent; box-shadow: none; padding: 0; gap: var(--space-5); border-radius: 0; }
+  .sched__head { align-items: center; } .sched__m { font-size: 30px; } .sched__k { display: none; }
+  .sched__tools { gap: var(--space-2); } .sched__tools .btn { background: var(--paper-2); box-shadow: none; }
+  .sched__lane { margin-bottom: -2px; }
+  .swk { padding: 0 2px 8px; border-radius: 20px; min-height: 0; } .swk.on { background: none; box-shadow: none; } .swk__bar, .swk small, .swk__chip:not(.now) { display: none; } .swk__r { color: var(--ink-3); } .swk b { font-size: 14px; }
+  .sched__detail { padding: 26px 22px; border-radius: 30px; gap: var(--space-4); } .sd__days, .sd__barl { display: none; } .sd__bar { margin-top: var(--space-4); }
+  .sched__all { display: none; } .sched__alert { border-radius: 24px; padding: 16px; }
+  .dues-top { margin-bottom: var(--space-5); } .who { gap: 10px; } .stu { min-height: 44px; }
+  .locked { padding: var(--space-5) 0; }
+}
+@media (max-width: 759px) {
+  body.fitur-tabs .fsec, body.fitur-tabs #banding, body.fitur-tabs #peran { display: none; } body.fitur-tabs .is-fshown { display: block; animation: scrr .6s var(--ease) both; }
+  .fnav { margin-top: -26px; } .fsec, .psec { padding-top: var(--space-6); } body.fitur-tabs .cta-band { margin-top: var(--space-7); }
+  .tx .am { white-space: nowrap; } body[data-sky-kasmode] { padding-bottom: 150px; }
+}
+@media (prefers-reduced-motion: reduce) { .mtabs__pill, .mtabs .ic { transition: none; } body.scr-r .page > section, body.scr-l .page > section { animation: none !important; } }
