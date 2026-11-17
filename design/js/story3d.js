@@ -128,7 +128,7 @@
 
   /* ================= tokoh ================= */
   var SPEC = {
-    jahfal: { skin: 0xc9946b, hair: 0x1d1814, top: 0x1c2a52, bot: 0xe8edf5, style: 'short', photo: 'jahfal' },
+    jahfal: { skin: 0xc9946b, hair: 0x211b18, top: 0xcdbb55, bot: 0x34405e, style: 'short', photo: 'jahfal' },
     ardellio: { skin: 0xd9a67f, hair: 0x16130f, top: 0xf2f5fb, bot: 0x72839f, style: 'short', photo: 'ardellio', collar: 0xffffff },
     nabila: { skin: 0xe5b894, hair: 0xd8d9d6, top: 0x8b9097, bot: 0x40454f, style: 'hijab', photo: 'nabila' },
     rafa: { skin: 0xb98863, hair: 0x14110e, top: 0x1b1c20, bot: 0x3a3d46, style: 'short', photo: 'rafa' },
