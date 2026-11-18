@@ -28,6 +28,7 @@ from .config import (
 )
 from .bot import db, build_telegram_app, _post_init, _after_decision, notify_many
 from .database import WEB_WALI_ID
+from . import version as appver
 from .export_excel import generate_excel_report
 from .formatters import format_rupiah, parse_nominal, format_wib, WIB
 from .generate_chart import generate_financial_chart
@@ -274,11 +275,16 @@ async def guru_logout():
 
 
 # ------------------------------------------------------------- publik (hanya baca)
+@app.get("/api/version")
+async def api_version():
+    return JSONResponse(appver.info())
+
+
 @app.get("/api/health")
 async def health_check():
     rep = runtime.store.status if runtime.store else None
     return JSONResponse({
-        "status": "ok", "telegram_webhook_ready": tg_app is not None,
+        "status": "ok", "version": appver.VERSION, "commit": appver.COMMIT, "telegram_webhook_ready": tg_app is not None,
         "replication": None if rep is None else {
             "ok": rep["last_error"] is None and not rep["conflict"], "uploads": rep["uploads"],
             "age_s": None if not rep["last_ok"] else round(time.time() - rep["last_ok"]),
