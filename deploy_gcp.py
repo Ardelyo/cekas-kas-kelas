@@ -96,7 +96,7 @@ def source_tarball() -> bytes:
         return None if "__pycache__" in ti.name or ti.name.endswith(".pyc") else ti
 
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
-        for item in ("Dockerfile", "requirements.txt", "run.py", "cekas_app", "cekas_core"):
+        for item in ("Dockerfile", "requirements.txt", "run.py", "cekas_app", "cekas_core", "design"):
             if (base / item).exists():
                 tar.add(str(base / item), arcname=item, filter=_f)
     return buf.getvalue()
@@ -208,7 +208,8 @@ def main() -> int:
     build = {"source": {"storageSource": {"bucket": SRC_BUCKET, "object": SRC_OBJECT}},
              "steps": [{"name": "gcr.io/cloud-builders/docker", "args": ["build", "-t", IMAGE_URI, "."]},
                        {"name": "gcr.io/cloud-builders/docker", "args": ["push", IMAGE_URI]}],
-             "images": [IMAGE_URI]}
+             "images": [IMAGE_URI],
+             "options": {"logging": "CLOUD_LOGGING_ONLY"}}
     b_url = f"https://cloudbuild.googleapis.com/v1/projects/{GCP_PROJECT_ID}/locations/{REGION}/builds"
     op = api(b_url, token, "POST", build)
     build_id = op["metadata"]["build"]["id"]
