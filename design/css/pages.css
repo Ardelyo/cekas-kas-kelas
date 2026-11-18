@@ -343,7 +343,7 @@
 .s3d.is-static .s3d__end h2 { opacity: 1; translate: none; }
 .ccard--soon .ccard__init { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; font: 800 clamp(90px, 14vw, 160px)/1 var(--mark); color: rgba(255, 255, 255, .92); text-shadow: 0 10px 30px rgba(6, 23, 63, .35); }
 @media (max-width: 759px) {
-  .s3d__ctl { top: 78px; right: 10px; } .s3d__ctl .btn { padding: 8px 12px; font-size: 13px; }
+  .s3d__ctl { top: 78px; left: 10px; right: 10px; flex-wrap: wrap; justify-content: flex-end; } .s3d__ctl .btn { padding: 8px 12px; font-size: 13px; }
   .s3d__narr { top: 128px; left: 12px; } .narr__txt { font-size: 15.5px; }
   .s3d__chat { top: auto; bottom: 104px; translate: 0 0; right: 12px; } .msg span { font-size: 13.5px; } .chat__list { gap: 5px; }
   .s3d__steps { bottom: 104px; gap: 6px; } .s3d__steps span { font-size: 13px; padding: 7px 12px 7px 7px; } .s3d__steps span b { width: 22px; height: 22px; }
