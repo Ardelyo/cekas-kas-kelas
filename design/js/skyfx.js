@@ -160,8 +160,8 @@
     $('.skypop__now', pop).textContent = label(e);
     $('#sxTime', pop).checked = state.time; $('#sxWx', pop).checked = state.wx; $('#sxWxS', pop).textContent = statusText();
     var mode = $('.skypop__mode', pop); if (mode) { mode.hidden = !hasKasMode; $$('button', mode).forEach(function (b) { b.classList.toggle('on', b.dataset.v === state.mode); }); }
-    if (window.motion && $('#mvPause', pop)) {
-      var ms = motion.state; $('#mvPause', pop).checked = !!ms.paused; $('#mvLite', pop).checked = motion.isLite(); $('#mvSound', pop).checked = !!ms.sound; $('#mvSpeed', pop).value = ms.speed; $('#mvSpeedV', pop).textContent = String(ms.speed).replace('.', ',') + '\u00d7';
+    if (window.motion && $('#mvLite', pop)) {
+      var ms = motion.state; $('#mvLite', pop).checked = motion.isLite(); $('#mvSound', pop).checked = !!ms.sound; $('#mvSpeed', pop).value = ms.speed; $('#mvSpeedV', pop).textContent = String(ms.speed).replace('.', ',') + '\u00d7';
       $('#mvLiteS', pop).textContent = motion.autoLite() ? 'Aktif otomatis di perangkat ini (hemat data, memori kecil, atau baterai rendah).' : 'Matikan awan berat, bintang, dan hujan. Otomatis di perangkat lemah.';
     }
     $$('[data-ph]', pop).forEach(function (b) { b.classList.toggle('on', preview.phase === b.dataset.ph); }); $$('[data-wx]', pop).forEach(function (b) { b.classList.toggle('on', preview.wx === b.dataset.wx); });
@@ -173,7 +173,6 @@
       '<label class="skysw"><span><b>Ikuti cuaca sekitar</b><small id="sxWxS"></small></span><input type="checkbox" role="switch" id="sxWx"><i></i></label>' +
       '<div class="skypop__mode" hidden><b>Di dashboard, cuaca langit mengikuti</b><div class="skyseg"><button type="button" data-v="kas">Kondisi kas</button><button type="button" data-v="real">Cuaca sekitar</button></div></div>' +
       '<details id="mvBox"><summary>Gerak dan hemat</summary>' +
-      '<label class="skysw"><span><b>Jeda gerak</b><small>Hentikan awan, karusel, dan animasi berulang.</small></span><input type="checkbox" role="switch" id="mvPause"><i></i></label>' +
       '<label class="skysw"><span><b>Mode hemat</b><small id="mvLiteS"></small></span><input type="checkbox" role="switch" id="mvLite"><i></i></label>' +
       '<label class="skysw"><span><b>Suara halus</b><small>Denting lembut saat disahkan. Mati secara bawaan.</small></span><input type="checkbox" role="switch" id="mvSound"><i></i></label>' +
       '<div class="skypop__mode"><b>Kecepatan gerak <span id="mvSpeedV">1\u00d7</span></b><input type="range" class="skyrange" id="mvSpeed" min="0.25" max="2" step="0.25" value="1" aria-label="Kecepatan gerak"><div class="skyrange__l"><span>Pelan</span><span>Normal</span><span>Cepat</span></div></div></details>' +
@@ -188,7 +187,6 @@
     $$('[data-ph]', pop).forEach(function (b) { b.addEventListener('click', function () { preview.phase = preview.phase === b.dataset.ph ? null : b.dataset.ph; apply(); }); });
     $$('[data-wx]', pop).forEach(function (b) { b.addEventListener('click', function () { preview.wx = preview.wx === b.dataset.wx ? null : b.dataset.wx; apply(); }); });
     if (window.motion) {
-      $('#mvPause', pop).addEventListener('change', function () { motion.set('paused', this.checked); });
       $('#mvLite', pop).addEventListener('change', function () { motion.set('lite', this.checked); });
       $('#mvSound', pop).addEventListener('change', function () { motion.set('sound', this.checked); if (this.checked) motion.sound('ok'); });
       $('#mvSpeed', pop).addEventListener('input', function () { motion.set('speed', +this.value); $('#mvSpeedV', pop).textContent = (+this.value).toString().replace('.', ',') + '\u00d7'; });
