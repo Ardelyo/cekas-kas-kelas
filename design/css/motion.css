@@ -2,9 +2,12 @@
 
 /* jeda gerak: semua animasi CSS berhenti */
 html.motion-paused *, html.motion-paused *::before, html.motion-paused *::after { animation-play-state: paused !important; }
+/* panel pengaturan langit tetap bisa dibuka saat gerak dijeda atau mode hemat (animasi masuknya tidak boleh ikut berhenti di keadaan transparan) */
+html.motion-paused .skypop, html.lite .skypop { animation: none !important; opacity: 1 !important; }
+html.motion-paused .skybtn, html.lite .skybtn { pointer-events: auto; }
 
 /* mode hemat: efek berat dimatikan */
-html.lite .sx-rain, html.lite .sx-flash, html.lite .sx-stars, html.lite .sx-orb { display: none; }
+html.lite .sx-rain, html.lite .sx-flash, html.lite .sx-stars, html.lite .sx-orb, html.lite .sx-aurora { display: none; }
 html.lite .hero__photo, html.lite .sky__photo { animation: none; }
 html.lite .cloud, html.lite .sky__cloud, html.lite .veil__stars i { animation: none; filter: none; }
 html.lite .mq__track { animation-duration: 120s; } html.lite .cardcloud { animation: none; }

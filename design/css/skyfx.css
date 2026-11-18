@@ -1,5 +1,5 @@
 /* CEKAS "Langit" — langit hidup: waktu (fajar, pagi, siang, sore, senja, malam) + cuaca sekitar (opsional).
-   Semua warna tetap keluarga biru. Tidak ada pink, oranye, atau ungu. */
+   Biru dominan; senja, sore, dan fajar memakai semburat hangat; malam punya aurora. */
 
 /* lapisan yang disuntik ke tiap .sky / .hero__sky */
 .sx, .sx-top, .sx-base { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
@@ -10,21 +10,30 @@ html[data-sky-wx="kabut"] .sx-img--mendung { filter: blur(7px) brightness(1.45) 
 html[data-sky-wx="badai"] .sx-img--badai { opacity: 1; }
 html[data-sky-phase="malam"]:not([data-sky-wx="mendung"]):not([data-sky-wx="hujan"]):not([data-sky-wx="kabut"]):not([data-sky-wx="badai"]) .sx-ph--malam { opacity: .4; }
 .sx-ph, .sx-wx, .sx-orb, .sx-stars, .sx-rain, .sx-flash { position: absolute; inset: 0; opacity: 0; transition: opacity 2.6s ease; }
-.sx-ph--fajar { background: linear-gradient(180deg, rgba(10, 28, 92, .55) 0%, rgba(40, 86, 170, .25) 55%, rgba(190, 215, 250, .3) 100%); }
-.sx-ph--pagi { background: linear-gradient(180deg, rgba(20, 70, 170, .14), rgba(190, 222, 255, .1)); }
-.sx-ph--sore { background: linear-gradient(180deg, rgba(14, 44, 120, .28) 0%, rgba(70, 110, 180, .22) 60%, rgba(180, 196, 225, .22) 100%); }
-.sx-ph--senja { background: linear-gradient(180deg, rgba(6, 22, 70, .62) 0%, rgba(30, 62, 140, .45) 55%, rgba(110, 140, 200, .32) 100%); }
+.sx-ph--fajar { background: linear-gradient(180deg, rgba(2, 6, 30, .9) 0%, rgba(12, 26, 90, .78) 30%, rgba(110, 86, 150, .5) 58%, rgba(255, 172, 112, .66) 90%); }
+.sx-ph--pagi { background: linear-gradient(180deg, rgba(120, 186, 255, .36) 0%, rgba(196, 228, 255, .42) 40%, rgba(255, 232, 182, .54) 85%); }
+.sx-ph--siang { background: linear-gradient(180deg, rgba(36, 150, 255, .5) 0%, rgba(110, 192, 255, .42) 60%, rgba(206, 232, 255, .32) 100%); }
+.sx-ph--sore { background: linear-gradient(180deg, rgba(60, 104, 196, .4) 0%, rgba(206, 172, 128, .42) 40%, rgba(255, 186, 92, .64) 80%); }
+.sx-ph--senja { background: linear-gradient(180deg, rgba(20, 24, 80, .72) 0%, rgba(176, 66, 84, .52) 28%, rgba(245, 104, 34, .72) 58%, rgba(255, 164, 46, .84) 90%); }
 .sx-ph--malam { background: linear-gradient(180deg, rgba(2, 8, 31, .86) 0%, rgba(5, 20, 60, .72) 55%, rgba(10, 42, 120, .5) 100%); }
 .sx-wx--mendung { background: linear-gradient(180deg, rgba(88, 102, 130, .5), rgba(120, 134, 160, .45)); }
 .sx-wx--storm { background: linear-gradient(180deg, rgba(14, 22, 48, .5), rgba(30, 44, 80, .3)); }
 .sx-wx--kabut { background: linear-gradient(180deg, rgba(150, 166, 192, .5), rgba(176, 190, 212, .5)); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
-html[data-sky-phase="fajar"] .sx-ph--fajar, html[data-sky-phase="pagi"] .sx-ph--pagi, html[data-sky-phase="sore"] .sx-ph--sore, html[data-sky-phase="senja"] .sx-ph--senja, html[data-sky-phase="malam"] .sx-ph--malam { opacity: 1; }
+html[data-sky-phase="fajar"] .sx-ph--fajar, html[data-sky-phase="pagi"] .sx-ph--pagi, html[data-sky-phase="siang"] .sx-ph--siang, html[data-sky-phase="sore"] .sx-ph--sore, html[data-sky-phase="senja"] .sx-ph--senja, html[data-sky-phase="malam"] .sx-ph--malam { opacity: 1; }
 html[data-sky-wx="mendung"] .sx-wx--mendung, html[data-sky-wx="hujan"] .sx-wx--mendung, html[data-sky-wx="badai"] .sx-wx--mendung, html[data-sky-wx="badai"] .sx-wx--storm, html[data-sky-wx="kabut"] .sx-wx--kabut { opacity: 1; }
 html[data-sky-wx="berawan"] .sx-wx--mendung { opacity: .38; }
 
 /* matahari / bulan */
 .sx-orb { inset: auto; left: calc(var(--ox, 70) * 1%); top: calc(var(--oy, 20) * 1%); width: calc(var(--os, 30) * 1vmin); height: calc(var(--os, 30) * 1vmin); margin: calc(var(--os, 30) * -.5vmin) 0 0 calc(var(--os, 30) * -.5vmin); border-radius: 50%; background: radial-gradient(circle, rgba(var(--oc, 255, 255, 255), .95) 0%, rgba(var(--oc, 255, 255, 255), .32) 38%, transparent 68%); opacity: var(--oo, 0); transition: left 3s ease, top 3s ease, width 3s ease, height 3s ease, margin 3s ease, opacity 2.6s ease; }
 html[data-sky-phase="malam"] .sx-orb { background: radial-gradient(circle, #f4f9ff 0 30%, rgba(200, 222, 255, .6) 36%, rgba(140, 182, 245, .2) 54%, transparent 72%); }
+
+/* aurora (malam yang cerah) */
+.sx-aurora { position: absolute; inset: 0 0 25% 0; opacity: var(--sx-aurora, 0); transition: opacity 3s ease; mix-blend-mode: screen; overflow: hidden; }
+.sx-aurora i { position: absolute; left: -20%; right: -20%; height: 46%; border-radius: 50%; filter: blur(18px); opacity: .95; transform-origin: 50% 100%; animation: sxaur 14s ease-in-out infinite alternate; }
+.sx-aurora i:nth-child(1) { top: 6%; background: linear-gradient(90deg, transparent 0%, rgba(60, 255, 170, .55) 30%, rgba(80, 230, 255, .5) 55%, transparent 90%); }
+.sx-aurora i:nth-child(2) { top: 18%; height: 38%; background: linear-gradient(90deg, transparent 5%, rgba(90, 160, 255, .5) 35%, rgba(150, 110, 255, .42) 65%, transparent 95%); animation-duration: 19s; animation-delay: -6s; }
+.sx-aurora i:nth-child(3) { top: 0; height: 30%; background: linear-gradient(90deg, transparent 15%, rgba(120, 255, 200, .4) 45%, rgba(60, 200, 255, .36) 70%, transparent 100%); animation-duration: 23s; animation-delay: -11s; }
+@keyframes sxaur { 0% { transform: translateX(-6%) skewX(-8deg) scaleY(.85); } 50% { transform: translateX(3%) skewX(5deg) scaleY(1.15); } 100% { transform: translateX(8%) skewX(-4deg) scaleY(.95); } }
 
 /* bintang */
 .sx-stars { opacity: var(--sx-stars, 0); inset: 0 0 35% 0; }
@@ -65,7 +74,7 @@ html[data-sky-wx="badai"] .sx-flash { animation: sxflash 11s ease-out infinite; 
 .skychips__l { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: #6b7893; font-weight: 700; margin-top: 8px; display: block; }
 .skypop__note { margin-top: 10px; color: #6b7893; font-size: 11.5px; line-height: 1.4; }
 
-@media (prefers-reduced-motion: reduce) { .sx-rain, .sx-flash, .sx-stars i { animation: none !important; } .sx-ph, .sx-wx, .sx-orb, .sx-stars { transition-duration: .01ms; } .skypop { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .sx-rain, .sx-flash, .sx-stars i, .sx-aurora i { animation: none !important; } .sx-ph, .sx-wx, .sx-orb, .sx-stars { transition-duration: .01ms; } .skypop { animation: none; } }
 
 @media (max-width: 759px) { .skypop { max-height: calc(100dvh - 90px); overflow: auto; overscroll-behavior: contain; } }
 .skypop .demo__body { width: auto; margin: 0; padding: 8px 0 0; box-shadow: none; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; display: grid; gap: 10px; }
