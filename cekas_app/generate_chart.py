@@ -99,7 +99,11 @@ def generate_financial_chart(db, class_id: str = CLASS_ID) -> BytesIO:
     try:
         from .viewmodel import ledger_rows
         rows = [r for r in reversed(ledger_rows(db, class_id, limit=10_000)) if not r["voided"]]
-        trend = [r["saldo"] for r in rows][-14:]
+        series = [r["saldo"] for r in rows]
+        if len(series) > 26:  # contoh merata sepanjang riwayat agar tren terbaca, bukan hanya hari-hari terakhir
+            idx = np.linspace(0, len(series) - 1, 26).round().astype(int)
+            series = [series[i] for i in idx]
+        trend = series
     except Exception:
         trend = []
     try:
