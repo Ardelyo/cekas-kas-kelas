@@ -18,6 +18,10 @@
   ],
   "rewrites": [
     {
+      "source": "/laporan",
+      "destination": "https://cekas-pgku264xda-uc.a.run.app/laporan"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://cekas-pgku264xda-uc.a.run.app/api/:path*"
     },
