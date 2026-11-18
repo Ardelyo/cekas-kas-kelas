@@ -656,26 +656,78 @@
   var dotsWrap = stage.querySelector('.story2__dots'); dotsWrap.innerHTML = '';
   var dots = CH.map(function (c) { var d = document.createElement('i'); d.setAttribute('role', 'button'); d.setAttribute('tabindex', '0'); d.setAttribute('aria-label', 'Ke ' + c[1]); d.title = c[1]; dotsWrap.appendChild(d); return d; });
   var tween = null;
+  var play = document.getElementById('s3dPlay');
+  var autoStart = null, autoProgress = 0;
+  function stopAuto() {
+    if (autoStart === null) return;
+    autoStart = null;
+    document.documentElement.style.scrollBehavior = '';
+    if (play) play.textContent = 'Putar otomatis';
+  }
+  function storyTop() { return sec.getBoundingClientRect().top + window.scrollY; }
+  function startAuto() {
+    stopTween();
+    var progress = (window.scrollY - storyTop()) / Math.max(1, range());
+    autoProgress = progress >= 0.999 ? 0 : Math.max(0, progress);
+    autoStart = performance.now();
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, storyTop() + range() * autoProgress);
+    if (play) play.textContent = 'Jeda cerita';
+  }
+  function advanceAuto(now) {
+    if (autoStart === null) return;
+    var progress = Math.min(1, autoProgress + Math.max(0, now - autoStart) / (TOTAL * 1000));
+    window.scrollTo(0, storyTop() + range() * progress);
+    target = progress;
+    if (progress === 1) stopAuto();
+  }
+  function manual() { stopAuto(); stopTween(); }
+  if (play) play.addEventListener('click', function () {
+    if (autoStart === null) startAuto(); else stopAuto();
+  });
   function stopTween() { if (tween) { tween.kill(); tween = null; document.documentElement.style.scrollBehavior = ''; } }
   function scrollToY(y) {
-    stopTween(); var html = document.documentElement, o = { v: window.pageYOffset }; html.style.scrollBehavior = 'auto';
+    manual(); var html = document.documentElement, o = { v: window.pageYOffset }; html.style.scrollBehavior = 'auto';
     tween = gsap.to(o, { v: y, duration: Math.min(2.4, 0.6 + Math.abs(y - o.v) / 5000), ease: 'power2.inOut', onUpdate: function () { window.scrollTo(0, o.v); }, onComplete: function () { html.style.scrollBehavior = ''; tween = null; } });
   }
   function range() { return sec.offsetHeight - stage.clientHeight; }
-  function toT(t) { scrollToY(sec.offsetTop + range() * (t / TOTAL)); }
+  function toT(t) { scrollToY(storyTop() + range() * (t / TOTAL)); }
   dots.forEach(function (d, i) { var go = function () { toT(CH[i][0] + (i ? 0.6 : 0)); }; d.addEventListener('click', go); d.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } }); });
   var replay = document.getElementById('s3dReplay'), skipBtn = document.getElementById('s3dSkip');
   if (replay) replay.addEventListener('click', function () { toT(0); });
-  if (skipBtn) skipBtn.addEventListener('click', function () { scrollToY(sec.offsetTop + sec.offsetHeight); });
-  window.addEventListener('wheel', stopTween, { passive: true }); window.addEventListener('touchstart', stopTween, { passive: true });
+  if (skipBtn) skipBtn.addEventListener('click', function () { scrollToY(storyTop() + sec.offsetHeight); });
+  window.addEventListener('wheel', manual, { passive: true });
+  window.addEventListener('touchmove', manual, { passive: true });
+  window.addEventListener('keydown', function (event) {
+    if (event.defaultPrevented || event.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (event.key === ' ' && event.target.closest('button, a')) return;
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) manual();
+  });
 
   resize(); window.addEventListener('resize', resize);
   ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: function (s) { target = s.progress; } });
   ScrollTrigger.create({ trigger: sec, start: 'top bottom', end: 'top top', onUpdate: function (s) { stage.style.setProperty('--enter', s.progress.toFixed(3)); } });
-  var running = false, inView = false;
-  function loop(n) { frame(n); if (running) requestAnimationFrame(loop); }
-  function start() { if (!running && inView && !document.hidden) { running = true; resize(); requestAnimationFrame(loop); } }
-  new IntersectionObserver(function (es) { inView = es[0].isIntersecting; if (inView) start(); else running = false; }, { rootMargin: '20% 0px' }).observe(sec);
-  document.addEventListener('visibilitychange', function () { if (document.hidden) running = false; else start(); });
+  var raf = null, inView = false;
+  function loop(now) {
+    advanceAuto(now);
+    frame(now);
+    raf = requestAnimationFrame(loop);
+  }
+  function start() {
+    if (raf === null && inView && !document.hidden) {
+      resize();
+      raf = requestAnimationFrame(loop);
+    }
+  }
+  function stop() {
+    manual();
+    if (raf !== null) cancelAnimationFrame(raf);
+    raf = null;
+  }
+  new IntersectionObserver(function (entries) {
+    inView = entries[0].isIntersecting;
+    if (inView) start(); else stop();
+  }, { rootMargin: '20% 0px' }).observe(sec);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else start(); });
   window.__s3d = { set: function (t) { target = cur = t / TOTAL; prevT = t; frame(performance.now()); }, TOTAL: TOTAL };
 })();
