@@ -452,7 +452,7 @@
     cheer: function () { [784, 988, 1175, 1568].forEach(function (f, i) { tone('triangle', f, 0, 0.25, 0.08, i * 0.05); }); },
     cricket: function () { for (var i = 0; i < 3; i++) tone('sine', 4300, 0, 0.035, 0.025, i * 0.06); }
   };
-  function play(n) { if (!soundOn || !AC) return; if (AC.state === 'suspended') AC.resume(); try { SFX[n](); } catch (e) {} }
+  function playSoundEffect(n) { if (!soundOn || !AC) return; if (AC.state === 'suspended') AC.resume(); try { SFX[n](); } catch (e) {} }
   var EVENTS = [[0.4, 'chime'], [3.1, 'whoosh'], [9.35, 'whoosh2'], [10.1, 'shout'], [31.4, 'page'], [38.5, 'huh'], [52.1, 'shout'], [60.6, 'ding'], [62.9, 'sparkle'], [76.8, 'lock'], [77.2, 'lock'], [77.6, 'lock'], [78.0, 'lock'], [78.4, 'lock'], [81.5, 'impact'], [81.7, 'glitch'], [84.6, 'stamp'], [85.0, 'sparkle'], [88.1, 'shout'], [96.6, 'cheer'], [97.0, 'sparkle'], [103.4, 'whoosh'], [106.6, 'whoosh2'], [107.4, 'chime'], [108.6, 'sparkle']];
   COINS.forEach(function (c) { EVENTS.push([c.t + 0.55, 'coin']); });
   LINES.forEach(function (l) { if (l[4] === 'chat') EVENTS.push([l[0], 'ping']); });
@@ -462,7 +462,7 @@
 
   var sndBtn = document.getElementById('s3dSound'), sndBtn2 = document.getElementById('s3dSound2');
   function syncSound() { [sndBtn, sndBtn2].forEach(function (b) { if (!b) return; b.setAttribute('aria-pressed', soundOn ? 'true' : 'false'); b.classList.toggle('is-on', soundOn); var s = b.querySelector('.snd__t'); if (s) s.textContent = soundOn ? 'Suara nyala' : (b === sndBtn2 ? 'Nyalakan suara' : 'Suara mati'); }); }
-  function toggleSound() { var v = !soundOn; if (window.motion) motion.set('sound', v); soundOn = v; if (soundOn) { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); play('chime'); } syncSound(); }
+  function toggleSound() { var v = !soundOn; if (window.motion) motion.set('sound', v); soundOn = v; if (soundOn) { audioInit(); if (AC && AC.state === 'suspended') AC.resume(); playSoundEffect('chime'); } syncSound(); }
   if (window.motion && motion.onchange) motion.onchange(function (s) { var v = !!s.sound; if (v !== soundOn) { soundOn = v; if (v) audioInit(); syncSound(); } });
   [sndBtn, sndBtn2].forEach(function (b) { if (b) b.addEventListener('click', toggleSound); });
   syncSound();
@@ -595,10 +595,10 @@
     var t = cur * TOTAL;
     if (soundOn && AC) {
       var dt = t - prevT;
-      if (dt > 0 && dt < 3) { for (var i = 0; i < EVENTS.length; i++) { var e = EVENTS[i]; if (e[0] > prevT && e[0] <= t) play(e[1]); } BUBS.forEach(function (b) { if (!b.chat && b.l[0] > prevT && b.l[0] <= t) play(b.l[4] === 'shout' ? 'shout' : b.l[4] === 'think' ? 'think' : 'pop'); }); }
-      else if (Math.abs(dt) >= 3) play('whoosh2');
+      if (dt > 0 && dt < 3) { for (var i = 0; i < EVENTS.length; i++) { var e = EVENTS[i]; if (e[0] > prevT && e[0] <= t) playSoundEffect(e[1]); } BUBS.forEach(function (b) { if (!b.chat && b.l[0] > prevT && b.l[0] <= t) playSoundEffect(b.l[4] === 'shout' ? 'shout' : b.l[4] === 'think' ? 'think' : 'pop'); }); }
+      else if (Math.abs(dt) >= 3) playSoundEffect('whoosh2');
       if (windG) windG.gain.setTargetAtTime((world !== 'room' ? 0.06 : 0) + mood.over * 0.03, AC.currentTime, 0.4);
-      if (mood.night > 0.7 && Math.random() < 0.012) play('cricket');
+      if (mood.night > 0.7 && Math.random() < 0.012) playSoundEffect('cricket');
     }
     prevT = t;
     setWorld(t < 9.75 ? 'ext' : t < 107.3 ? 'room' : 'sky');
@@ -656,13 +656,13 @@
   var dotsWrap = stage.querySelector('.story2__dots'); dotsWrap.innerHTML = '';
   var dots = CH.map(function (c) { var d = document.createElement('i'); d.setAttribute('role', 'button'); d.setAttribute('tabindex', '0'); d.setAttribute('aria-label', 'Ke ' + c[1]); d.title = c[1]; dotsWrap.appendChild(d); return d; });
   var tween = null;
-  var play = document.getElementById('s3dPlay');
+  var playButton = document.getElementById('s3dPlay');
   var autoStart = null, autoProgress = 0;
   function stopAuto() {
     if (autoStart === null) return;
     autoStart = null;
     document.documentElement.style.scrollBehavior = '';
-    if (play) play.textContent = 'Putar otomatis';
+    if (playButton) playButton.textContent = 'Putar otomatis';
   }
   function storyTop() { return sec.getBoundingClientRect().top + window.scrollY; }
   function startAuto() {
@@ -672,7 +672,7 @@
     autoStart = performance.now();
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, storyTop() + range() * autoProgress);
-    if (play) play.textContent = 'Jeda cerita';
+    if (playButton) playButton.textContent = 'Jeda cerita';
   }
   function advanceAuto(now) {
     if (autoStart === null) return;
@@ -682,7 +682,7 @@
     if (progress === 1) stopAuto();
   }
   function manual() { stopAuto(); stopTween(); }
-  if (play) play.addEventListener('click', function () {
+  if (playButton) playButton.addEventListener('click', function () {
     if (autoStart === null) startAuto(); else stopAuto();
   });
   function stopTween() { if (tween) { tween.kill(); tween = null; document.documentElement.style.scrollBehavior = ''; } }
