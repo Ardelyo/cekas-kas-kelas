@@ -106,10 +106,23 @@
   }
   applyLive();
   var dbWeek = function (n) { return window.CEKAS_LIVE.active_week - (state.activeWeek - n); };
-  async function refreshLive() {
-    var r = await fetch('/api/langit/state', { credentials: 'same-origin', cache: 'no-store' }); window.CEKAS_LIVE = await r.json();
+  var liveSig = window.CEKAS_LIVE ? JSON.stringify(window.CEKAS_LIVE) : '';
+  async function refreshLive(fromPoll) {
+    var r = await fetch('/api/langit/state', { credentials: 'same-origin', cache: 'no-store' }); var j = await r.json();
+    var sig = JSON.stringify(j); if (fromPoll && sig === liveSig) return false;
+    liveSig = sig; window.CEKAS_LIVE = j;
     var keepWeek = state.week; seed(); applyLive(); state.week = Math.min(keepWeek, 4); renderAll(true); renderWeeks(true); renderDues(true);
+    return true;
   }
+  /* Data yang diubah dari Telegram (atau perangkat lain) muncul sendiri: cek berkala, dan saat tab kembali aktif. */
+  var pollBusy = false;
+  async function pollLive() {
+    if (!state.live || pollBusy || document.hidden || document.querySelector('dialog[open]')) return;
+    pollBusy = true;
+    try { if (await refreshLive(true)) toast('Ada perubahan terbaru dari Telegram.'); } catch (e) {} finally { pollBusy = false; }
+  }
+  setInterval(pollLive, 8000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) pollLive(); });
   /* kirim aksi ke endpoint server yang sama dengan halaman lama (dan bot Telegram ikut diberi tahu di sana) */
   async function serverPost(url, data) {
     try {
