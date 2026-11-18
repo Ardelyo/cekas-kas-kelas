@@ -27,13 +27,19 @@ html[data-sky-wx="berawan"] .sx-wx--mendung { opacity: .38; }
 .sx-orb { inset: auto; left: calc(var(--ox, 70) * 1%); top: calc(var(--oy, 20) * 1%); width: calc(var(--os, 30) * 1vmin); height: calc(var(--os, 30) * 1vmin); margin: calc(var(--os, 30) * -.5vmin) 0 0 calc(var(--os, 30) * -.5vmin); border-radius: 50%; background: radial-gradient(circle, rgba(var(--oc, 255, 255, 255), .95) 0%, rgba(var(--oc, 255, 255, 255), .32) 38%, transparent 68%); opacity: var(--oo, 0); transition: left 3s ease, top 3s ease, width 3s ease, height 3s ease, margin 3s ease, opacity 2.6s ease; }
 html[data-sky-phase="malam"] .sx-orb { background: radial-gradient(circle, #f4f9ff 0 30%, rgba(200, 222, 255, .6) 36%, rgba(140, 182, 245, .2) 54%, transparent 72%); }
 
-/* aurora (malam yang cerah) */
-.sx-aurora { position: absolute; inset: 0 0 25% 0; opacity: var(--sx-aurora, 0); transition: opacity 3s ease; mix-blend-mode: screen; overflow: hidden; }
-.sx-aurora i { position: absolute; left: -20%; right: -20%; height: 46%; border-radius: 50%; filter: blur(18px); opacity: .95; transform-origin: 50% 100%; animation: sxaur 14s ease-in-out infinite alternate; }
-.sx-aurora i:nth-child(1) { top: 6%; background: linear-gradient(90deg, transparent 0%, rgba(60, 255, 170, .55) 30%, rgba(80, 230, 255, .5) 55%, transparent 90%); }
-.sx-aurora i:nth-child(2) { top: 18%; height: 38%; background: linear-gradient(90deg, transparent 5%, rgba(90, 160, 255, .5) 35%, rgba(150, 110, 255, .42) 65%, transparent 95%); animation-duration: 19s; animation-delay: -6s; }
-.sx-aurora i:nth-child(3) { top: 0; height: 30%; background: linear-gradient(90deg, transparent 15%, rgba(120, 255, 200, .4) 45%, rgba(60, 200, 255, .36) 70%, transparent 100%); animation-duration: 23s; animation-delay: -11s; }
-@keyframes sxaur { 0% { transform: translateX(-6%) skewX(-8deg) scaleY(.85); } 50% { transform: translateX(3%) skewX(5deg) scaleY(1.15); } 100% { transform: translateX(8%) skewX(-4deg) scaleY(.95); } }
+/* aurora (malam yang cerah): tirai cahaya hijau-tosca, berkilau dari bawah ke atas, bergoyang pelan */
+.sx-aurora { position: absolute; inset: 0 0 20% 0; opacity: var(--sx-aurora, 0); transition: opacity 3s ease; mix-blend-mode: screen; overflow: hidden; }
+.sx-aurora i { position: absolute; left: -10%; right: -10%; height: 62%; transform-origin: 50% 100%; animation: sxaur 16s ease-in-out infinite alternate;
+  background: linear-gradient(0deg, rgba(70, 255, 170, .95) 0%, rgba(60, 235, 200, .6) 26%, rgba(110, 170, 255, .32) 62%, rgba(190, 120, 255, .16) 82%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%, rgba(0, 0, 0, .55) 42%, #000 66%, transparent 100%), linear-gradient(0deg, transparent 0%, #000 16%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 18%, rgba(0, 0, 0, .55) 42%, #000 66%, transparent 100%), linear-gradient(0deg, transparent 0%, #000 16%, #000 62%, transparent 100%);
+  -webkit-mask-composite: source-in; mask-composite: intersect; filter: blur(4px) saturate(1.6) brightness(1.3); }
+.sx-aurora i::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0) 0 7px, rgba(0, 0, 0, .5) 7px 15px, rgba(0, 0, 0, .15) 15px 19px); animation: sxray 9s linear infinite; }
+.sx-aurora i:nth-child(1) { top: 4%; }
+.sx-aurora i:nth-child(2) { top: 14%; height: 52%; left: 10%; right: -30%; opacity: .9; animation-duration: 21s; animation-delay: -7s; filter: blur(6px) hue-rotate(38deg) saturate(1.6) brightness(1.3); }
+.sx-aurora i:nth-child(3) { top: 0; height: 44%; left: -35%; right: 15%; opacity: .6; animation-duration: 26s; animation-delay: -13s; filter: blur(8px) hue-rotate(-25deg) saturate(1.6) brightness(1.3); }
+@keyframes sxaur { 0% { transform: translateX(-5%) skewX(-10deg) scaleY(.82); } 50% { transform: translateX(2%) skewX(6deg) scaleY(1.12); } 100% { transform: translateX(7%) skewX(-5deg) scaleY(.92); } }
+@keyframes sxray { to { background-position: 38px 0; } }
 
 /* bintang */
 .sx-stars { opacity: var(--sx-stars, 0); inset: 0 0 35% 0; }
