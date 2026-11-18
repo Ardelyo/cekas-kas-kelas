@@ -350,7 +350,10 @@ class CekasDB:
                 )
 
     def seed_initial_students(self, class_id: str = CLASS_ID):
-        """Seed roster contoh XI-F2. Tidak menimpa data yang sudah ada."""
+        """Seed roster contoh XI-F2. Hanya dijalankan bila whitelist masih kosong,
+        agar roster asli yang sudah dipasang tidak tercampur nama contoh saat boot."""
+        if self.get_all_whitelist_students(class_id):
+            return
         students = [
             {"nis": "23241001", "nama_resmi": "Ardellio Satria Anindito", "role": "siswa"},
             {"nis": "23241015", "nama_resmi": "Tarina", "role": "bendahara"},
