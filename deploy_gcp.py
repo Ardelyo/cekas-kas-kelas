@@ -116,6 +116,14 @@ def local_db_snapshot():
         return None
 
 
+def git_commit() -> str:
+    try:
+        import subprocess
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, cwd=str(Path(__file__).parent), timeout=10).stdout.strip()
+    except Exception:
+        return ""
+
+
 def env_vars(public_url: str = "") -> list:
     values = {
         "GCP_PROJECT_ID": GCP_PROJECT_ID, "TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN, "CLASS_ID": CLASS_ID,
@@ -125,7 +133,7 @@ def env_vars(public_url: str = "") -> list:
         "CEKAS_GCS_BUCKET": DATA_BUCKET, "CEKAS_GCS_OBJECT": DATA_OBJECT, "PUBLIC_URL": public_url,
         "APPROVAL_THRESHOLD": str(APPROVAL_THRESHOLD), "APPROVALS_NEEDED": str(APPROVALS_NEEDED),
         "NOMINAL_IURAN_MINGGUAN": str(NOMINAL_IURAN_MINGGUAN), "SEMESTER_START": SEMESTER_START,
-        "PIN_WALI": PIN_WALI, "TEACHER_VERIFICATION": "1" if TEACHER_VERIFICATION else "0",
+        "PIN_WALI": PIN_WALI, "APP_COMMIT": git_commit(), "TEACHER_VERIFICATION": "1" if TEACHER_VERIFICATION else "0",
     }
     return [{"name": k, "value": v} for k, v in values.items() if v != ""]
 

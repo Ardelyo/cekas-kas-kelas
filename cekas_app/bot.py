@@ -25,8 +25,10 @@ from .export_excel import generate_excel_report
 from .formatters import format_rupiah, parse_nominal, parse_transaction_args, normalize_category
 from .generate_chart import generate_financial_chart
 from .runtime import db
+from . import version as appver
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+logging.getLogger("httpx").setLevel(logging.WARNING)  # URL httpx memuat token bot; jangan tulis ke log
 logger = logging.getLogger("cekas.bot")
 HTML = ParseMode.HTML
 
@@ -212,12 +214,35 @@ async def cmd_daftar(update, context):
               [[("🪪 Profil", "me")], ui.nav()])
 
 
+def _clean_pin(args) -> str:
+    """PIN dari argumen perintah. Toleran pada salah ketik umum: kurung sudut seperti <123456>, kata 'PIN', spasi."""
+    parts = [a for a in args if a.strip().lower() not in ("pin", "pin:")]
+    return "".join(parts).strip().strip("<>[]()\"'`").strip()
+
+
+async def cmd_versi(update, context):
+    i = appver.info()
+    await say(update, "\n".join([ui.head("VERSI CEKAS", "🧩"), "",
+                                 ui.pre([("Versi", i["version"]), ("Commit", i["commit"]), ("Revisi", i["revision"][:24])], vw=24),
+                                 "Bandingkan dengan versi di dashboard web (/api/version)."]))
+
+
+async def cmd_tak_dikenal(update, context):
+    """Perintah yang salah ketik (mis. /kalimbendahara) tidak lagi diam saja: beri saran."""
+    import difflib
+    raw = (update.effective_message.text or "").split()[0].lstrip("/").split("@")[0].lower()
+    known = list(dict.fromkeys([c for c, _ in COMMANDS_ALL] + ["klaimbendahara", "catat", "tambah", "kurang", "bayar", "koreksi", "spj", "lepas", "versi"]))
+    near = difflib.get_close_matches(raw, known, n=2, cutoff=0.6)
+    tip = ("Maksudmu " + " atau ".join(f"/{n}" for n in near) + "?") if near else "Ketik /start untuk melihat menu."
+    await say(update, f"🤔 Perintah <code>/{_e(raw)}</code> tidak dikenal. {tip}")
+
+
 async def cmd_klaim(update, context):
     if not context.args:
         await say(update, "\n".join([ui.head("AKSES BENDAHARA", "🔐"), "", "Ketik: <code>/klaimbendahara PIN</code>",
                                      "<i>Lakukan lewat chat pribadi agar PIN tidak terbaca orang lain.</i>"]))
         return
-    pin = context.args[0].strip()
+    pin = _clean_pin(context.args)
     user = update.effective_user
     if update.effective_chat.type != "private":
         try:
@@ -245,7 +270,7 @@ async def cmd_klaimwali(update, context):
             await update.effective_message.delete()
         except Exception:
             pass
-    res = db.claim_wali(CLASS_ID, user.id, context.args[0].strip(), user.first_name or "Wali Kelas")
+    res = db.claim_wali(CLASS_ID, user.id, _clean_pin(context.args), user.first_name or "Wali Kelas")
     if not res["success"]:
         await context.bot.send_message(update.effective_chat.id, "\n".join([ui.head("AKSES DITOLAK", "❌"), "", _e(res["error"])]), parse_mode=HTML)
         return
@@ -638,6 +663,7 @@ COMMANDS_ALL = [
     ("grafik", "Grafik alokasi"), ("excel", "Unduh buku kas Excel"), ("cek", "Verifikasi buku kas"),
     ("daftar", "Daftar dengan NIS"), ("profil", "Profil & iuran saya"), ("notif", "Atur notifikasi"),
     ("verifikasi", "Antrean verifikasi Wali Kelas"), ("klaimwali", "Aktivasi Wali Kelas dengan PIN"),
+    ("klaimbendahara", "Aktivasi Bendahara dengan PIN"), ("versi", "Cek versi aplikasi"),
 ]
 COMMANDS_BENDAHARA = COMMANDS_ALL + [
     ("catat", "Catat kas dengan tombol"), ("tambah", "Catat pemasukan cepat"), ("kurang", "Catat pengeluaran cepat"),
@@ -662,11 +688,12 @@ def build_telegram_app() -> Application:
         ("start", "help", "menu"): cmd_start, "saldo": cmd_saldo, "alokasi": cmd_saldo, "riwayat": cmd_riwayat,
         "tagihan": cmd_tagihan, "profil": cmd_profil, "insight": cmd_insight, "usulan": cmd_usulan,
         "cek": cmd_cek, "rekap": cmd_rekap, "grafik": cmd_grafik, "excel": cmd_excel, "spj": cmd_spj,
-        "daftar": cmd_daftar, "klaimbendahara": cmd_klaim, "notif": cmd_notif, "lepas": cmd_lepas,
-        "klaimwali": cmd_klaimwali, "verifikasi": cmd_verifikasi, "catat": cmd_catat, "tambah": cmd_tambah, "kurang": cmd_kurang, "bayar": cmd_bayar, "koreksi": cmd_koreksi,
+        "daftar": cmd_daftar, ("klaimbendahara", "kalimbendahara", "klaim_bendahara", "klaimbendahra"): cmd_klaim, "notif": cmd_notif, "lepas": cmd_lepas,
+        ("klaimwali", "kalimwali", "klaim_wali"): cmd_klaimwali, "versi": cmd_versi, "verifikasi": cmd_verifikasi, "catat": cmd_catat, "tambah": cmd_tambah, "kurang": cmd_kurang, "bayar": cmd_bayar, "koreksi": cmd_koreksi,
     }
     for names, fn in handlers.items():
         app.add_handler(CommandHandler(list(names) if isinstance(names, tuple) else names, fn))
+    app.add_handler(MessageHandler(filters.COMMAND, cmd_tak_dikenal))  # terakhir di grup yang sama: hanya jalan bila tak ada perintah cocok
     app.add_handler(CallbackQueryHandler(on_callback))
     app.add_handler(MessageHandler(filters.PHOTO, on_photo))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
