@@ -47,8 +47,8 @@
   }
 
   var ORB = {
-    fajar: [18, 78, 56, '235,245,255', .8], pagi: [80, 22, 42, '255,255,255', .5], siang: [62, 8, 38, '255,255,255', .4],
-    sore: [84, 46, 48, '255,249,232', .5], senja: [78, 72, 52, '205,225,255', .55], malam: [76, 20, 15, '226,238,255', .95]
+    fajar: [16, 80, 54, '255,226,170', .85], pagi: [78, 24, 40, '255,247,214', .6], siang: [58, 7, 36, '255,255,255', .55],
+    sore: [84, 42, 50, '255,226,150', .7], senja: [80, 74, 60, '255,150,70', .9], malam: [76, 20, 15, '226,238,255', .95]
   };
   var CB = { fajar: .62, pagi: .98, siang: 1, sore: .84, senja: .6, malam: .3 }, CS = { fajar: .8, pagi: 1, siang: 1, sore: .9, senja: .75, malam: .5 }, ST = { fajar: .55, pagi: 0, siang: 0, sore: 0, senja: .3, malam: 1 };
   var WB = { cerah: 1, berawan: .95, mendung: .72, hujan: .62, kabut: .85, badai: .5 }, WS = { cerah: 1, berawan: .9, mendung: .5, hujan: .45, kabut: .6, badai: .4 };
@@ -60,6 +60,7 @@
     var orb = p ? ORB[p] : null;
     s.setProperty('--sx-cb', ((p ? CB[p] : 1) * WB[w]).toFixed(3)); s.setProperty('--sx-cs', ((p ? CS[p] : 1) * WS[w]).toFixed(3));
     s.setProperty('--sx-stars', ((p ? ST[p] : 0) * WSTAR[w]).toFixed(3));
+    s.setProperty('--sx-aurora', ((p === 'malam' ? 1 : p === 'fajar' ? .25 : 0) * WSTAR[w]).toFixed(3));
     if (orb) { s.setProperty('--ox', orb[0]); s.setProperty('--oy', orb[1]); s.setProperty('--os', orb[2]); s.setProperty('--oc', orb[3]); s.setProperty('--oo', (orb[4] * WORB[w]).toFixed(3)); } else s.setProperty('--oo', 0);
     ensureImgs(e); updateUI(e);
     listeners.forEach(function (f) { try { f(e); } catch (x) {} });
@@ -70,11 +71,11 @@
     if (host.querySelector('.sx-base')) return;
     var base = document.createElement('div'); base.className = 'sx-base'; base.setAttribute('aria-hidden', 'true');
     base.innerHTML = ['malam', 'mendung', 'badai'].map(function (k) { return '<img class="sx-img sx-img--' + k + '" data-src="assets/weather/sky-' + k + '.webp" alt="" decoding="async">'; }).join('') +
-      PH.filter(function (x) { return x !== 'siang'; }).map(function (x) { return '<div class="sx-ph sx-ph--' + x + '"></div>'; }).join('') + '<div class="sx-wx sx-wx--mendung"></div><div class="sx-wx sx-wx--storm"></div>';
+      PH.map(function (x) { return '<div class="sx-ph sx-ph--' + x + '"></div>'; }).join('') + '<div class="sx-wx sx-wx--mendung"></div><div class="sx-wx sx-wx--storm"></div>';
     var photo = host.querySelector('picture') || host.querySelector('.hero__photo, .sky__photo');
     if (photo && photo.parentNode === host) host.insertBefore(base, photo.nextSibling); else host.insertBefore(base, host.firstChild);
     var a = document.createElement('div'); a.className = 'sx'; a.setAttribute('aria-hidden', 'true');
-    a.innerHTML = '<div class="sx-orb"></div><div class="sx-stars"></div>';
+    a.innerHTML = '<div class="sx-aurora"><i></i><i></i><i></i></div><div class="sx-orb"></div><div class="sx-stars"></div>';
     var st = $('.sx-stars', a);
     var NSTAR = window.matchMedia('(pointer: coarse)').matches ? 34 : 70;
     for (var i = 0; i < NSTAR; i++) { var d = document.createElement('i'), z = 1 + Math.random() * 2; d.style.cssText = 'left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;width:' + z + 'px;height:' + z + 'px;opacity:' + (.35 + Math.random() * .6) + ';animation-delay:' + (-Math.random() * 3) + 's;animation-duration:' + (2.4 + Math.random() * 2.4) + 's'; st.appendChild(d); }
@@ -159,8 +160,8 @@
     $('.skypop__now', pop).textContent = label(e);
     $('#sxTime', pop).checked = state.time; $('#sxWx', pop).checked = state.wx; $('#sxWxS', pop).textContent = statusText();
     var mode = $('.skypop__mode', pop); if (mode) { mode.hidden = !hasKasMode; $$('button', mode).forEach(function (b) { b.classList.toggle('on', b.dataset.v === state.mode); }); }
-    if (window.motion && $('#mvPause', pop)) {
-      var ms = motion.state; $('#mvPause', pop).checked = !!ms.paused; $('#mvLite', pop).checked = motion.isLite(); $('#mvSound', pop).checked = !!ms.sound; $('#mvSpeed', pop).value = ms.speed; $('#mvSpeedV', pop).textContent = String(ms.speed).replace('.', ',') + '\u00d7';
+    if (window.motion && $('#mvLite', pop)) {
+      var ms = motion.state; $('#mvLite', pop).checked = motion.isLite(); $('#mvSound', pop).checked = !!ms.sound; $('#mvSpeed', pop).value = ms.speed; $('#mvSpeedV', pop).textContent = String(ms.speed).replace('.', ',') + '\u00d7';
       $('#mvLiteS', pop).textContent = motion.autoLite() ? 'Aktif otomatis di perangkat ini (hemat data, memori kecil, atau baterai rendah).' : 'Matikan awan berat, bintang, dan hujan. Otomatis di perangkat lemah.';
     }
     $$('[data-ph]', pop).forEach(function (b) { b.classList.toggle('on', preview.phase === b.dataset.ph); }); $$('[data-wx]', pop).forEach(function (b) { b.classList.toggle('on', preview.wx === b.dataset.wx); });
@@ -172,7 +173,6 @@
       '<label class="skysw"><span><b>Ikuti cuaca sekitar</b><small id="sxWxS"></small></span><input type="checkbox" role="switch" id="sxWx"><i></i></label>' +
       '<div class="skypop__mode" hidden><b>Di dashboard, cuaca langit mengikuti</b><div class="skyseg"><button type="button" data-v="kas">Kondisi kas</button><button type="button" data-v="real">Cuaca sekitar</button></div></div>' +
       '<details id="mvBox"><summary>Gerak dan hemat</summary>' +
-      '<label class="skysw"><span><b>Jeda gerak</b><small>Hentikan awan, karusel, dan animasi berulang.</small></span><input type="checkbox" role="switch" id="mvPause"><i></i></label>' +
       '<label class="skysw"><span><b>Mode hemat</b><small id="mvLiteS"></small></span><input type="checkbox" role="switch" id="mvLite"><i></i></label>' +
       '<label class="skysw"><span><b>Suara halus</b><small>Denting lembut saat disahkan. Mati secara bawaan.</small></span><input type="checkbox" role="switch" id="mvSound"><i></i></label>' +
       '<div class="skypop__mode"><b>Kecepatan gerak <span id="mvSpeedV">1\u00d7</span></b><input type="range" class="skyrange" id="mvSpeed" min="0.25" max="2" step="0.25" value="1" aria-label="Kecepatan gerak"><div class="skyrange__l"><span>Pelan</span><span>Normal</span><span>Cepat</span></div></div></details>' +
@@ -187,7 +187,6 @@
     $$('[data-ph]', pop).forEach(function (b) { b.addEventListener('click', function () { preview.phase = preview.phase === b.dataset.ph ? null : b.dataset.ph; apply(); }); });
     $$('[data-wx]', pop).forEach(function (b) { b.addEventListener('click', function () { preview.wx = preview.wx === b.dataset.wx ? null : b.dataset.wx; apply(); }); });
     if (window.motion) {
-      $('#mvPause', pop).addEventListener('change', function () { motion.set('paused', this.checked); });
       $('#mvLite', pop).addEventListener('change', function () { motion.set('lite', this.checked); });
       $('#mvSound', pop).addEventListener('change', function () { motion.set('sound', this.checked); if (this.checked) motion.sound('ok'); });
       $('#mvSpeed', pop).addEventListener('input', function () { motion.set('speed', +this.value); $('#mvSpeedV', pop).textContent = (+this.value).toString().replace('.', ',') + '\u00d7'; });

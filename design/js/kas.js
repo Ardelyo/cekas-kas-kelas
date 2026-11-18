@@ -590,7 +590,14 @@
   function flash(btn, label) { var s = $('span', btn), old = s.textContent; s.textContent = label; btn.querySelector('use').setAttribute('href', '#i-check'); setTimeout(function () { s.textContent = old; btn.querySelector('use').setAttribute('href', btn.id === 'copyWa' ? '#i-copy' : '#i-bell'); }, 1600); }
   $('#copyWa').addEventListener('click', function () { var tx = waText(); copy(tx); flash(this, 'Tersalin'); var p = $('#waPreview'); p.hidden = false; p.innerHTML = tx.split('\n').map(function (l) { return '<span>' + esc(l) + '</span>'; }).join(''); });
   $('#copyRem').addEventListener('click', function () { copy(remText()); flash(this, 'Tersalin'); });
-  $$('[data-soon]').forEach(function (b) { b.addEventListener('click', function () { toast(b.dataset.soon + ' dibuat di versi server. Ini prototipe desain.'); }); });
+  var LIVE_FILE = { 'Unduh Excel': ['/api/export/excel', false], 'Laporan SPJ': ['/laporan', true] };
+  $$('[data-soon]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = LIVE_FILE[b.dataset.soon];
+      if (state.live && f) { if (f[1]) window.open(f[0], '_blank', 'noopener'); else window.location.href = f[0]; toast(f[1] ? 'Membuka laporan SPJ. Gunakan Cetak untuk simpan PDF.' : 'Mengunduh Excel.'); return; }
+      toast(b.dataset.soon + ' dibuat di versi server. Ini prototipe desain.');
+    });
+  });
 
   /* ---------- catat ---------- */
   var dlg = $('#txDialog'), form = $('#txForm'), nom = $('#f-nominal'), desc = $('#f-desc'), err = $('#txErr');

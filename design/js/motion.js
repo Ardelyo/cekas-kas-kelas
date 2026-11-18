@@ -5,7 +5,10 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var load = function () { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
   var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
-  var st = Object.assign({ paused: false, lite: null, sound: false, speed: 1 }, load());
+  var st = Object.assign({ lite: null, sound: false, speed: 1 }, load());
+  /* fitur "Jeda gerak" dihapus: buang sisa pilihan lama di perangkat agar animasi tidak terus berhenti */
+  if ('paused' in st) { delete st.paused; save(); }
+  document.documentElement.classList.remove('motion-paused');
   var lowBattery = false, listeners = [];
 
   var auto = (function () {
@@ -24,7 +27,7 @@
     try { if (document.getAnimations) document.getAnimations().forEach(function (a) { if (a.playbackRate !== v) a.updatePlaybackRate(v); }); } catch (e) {}
   }
   function apply() {
-    root.classList.toggle('motion-paused', !!st.paused); root.classList.toggle('lite', isLite());
+    root.classList.remove('motion-paused'); root.classList.toggle('lite', isLite());
     clearInterval(rateT); applyRate(); if (st.speed !== 1) rateT = setInterval(applyRate, 700);
     listeners.forEach(function (f) { try { f(st); } catch (e) {} });
   }
@@ -51,7 +54,7 @@
   var routeOn = !reduce;
   try { if (routeOn && sessionStorage.getItem('cekas-route') === '1') { sessionStorage.removeItem('cekas-route'); root.classList.add('route-in'); setTimeout(function () { root.classList.remove('route-in'); }, 700); } } catch (e) {}
   document.addEventListener('click', function (e) {
-    if (!routeOn || st.paused || isLite() || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button > 0) return;
+    if (!routeOn || isLite() || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button > 0) return;
     var a = e.target.closest && e.target.closest('a[href]'); if (!a || a.target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-leave') || a.classList.contains('skip-link')) return;
     var href = a.getAttribute('href'); if (!href || href.charAt(0) === '#' || /^(https?:|mailto:|tel:|webcal:)/.test(href)) return;
     var url; try { url = new URL(a.href, location.href); } catch (x) { return; }
