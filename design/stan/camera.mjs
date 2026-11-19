@@ -12,6 +12,8 @@ export function connectCamera({ button, video, cursor, status, canSelect }) {
   let target;
   let started;
   let selected;
+  let pen = null; // kanvas jurus yang sedang digambar dengan cubitan
+  let pinched = false;
 
   function message(text) {
     status.hidden = false;
@@ -27,7 +29,17 @@ export function connectCamera({ button, video, cursor, status, canSelect }) {
     selected = false;
   }
 
+  function penEvent(type, canvas) {
+    canvas.dispatchEvent(new PointerEvent(type, { pointerId: 77, pointerType: "pen", button: 0, buttons: type === "pointerup" ? 0 : 1, clientX: position.x, clientY: position.y, bubbles: true }));
+  }
+  function liftPen() {
+    if (pen && position) penEvent("pointerup", pen);
+    pen = null;
+    cursor.classList.remove("is-drawing");
+  }
+
   function stop() {
+    liftPen();
     cancelAnimationFrame(raf);
     stream?.getTracks().forEach(track => track.stop());
     stream = null;
@@ -58,6 +70,7 @@ export function connectCamera({ button, video, cursor, status, canSelect }) {
     }
 
     if (!hand) {
+      liftPen();
       cursor.hidden = true;
       position = null;
       clearTarget();
@@ -74,6 +87,17 @@ export function connectCamera({ button, video, cursor, status, canSelect }) {
     } : { x, y };
     cursor.hidden = false;
     cursor.style.transform = `translate(${position.x}px,${position.y}px) translate(-50%,-50%)`;
+
+    // Cubit jempol + telunjuk = pena turun. Ambang relatif terhadap ukuran tangan, dengan histeresis.
+    const span = Math.hypot(hand[0].x - hand[9].x, hand[0].y - hand[9].y) || 0.1;
+    const gap = Math.hypot(hand[4].x - hand[8].x, hand[4].y - hand[8].y) / span;
+    pinched = pinched ? gap < 0.45 : gap < 0.3;
+    cursor.classList.toggle("is-pinch", pinched);
+    const pad = document.elementFromPoint(position.x, position.y)?.closest(".rune-pad canvas");
+    if (pinched && !pen && pad) { pen = pad; cursor.classList.add("is-drawing"); penEvent("pointerdown", pen); }
+    else if (pinched && pen) { if (pen.isConnected) penEvent("pointermove", pen); else liftPen(); }
+    else if (!pinched && pen) liftPen();
+    if (pen) { clearTarget(); return; }
 
     const next = canSelect()
       ? document.elementFromPoint(position.x, position.y)?.closest("[data-dwell]:not(:disabled)")
@@ -124,7 +148,7 @@ export function connectCamera({ button, video, cursor, status, canSelect }) {
       await video.play();
       button.textContent = "Matikan kamera";
       button.setAttribute("aria-pressed", "true");
-      message("Kamera aktif. Angkat satu tangan, lalu tahan kursor di atas pilihan. Video diproses di perangkat.");
+      message("Kamera aktif. Angkat satu tangan: tahan kursor di atas pilihan untuk memilih, cubit jempol + telunjuk untuk menggambar jurus. Video diproses di perangkat.");
       raf = requestAnimationFrame(track);
     } catch (error) {
       console.warn("Gagal memulai kamera.", error);

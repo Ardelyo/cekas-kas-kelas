@@ -109,3 +109,13 @@
 .maker-error{color:#ffb4b4;font-weight:700;min-height:1.2em;margin:.2rem 0}
 @media(max-width:640px){.maker{grid-template-columns:1fr}.maker-face{max-width:240px;margin:auto;width:100%}}
 .spell-element{position:absolute;left:50%;top:calc(50% + clamp(1.4rem,3.4vw,2.2rem));transform:translateX(-50%);pointer-events:none;font:800 .78rem var(--sans);font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:var(--c);background:#06173fcc;padding:.25rem .6rem;border-radius:999px;white-space:nowrap;animation:vs-in .4s .35s both}
+/* Kamera: kursor cubit + foto tokoh langsung */
+#hand-cursor.is-pinch{scale:.7;background:#d6ff3f55}
+#hand-cursor.is-drawing{scale:.55;background:var(--lime);box-shadow:0 0 0 3px #06173f,0 0 30px var(--lime)}
+.maker-src{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.maker-src .button{font-size:.85rem;padding-inline:.4rem;text-align:center}
+.maker-video{position:absolute;left:0;top:0;width:100%;aspect-ratio:1;object-fit:cover;transform:scaleX(-1);border-radius:18px;border:3px solid var(--lime)}
+.maker-face.live::after{content:"";position:absolute;left:22%;top:10%;width:56%;aspect-ratio:.8;border:2px dashed #ffffffb0;border-radius:50%;pointer-events:none}
+.maker-face[data-count]::before{content:attr(data-count);position:absolute;z-index:2;left:0;top:0;width:100%;aspect-ratio:1;display:grid;place-items:center;font:900 italic 5rem var(--mark);color:var(--lime);-webkit-text-stroke:3px #06173f;paint-order:stroke fill;pointer-events:none}
+.maker-face.flash canvas{animation:snap-flash .4s ease-out}
+@keyframes snap-flash{from{filter:brightness(3)}}

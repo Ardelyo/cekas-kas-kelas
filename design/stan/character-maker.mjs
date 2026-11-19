@@ -26,8 +26,8 @@ export function openMaker(panel,taken,done,cancel){
   const full=read().filter(valid).length>=LIMIT;
   panel.innerHTML=`<p class="eyebrow">TOKOH BARU</p><h2>Jadikan fotomu tokoh</h2>
   <div class="maker">
-    <div class="maker-face"><canvas width="256" height="256" aria-label="Pratinjau wajah tokoh"></canvas><span class="maker-empty">Belum ada foto</span>
-      <label class="button quiet maker-upload">Pilih foto<input type="file" accept="image/*" hidden></label></div>
+    <div class="maker-face"><canvas width="256" height="256" aria-label="Pratinjau wajah tokoh"></canvas><video class="maker-video" playsinline muted hidden></video><span class="maker-empty">Belum ada foto</span>
+      <div class="maker-src"><button type="button" class="button quiet" data-dwell data-shoot>Ambil foto</button><label class="button quiet maker-upload">Pilih file<input type="file" accept="image/*" hidden></label></div></div>
     <div class="maker-fields">
       <label>Nama tokoh<input id="maker-name" maxlength="14" autocomplete="off" placeholder="mis. Dimas"></label>
       <label>Perbesar wajah<input type="range" id="maker-zoom" min="1" max="3" step="0.01" value="1.3"></label>
@@ -68,8 +68,40 @@ export function openMaker(panel,taken,done,cancel){
   canvas.onpointerdown=e=>{if(!img)return;drag={x:e.clientX,y:e.clientY,ox,oy};canvas.setPointerCapture(e.pointerId);};
   canvas.onpointermove=e=>{if(!drag)return;const k=256/canvas.getBoundingClientRect().width;ox=drag.ox+(e.clientX-drag.x)*k;oy=drag.oy+(e.clientY-drag.y)*k;paint();};
   canvas.onpointerup=canvas.onpointercancel=()=>{drag=null;};
+  // Kamera langsung: pratinjau cermin, hitung mundur 3 detik agar bisa dipakai tanpa tangan.
+  const video=$(".maker-video"), shoot=$("[data-shoot]"), face=$(".maker-face");
+  let cam=null, counting=false, watch=0;
+  function stopCam(){
+    cam?.getTracks().forEach(t=>t.stop());cam=null;clearInterval(watch);
+    video.srcObject=null;video.hidden=true;face.classList.remove("live");counting=false;shoot.textContent=img?"Foto ulang":"Ambil foto";
+  }
+  shoot.onclick=async()=>{
+    error.textContent="";
+    if(cam){
+      if(counting)return;counting=true;
+      for(const n of [3,2,1]){shoot.textContent=`Jepret dalam ${n}…`;face.dataset.count=n;await new Promise(r=>setTimeout(r,700));if(!cam)return;}
+      delete face.dataset.count;
+      const c=document.createElement("canvas");c.width=video.videoWidth;c.height=video.videoHeight;
+      const g=c.getContext("2d");g.translate(c.width,0);g.scale(-1,1);g.drawImage(video,0,0);
+      const next=new Image();
+      next.onload=()=>{img=next;$(".maker-empty").hidden=true;face.classList.add("flash");setTimeout(()=>face.classList.remove("flash"),400);center();};
+      next.src=c.toDataURL("image/jpeg",.9);
+      stopCam();return;
+    }
+    if(!navigator.mediaDevices?.getUserMedia){error.textContent="Kamera butuh localhost atau HTTPS. Pakai Pilih file saja.";return;}
+    shoot.disabled=true;shoot.textContent="Membuka kamera…";
+    try{
+      cam=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:720},height:{ideal:720}},audio:false});
+      video.srcObject=cam;video.hidden=false;face.classList.add("live");await video.play();
+      shoot.textContent="Jepret!";
+      watch=setInterval(()=>{if(!video.isConnected)stopCam();},500);
+    }catch(e){
+      stopCam();
+      error.textContent=e.name==="NotAllowedError"?"Izin kamera ditolak. Izinkan di browser atau pakai Pilih file.":"Kamera tidak bisa dibuka. Pakai Pilih file.";
+    }finally{shoot.disabled=false;}
+  };
   paint();
-  $("[data-cancel]").onclick=cancel;
+  $("[data-cancel]").onclick=()=>{stopCam();cancel();};
   $("[data-make]").onclick=()=>{
     const name=cleanName($("#maker-name").value);
     if(!img){error.textContent="Pilih foto dulu.";return;}
@@ -83,6 +115,6 @@ export function openMaker(panel,taken,done,cancel){
     if(!c.face.startsWith("data:image/webp"))c.face=canvas.toDataURL("image/jpeg",.85);
     const list=read().filter(valid);list.push(c);
     if(!write(list)){error.textContent="Penyimpanan perangkat penuh. Hapus tokoh lain dulu.";return;}
-    registerChar(c.id,c);done(c);
+    stopCam();registerChar(c.id,c);done(c);
   };
 }

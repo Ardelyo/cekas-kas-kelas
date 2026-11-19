@@ -19,7 +19,7 @@ const hexA = (hex,a) => hex + Math.round(a*255).toString(16).padStart(2,"0");
 
 export function drawSpell(panel,round,cast,name="") {
   panel.innerHTML=`<p class="eyebrow">Jurus langit · Babak ${round+1}</p><h2>${name?name+", ukir jurusmu":"Ukir jurusmu"}</h2>
-    <p>Tarik satu goresan. Bentuk, arah, ukuran, dan kecepatan goresanmu menentukan nama dan wujud jurus.</p>
+    <p>Tarik satu goresan (kamera: cubit jempol + telunjuk untuk menggambar). Bentuk, arah, ukuran, dan kecepatan goresanmu menentukan nama dan wujud jurus.</p>
     <div class="rune-pad"><canvas aria-label="Bidang gambar jurus"></canvas><span aria-hidden="true">Mulai goresan di sini</span><strong class="spell-stamp" hidden></strong><em class="spell-element" hidden></em></div>
     <ul class="spell-legend" aria-label="Petunjuk elemen"><li style="--c:${ELEMENTS.petir.css}"><b>Zigzag</b>Petir</li><li style="--c:${ELEMENTS.cahaya.css}"><b>Lingkaran</b>Cahaya</li><li style="--c:${ELEMENTS.angin.css}"><b>Spiral</b>Angin</li><li style="--c:${ELEMENTS.ombak.css}"><b>Gelombang</b>Ombak</li><li style="--c:${ELEMENTS.meteor.css}"><b>Tarik ke bawah</b>Meteor</li><li style="--c:${ELEMENTS.kristal.css}"><b>Garis tegas</b>Kristal</li></ul>
     <div class="actions"><button class="button quiet" data-dwell data-rune>Gunakan jurus bawaan</button></div>`;
@@ -131,7 +131,7 @@ export function drawSpell(panel,round,cast,name="") {
   }
   canvas.onpointerdown=e=>{
     if(finished||pointer!==null||e.button!==0)return;
-    fit();pointer=e.pointerId;points=[];began=performance.now();canvas.setPointerCapture(pointer);hint.hidden=true;pad.classList.add("drawing");append(e);
+    fit();pointer=e.pointerId;points=[];began=performance.now();try{canvas.setPointerCapture(pointer)}catch{}hint.hidden=true;pad.classList.add("drawing");append(e);
   };
   canvas.onpointermove=e=>{if(pointer===e.pointerId)append(e)};
   canvas.onpointerup=e=>{
