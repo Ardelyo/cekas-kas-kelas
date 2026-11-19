@@ -4,6 +4,8 @@ import {classroom} from "./room.mjs";
 import {connectCamera} from "./camera.mjs";
 import {auditCase} from "./rounds.mjs";
 import {sfx} from "./duel-sfx.mjs";
+import {openSettings} from "./settings.mjs";
+import {arLayer} from "./ar-layer.mjs";
 import {loadCustom,openMaker,removeCustom} from "./character-maker.mjs";
 import {versus,cutIn,victory,clearCine} from "./cinema-ui.mjs";
 
@@ -192,4 +194,21 @@ addEventListener("keydown",e=>{if(e.repeat||e.ctrlKey||e.altKey||e.metaKey)retur
  if(phase==="split"){const n="123jkl".indexOf(key);if(key.length===1&&n>=0){e.preventDefault();localAnswer(Math.floor(n/3),n%3)}}
  else if(/^[1-3]$/.test(key))answer(Number(key)-1)});
 sfx.bindToggle($("sound"));
+$("settings-open").onclick=openSettings;
+// Layar penuh: API asli bila ada, jika tidak (mis. iOS) pakai mode penuh berbasis CSS.
+function setFull(on){
+  document.body.classList.toggle("is-full",on);
+  $("fullscreen").setAttribute("aria-pressed",String(on));$("fullscreen").textContent=on?"Keluar layar penuh":"Layar penuh";
+  dispatchEvent(new Event("resize"));
+}
+$("fullscreen").onclick=async()=>{
+  const on=!document.body.classList.contains("is-full");
+  if(document.fullscreenEnabled){
+    try{on?await document.documentElement.requestFullscreen({navigationUI:"hide"}):await document.exitFullscreen();return;}catch{}
+  }
+  setFull(on);
+};
+document.addEventListener("fullscreenchange",()=>setFull(!!document.fullscreenElement));
+addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("is-full")&&!document.fullscreenElement)setFull(false);});
+arLayer({video:$("camera-feed"),room:document.querySelector(".room"),onAR:on=>room?.setAR(on)});
 connectCamera({button:$("camera"),video:$("camera-feed"),cursor:$("hand-cursor"),status:$("camera-status"),canSelect:()=>true});

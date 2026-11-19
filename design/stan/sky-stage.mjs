@@ -3,6 +3,9 @@ import { mkChar } from "./actors.mjs";
 import { spellFx } from "./spell-fx.mjs";
 import { spellDNA } from "./spell-shape.mjs";
 import { sfx } from "./duel-sfx.mjs";
+import { settings } from "./settings.mjs";
+import { vision } from "./vision.mjs";
+import { applyPose } from "./body-rig.mjs";
 const T = window.THREE;
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = x => {x=clamp(x); return x*x*(3-2*x);};
@@ -22,7 +25,7 @@ function glowTexture(){
 export function skyStage(renderer) {
   const scene=new T.Scene();
   const camera=new T.PerspectiveCamera(39,1,.1,170);
-  scene.fog=new T.FogExp2(0xaedbff,.024);
+  const fog=new T.FogExp2(0xaedbff,.024);scene.fog=fog;
   scene.add(new T.HemisphereLight(0xfffaff,0x7089be,1.4));
   const sun=new T.DirectionalLight(0xffefcb,1.4);sun.position.set(-5,8,5);scene.add(sun);
   const dome=new T.Mesh(new T.SphereGeometry(100,36,24),new T.ShaderMaterial({
@@ -42,9 +45,11 @@ export function skyStage(renderer) {
   const hue=[0xd6ff3f,0x65dfff];
   const add=m=>{scene.add(m);return m;};
   const lit=(geometry,color)=>add(new T.Mesh(geometry,new T.MeshLambertMaterial({color,flatShading:true})));
+  const isle=[], shadows=[];
   for(const x of [-2.6,2.6]){
-    const rock=lit(new T.ConeGeometry(1.7,2,7),0x4466aa);rock.rotation.z=Math.PI;rock.position.set(x,-1.15,0);
-    const plinth=lit(new T.CylinderGeometry(1.65,1.75,.24,7),0xe4f5ff);plinth.position.set(x,-.12,0);
+    const sh=add(new T.Mesh(new T.CircleGeometry(.9,40),new T.MeshBasicMaterial({color:0x06173f,transparent:true,opacity:.35,depthWrite:false})));sh.rotation.x=-Math.PI/2;sh.position.set(x,.01,0);sh.visible=false;shadows.push(sh);
+    const rock=lit(new T.ConeGeometry(1.7,2,7),0x4466aa);rock.rotation.z=Math.PI;rock.position.set(x,-1.15,0);isle.push(rock);
+    const plinth=lit(new T.CylinderGeometry(1.65,1.75,.24,7),0xe4f5ff);plinth.position.set(x,-.12,0);isle.push(plinth);
   }
   const additive=(color,extra={})=>new T.MeshBasicMaterial({color,transparent:true,depthWrite:false,blending:T.AdditiveBlending,side:T.DoubleSide,...extra});
 
@@ -126,6 +131,11 @@ export function skyStage(renderer) {
   }
   const cue=(name,when,fn)=>{if(shot&&!shot.cues.has(name)&&when){shot.cues.add(name);fn();}};
 
+  let ar=false;
+  function setAR(on){
+    ar=on;dome.visible=clouds.visible=!on;isle.forEach(m=>m.visible=!on);shadows.forEach(m=>m.visible=on);
+    scene.fog=on?null:fog;
+  }
   function draw(now){
     if(!visible)return false;
     const width=renderer.domElement.clientWidth,height=renderer.domElement.clientHeight;
@@ -168,7 +178,14 @@ export function skyStage(renderer) {
         }else{u.aR.rotation.x-=charge*1.3;u.aR.rotation.z+=charge*.4;}
         u.aL.rotation.x-=charge*.54;
       }
-      u.lL.rotation.x=leap*.65;u.lR.rotation.x=-leap*.75;
+      u.lL.rotation.x=leap*.65;u.lR.rotation.x=-leap*.75;u.lL.rotation.z=u.lR.rotation.z=0;
+      // Kontrol tubuh: pemain 1 meniru gerakmu, kecuali saat adegan serangannya sendiri.
+      const ownAttack=attack&&(side===2||side===0)&&t<.72;
+      if(i===0&&settings.get("body")&&vision.pose&&!ownAttack){
+        c.rotation.y=.42;c.rotation.z=0;
+        applyPose(c,vision,{mirror:settings.get("mirror"),legs:true});
+      }else if(i===0&&u.rig){u.body.rotation.z=u.head.rotation.z=u.head.rotation.y=0;}
+      if(ar)shadows[i].position.set(c.position.x,.01,c.position.z);
     });
 
     // ---- kamera ----
@@ -337,5 +354,5 @@ export function skyStage(renderer) {
     hero.userData.aR.getWorldPosition(out);out.y-=.35;
     return out;
   }
-  return {enter,draw,cut,skip,prepareSpell,leave(){clearSpell();fx.clear();hideFx();setCharge(false);visible=false;shot=null;}};
+  return {enter,draw,cut,skip,prepareSpell,setAR,leave(){clearSpell();fx.clear();hideFx();setCharge(false);visible=false;shot=null;}};
 }

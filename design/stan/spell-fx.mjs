@@ -1,5 +1,6 @@
 // Partikel aditif + lingkaran sihir untuk jurus yang digambar pemain.
 const T = window.THREE;
+import {quality} from "./settings.mjs";
 
 function circleTexture(sides) {
   const c=document.createElement("canvas");c.width=c.height=512;
@@ -64,7 +65,7 @@ export function spellFx(scene) {
   // The impact explodes in the silhouette of what the player drew, styled by the spell's element.
   function burst(center,shape,dna,dir,view){
     axis.copy(view).normalize();
-    const el=dna.element, n=Math.round(420*dna.power);
+    const el=dna.element, n=Math.round(420*dna.power*quality().particles);
     for(let i=0;i<n;i++){
       const p=shape[(Math.random()*shape.length)|0];
       tmp.copy(p);
@@ -80,7 +81,7 @@ export function spellFx(scene) {
       if(dna.kind==="lance")out.x+=dir*2.5;
       emit(center.x+p.x*.9,center.y+p.y*.9,center.z+p.z*.9,out.x,out.y,out.z+rnd(1.5),color,life,size,drag,Math.random()*.4);
     }
-    for(let i=0;i<160;i++){
+    for(let i=0;i<160*quality().particles;i++){
       const a=Math.random()*Math.PI*2,b=rnd(2),v=6+Math.random()*9;
       emit(center.x,center.y,center.z,Math.cos(a)*v,Math.sin(a)*v,b*v*.3,0xffffff,.25+Math.random()*.35,.05+Math.random()*.06,.86);
     }

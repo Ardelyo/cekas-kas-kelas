@@ -1,4 +1,5 @@
 // Sound FX sintetis (WebAudio) — tanpa file audio, ringan untuk mobile.
+import {settings} from "./settings.mjs";
 let ctx=null, master=null, noiseBuf=null, last=0;
 let muted=false;
 try{muted=localStorage.getItem("cekas-duel-mute")==="1";}catch{}
@@ -9,7 +10,7 @@ function ac(){
     const A=window.AudioContext||window.webkitAudioContext; if(!A)return null;
     ctx=new A();
     const comp=ctx.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;
-    master=ctx.createGain();master.gain.value=.55;master.connect(comp);comp.connect(ctx.destination);
+    master=ctx.createGain();master.gain.value=settings.get("volume");master.connect(comp);comp.connect(ctx.destination);
     noiseBuf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);
     const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   }
@@ -39,6 +40,7 @@ function noise({type="bandpass",f0,f1=f0,q=1,dur=.4,gain=.3,at=0,attack=.005}){
   s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+dur+.05);
 }
 
+settings.on((k,v)=>{if(k==="volume"&&master)master.gain.value=v;});
 export const sfx={
   // Goresan kuas: desis halus, dibatasi agar tidak menumpuk.
   scratch(){

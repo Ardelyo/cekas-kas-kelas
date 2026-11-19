@@ -1,23 +1,30 @@
 import {mkChar} from "./actors.mjs";
 import {skyStage} from "./sky-stage.mjs";
+import {settings,quality} from "./settings.mjs";
+import {vision} from "./vision.mjs";
+import {applyPose} from "./body-rig.mjs";
 const T=window.THREE;
 export function classroom(canvas,onVisit){
-  const renderer=new T.WebGLRenderer({canvas,antialias:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
+  const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setClearColor(0x000000,0);
+  const applyQuality=()=>{renderer.setPixelRatio(Math.min(devicePixelRatio,quality().ratio));if(canvas.clientWidth)renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);};
+  applyQuality();settings.on(k=>{if(k==="quality")applyQuality();});
+  let ar=false;
   let sky;
   const scene=new T.Scene(), camera=new T.OrthographicCamera();
-  scene.background=new T.Color(0xbddcf4);
+  const backdrop=new T.Color(0xbddcf4);scene.background=backdrop;
+  const env=new T.Group();scene.add(env);
   camera.position.set(6,7.8,14); camera.lookAt(0,1,0);
   scene.add(new T.HemisphereLight(0xffffff,0x9baecd,1.25));
   const sun=new T.DirectionalLight(0xfff4cb,1.1);sun.position.set(-4,8,5);scene.add(sun);
   function box(w,h,d,x,y,z,color){
     const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshLambertMaterial({color}));
-    mesh.position.set(x,y,z);scene.add(mesh);return mesh;
+    mesh.position.set(x,y,z);env.add(mesh);return mesh;
   }
   function sign(word,x,y,z,w,h,bg="#193f50"){
     const c=document.createElement("canvas");c.width=600;c.height=160;
     const g=c.getContext("2d");g.fillStyle=bg;g.fillRect(0,0,600,160);g.textAlign="center";g.textBaseline="middle";g.fillStyle="#ffffff";g.font="bold 52px sans-serif";g.fillText(word,300,80,572);
-    const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:new T.CanvasTexture(c)}));m.position.set(x,y,z);scene.add(m);return m;
+    const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:new T.CanvasTexture(c)}));m.position.set(x,y,z);env.add(m);return m;
   }
   box(11,.3,7,0,-.16,0,0x365183);
   for(let x=-5;x<=5;x++)for(let z=-3;z<=3;z++)box(.99,.035,.99,x,0,z,(x+z)%2?0xe1d7be:0xf1e7d1);
@@ -57,6 +64,10 @@ export function classroom(canvas,onVisit){
       const i=stations.findIndex(([x,z])=>Math.hypot(x-actor.position.x,z-actor.position.z)<.45);
       if(i!==lastPlace){lastPlace=i;if(i>=0)onVisit(i);}
     }
+    if(actor&&settings.get("body")&&vision.pose){
+      if(!goal&&!keys.size)actor.rotation.y=.42;
+      applyPose(actor,vision,{mirror:settings.get("mirror"),legs:!goal&&!keys.size});
+    }
     const cheering=now<celebrateUntil&&!active;
     if(actor)actor.userData.aR.rotation.z=cheering&&celebratePlayer?2.6+Math.sin(now*.012)*.16:0;
     if(opponent){
@@ -65,7 +76,7 @@ export function classroom(canvas,onVisit){
     }
     renderer.render(scene,camera);requestAnimationFrame(draw);
   }requestAnimationFrame(draw);
-  return {characters,visit,enterSky(a,b){sky??=skyStage(renderer);sky.enter(a,b)},prepareSpell(path,side){sky.prepareSpell(path,side)},cut(kind,side,bab,done){sky.cut(kind,side,bab,done)},skip(){sky?.skip()},leaveSky(){sky?.leave()},celebrate(playerWon,rivalWon){
+  return {characters,visit,setAR(on){ar=on;env.visible=!on;scene.background=on?null:backdrop;sky?.setAR(on);},enterSky(a,b){sky??=skyStage(renderer);sky.setAR(ar);sky.enter(a,b)},prepareSpell(path,side){sky.prepareSpell(path,side)},cut(kind,side,bab,done){sky.cut(kind,side,bab,done)},skip(){sky?.skip()},leaveSky(){sky?.leave()},celebrate(playerWon,rivalWon){
     celebratePlayer=playerWon;celebrateRival=rivalWon;celebrateUntil=performance.now()+2200;
   },enable(v){active=v;goal=null;keys.clear();if(!v&&actor){actor.rotation.y=.25;actor.userData.lL.rotation.x=actor.userData.lR.rotation.x=0;}}};
 }

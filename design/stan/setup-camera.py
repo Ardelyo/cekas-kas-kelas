@@ -1,4 +1,4 @@
-"""Download the pinned camera runtime and hand model for offline use."""
+"""Download the pinned camera runtime, hand model, and body pose model for offline use."""
 
 import io
 import tarfile
@@ -32,6 +32,8 @@ def install():
             with archive.extractfile(f"package/{name}") as source:
                 target.write_bytes(source.read())
     (VENDOR / "hand_landmarker.task").write_bytes(model)
+    pose = download("https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task")
+    (VENDOR / "pose_landmarker_lite.task").write_bytes(pose)
 
 
 if __name__ == "__main__":

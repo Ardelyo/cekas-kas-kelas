@@ -119,3 +119,69 @@
 .maker-face[data-count]::before{content:attr(data-count);position:absolute;z-index:2;left:0;top:0;width:100%;aspect-ratio:1;display:grid;place-items:center;font:900 italic 5rem var(--mark);color:var(--lime);-webkit-text-stroke:3px #06173f;paint-order:stroke fill;pointer-events:none}
 .maker-face.flash canvas{animation:snap-flash .4s ease-out}
 @keyframes snap-flash{from{filter:brightness(3)}}
+/* ===== Header tools ===== */
+.top-tools{display:flex;gap:.45rem;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.top-tools .button{font-size:.82rem;padding:.5rem .8rem}
+#sound{margin-left:0}
+@media(max-width:640px){.top-tools .button{font-size:.74rem;padding:.42rem .6rem}.top .brand span{display:none}}
+/* ===== Layar penuh ===== */
+body.is-full{overflow:hidden}
+.is-full .top{position:fixed;inset:0 0 auto;z-index:30;background:linear-gradient(#06173fe6,#06173f00);border:0}
+.is-full main{max-width:none;padding:0}
+.is-full .duel-head,.is-full .foot{display:none}
+.is-full .desk{position:fixed;inset:0;display:block;border:0;border-radius:0;background:#06173f}
+.is-full .room,.is-full.cinema .room{position:absolute;inset:0;height:auto!important;min-height:0!important}
+.is-full #panel{position:absolute;z-index:6;right:clamp(12px,2vw,28px);top:84px;bottom:clamp(12px,2vw,28px);width:min(430px,38vw);overflow:auto;align-self:auto;background:#06173fd9;backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);border:1px solid #a3c8ff3d;border-radius:26px;box-shadow:0 30px 60px -30px #000}
+.is-full.cinema #panel{display:none}
+.is-full.split-round #panel{left:clamp(12px,2vw,28px);width:auto}
+.is-full .roomtag{top:84px}
+.is-full .roomnav{right:calc(min(430px,38vw) + 44px)}
+.is-full .cine-caption{bottom:12%}
+@media(max-width:740px){
+  .is-full #panel{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:56svh;border-radius:22px}
+  .is-full .roomnav{right:.8rem;bottom:calc(56svh + 16px)}
+}
+/* ===== AR & kamera ===== */
+.room canvas#world{z-index:1}
+#camera-feed.ar-bg{position:absolute;inset:0;width:100%;height:100%;opacity:1;object-fit:cover;z-index:0;pointer-events:none}
+#camera-feed.pip{position:absolute;left:.8rem;bottom:3.6rem;right:auto;top:auto;width:clamp(120px,18%,220px);height:auto;aspect-ratio:16/9;object-fit:cover;opacity:1;z-index:5;border-radius:12px;border:2px solid var(--lime);box-shadow:0 10px 30px -10px #000;pointer-events:none}
+#camera-feed.mirror{transform:scaleX(-1)}
+.skeleton{position:absolute;pointer-events:none}
+.skeleton.ar{inset:0;width:100%;height:100%;z-index:2}
+.skeleton.pip{left:.8rem;bottom:3.6rem;width:clamp(120px,18%,220px);aspect-ratio:16/9;z-index:6;border-radius:12px}
+.cam-hud{position:absolute;right:.8rem;bottom:3.6rem;z-index:6;font:700 .72rem var(--sans);color:#d6ff3f;background:#06173fcc;padding:.25rem .55rem;border-radius:999px;pointer-events:none}
+.ar-on .room{background:#000}
+.ar-on .roomtag::after{content:" · AR";color:var(--lime)}
+.cinema .cam-hud,.cinema #camera-feed.pip,.cinema .skeleton.pip{display:none}
+/* Status tangan di bidang gambar */
+.rune-pad[data-hand]::after{position:absolute;left:.6rem;top:.6rem;font:700 .75rem var(--sans);padding:.25rem .6rem;border-radius:999px;background:#06173fd9;color:#cfe6fb;pointer-events:none}
+.rune-pad[data-hand=none]::after{content:"Kamera aktif · tunjukkan tanganmu"}
+.rune-pad[data-hand=ready]::after{content:"Tangan terbaca · tahan gestur pena untuk menggambar";color:var(--lime)}
+.rune-pad[data-hand=drawing]::after{content:"Menggambar… lepaskan gestur untuk melepas jurus";color:#06173f;background:var(--lime)}
+.rune-pad.cast::after{display:none}
+/* ===== Dialog pengaturan ===== */
+dialog.settings{width:min(560px,calc(100vw - 32px));max-height:calc(100svh - 32px);padding:0;border:1px solid #a3c8ff50;border-radius:24px;background:#071c44;color:#fff;box-shadow:0 40px 80px -30px #000}
+dialog.settings::backdrop{background:#020b1fb3;backdrop-filter:blur(4px)}
+.settings form{display:block;max-height:calc(100svh - 34px);overflow:auto}
+.settings header{position:sticky;top:0;background:#071c44;padding:1.1rem 1.3rem .6rem;border-bottom:1px solid #a3c8ff26;z-index:1}
+.settings header h2{margin:.2rem 0 0;font-size:1.5rem}
+.set-close{position:absolute;right:1rem;top:1rem;width:2.2rem;height:2.2rem;border-radius:50%;border:1px solid #a3c8ff50;background:#0b244e;color:#fff;cursor:pointer}
+.settings section{padding:.6rem 1.3rem;border-bottom:1px solid #a3c8ff1a}
+.settings h3{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin:.4rem 0}
+.set-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.4rem 1rem;padding:.5rem 0}
+.set-row span{display:grid;gap:.1rem}
+.set-row small{color:#a9bfdf;font-size:.78rem}
+.set-row select{max-width:210px;padding:.45rem;border-radius:10px;background:#0b244e;color:#fff;border:1px solid #769ddb}
+.set-row input[type=range]{width:150px;accent-color:var(--lime)}
+.set-row output{grid-column:2;justify-self:end;font-size:.75rem;color:#cfe6fb;margin-top:-.4rem}
+.set-row input[type=checkbox]{appearance:none;width:46px;height:26px;border-radius:999px;background:#2a4370;position:relative;cursor:pointer;transition:background .2s}
+.set-row input[type=checkbox]::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s var(--spring)}
+.set-row input[type=checkbox]:checked{background:var(--lime)}
+.set-row input[type=checkbox]:checked::after{transform:translateX(20px);background:#06173f}
+.set-row :focus-visible{outline:2px solid #fff;outline-offset:2px}
+.settings footer{position:sticky;bottom:0;display:flex;justify-content:space-between;gap:.6rem;padding:.9rem 1.3rem;background:#071c44;border-top:1px solid #a3c8ff26}
+@media(max-width:520px){.set-row{grid-template-columns:1fr}.set-row output{grid-column:1;justify-self:start;margin:0}.set-row select{max-width:none;width:100%}}
+@media(min-width:641px){.top-tools{flex-wrap:nowrap}}
+.is-full .top{padding-block:.7rem}
+.spell-stamp{white-space:normal;width:max-content;max-width:92%;text-align:center;font-size:clamp(1.15rem,3.2vw,2.2rem);line-height:1.05}
+.spell-element{max-width:92%;overflow:hidden;text-overflow:ellipsis}
