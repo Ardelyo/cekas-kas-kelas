@@ -1,7 +1,7 @@
 import { flight } from "./sky-effects.mjs";
 import { mkChar } from "./actors.mjs";
 import { spellFx } from "./spell-fx.mjs";
-import { readSpell, SPELLS } from "./spell-shape.mjs";
+import { spellDNA } from "./spell-shape.mjs";
 import { sfx } from "./duel-sfx.mjs";
 const T = window.THREE;
 const clamp = x => Math.max(0, Math.min(1, x));
@@ -26,9 +26,9 @@ export function skyStage(renderer) {
   scene.add(new T.HemisphereLight(0xfffaff,0x7089be,1.4));
   const sun=new T.DirectionalLight(0xffefcb,1.4);sun.position.set(-5,8,5);scene.add(sun);
   const dome=new T.Mesh(new T.SphereGeometry(100,36,24),new T.ShaderMaterial({
-    side:T.BackSide,depthWrite:false,uniforms:{dusk:{value:0}},
+    side:T.BackSide,depthWrite:false,uniforms:{dusk:{value:0},tint:{value:new T.Vector3(1,1,1)}},
     vertexShader:"varying vec3 v;void main(){v=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}",
-    fragmentShader:"uniform float dusk;varying vec3 v;void main(){vec3 d=normalize(v);vec3 c=mix(vec3(.85,.93,1.),vec3(.10,.37,.83),smoothstep(-.22,.55,d.y));c=mix(c,mix(vec3(.13,.16,.42),vec3(.02,.05,.18),smoothstep(-.2,.6,d.y)),dusk);float s=distance(d,normalize(vec3(-.55,.24,-1.)));c+=vec3(.65,.52,.23)*exp(-8.*s)*(1.-dusk*.7);c=mix(c,vec3(1.,.97,.8),(1.-smoothstep(.073,.078,s))*(1.-dusk));gl_FragColor=vec4(c,1.);}"
+    fragmentShader:"uniform float dusk;uniform vec3 tint;varying vec3 v;void main(){vec3 d=normalize(v);vec3 c=mix(vec3(.85,.93,1.),vec3(.10,.37,.83),smoothstep(-.22,.55,d.y));c=mix(c,mix(vec3(.13,.16,.42),vec3(.02,.05,.18),smoothstep(-.2,.6,d.y)),dusk);float s=distance(d,normalize(vec3(-.55,.24,-1.)));c+=vec3(.65,.52,.23)*exp(-8.*s)*(1.-dusk*.7);c=mix(c,vec3(1.,.97,.8),(1.-smoothstep(.073,.078,s))*(1.-dusk));c+=tint*dusk*.22*smoothstep(-.3,.4,d.y);gl_FragColor=vec4(c,1.);}"
   }));scene.add(dome);
   const cloudGeo=new T.IcosahedronGeometry(1,1), cloudMat=new T.MeshLambertMaterial({color:0xf3f8ff,flatShading:true});
   const clouds=new T.Group();scene.add(clouds);
@@ -56,7 +56,7 @@ export function skyStage(renderer) {
   const flash=glow(0xffffff,1);
   const shock=add(new T.Mesh(new T.RingGeometry(.86,1,72),additive(0xffffff)));shock.rotation.x=-Math.PI/2;shock.visible=false;
   const shock2=add(new T.Mesh(new T.RingGeometry(.94,1,72),additive(0xffffff)));shock2.visible=false;
-  const bolts=Array.from({length:8},()=>{
+  const bolts=Array.from({length:14},()=>{
     const g=new T.BufferGeometry();g.setAttribute("position",new T.BufferAttribute(new Float32Array(16*3),3));
     const l=add(new T.Line(g,new T.LineBasicMaterial({color:0xffffff,transparent:true,blending:T.AdditiveBlending,depthWrite:false})));
     l.frustumCulled=false;l.visible=false;l.renderOrder=7;return l;
@@ -74,19 +74,20 @@ export function skyStage(renderer) {
   const sigil=new T.Group();scene.add(sigil);
   const ink=new T.MeshBasicMaterial({color:0xbfff56,transparent:true,depthWrite:false,blending:T.AdditiveBlending});
   const core=new T.MeshBasicMaterial({color:0xffffea,transparent:true,depthWrite:false});
-  let gesture=null, caster=0, spellKind="nova", lastNow=0, fxTimer=0, charging=false;
+  let gesture=null, caster=0, dna=null, lastNow=0, fxTimer=0, charging=false;
   const pen=new T.Vector3(), v1=new T.Vector3(), v2=new T.Vector3(), camDir=new T.Vector3();
   function clearSpell(){
-    gesture=null;spellKind="nova";
+    gesture=null;dna=null;
     while(sigil.children.length){const line=sigil.children[0];sigil.remove(line);line.geometry.dispose();}
   }
   function prepareSpell(path,side=0){
     caster=side;clearSpell();
     const curve=new T.CatmullRomCurve3(path.map(([x,y])=>new T.Vector3(x*2.5,y*2.5,0)));
-    gesture=curve;spellKind=readSpell(path);
-    ink.color.setHex(SPELLS[spellKind].color);
+    gesture=curve;
+    dna=path.dna||spellDNA(path.map(([x,y])=>[x,-y]));
+    ink.color.setHex(dna.color);core.color.setHex(dna.element==="ombak"?0xe8f6ff:0xffffea);
     const segments=Math.min(240,Math.max(40,path.length*2));
-    for(const [radius,material] of [[.09,ink],[.03,core]]){
+    for(const [radius,material] of [[.07*dna.power,ink],[.025*dna.power,core]]){
       const stroke=new T.Mesh(new T.TubeGeometry(curve,segments,radius,6,false),material);
       if(material===core)stroke.position.z=.07;
       sigil.add(stroke);
@@ -120,7 +121,8 @@ export function skyStage(renderer) {
   function skip(){setCharge(false);hideFx();if(shot){const done=shot.done;shot=null;clearSpell();done();}}
   function cut(kind,side,bab,done){
     shot={kind,side,bab,start:performance.now(),done,burst:false,cues:new Set()};
-    fx.setSigil(gesture?SPELLS[spellKind].sides:0,gesture?SPELLS[spellKind].color:hue[side===1?1:0]);
+    fx.setSigil(gesture?dna.sides:0,gesture?dna.accent:hue[side===1?1:0]);
+    const tint=gesture?dna.tint:(side===1?[.4,.85,1]:[.8,1,.3]);dome.material.uniforms.tint.value.set(...tint);
   }
   const cue=(name,when,fn)=>{if(shot&&!shot.cues.has(name)&&when){shot.cues.add(name);fn();}};
 
@@ -219,16 +221,16 @@ export function skyStage(renderer) {
     hideFx();
     setCharge(attack&&t<.3);
     if(hit&&shot){
-      const kindNow=gesture?spellKind:"nova";
+      const spell=gesture?dna:{kind:"nova",element:"cahaya",color:hue[focus],accent:0xffffff,power:1,spin:1,bolts:3};
       if(attack){
         cue("charge",t>.01,()=>sfx.charge());
         cue("cast",gesture&&t>.06,()=>sfx.cast());
         cue("whoosh",t>.3,()=>sfx.whoosh());
-        if(kindNow==="storm")cue("zap",t>.36,()=>sfx.zap());
+        if(spell.element==="petir")cue("zap",t>.36,()=>sfx.zap());
       }
       pair.forEach((hero,i)=>{
         if(!(attack&&(side===2||side===i)))return;
-        const color=gesture&&i===caster?SPELLS[spellKind].color:hue[i];
+        const color=gesture&&i===caster?dna.color:hue[i];
         const sign=i===0?1:-1;
         // Tenaga terkumpul di tangan.
         const charge=smooth(t/.1)*(1-smooth((t-.3)/.06));
@@ -272,7 +274,7 @@ export function skyStage(renderer) {
             gesture.getPointAt(Math.random(),v2);sigil.localToWorld(v2);
             fx.emit(v2.x,v2.y,v2.z,-sign*(1+Math.random()*2),fx.rnd(1),fx.rnd(1),color,.45,.06+Math.random()*.07,.9,.2);
           }
-          if(kindNow==="storm"||Math.random()<.12){
+          if(spell.element==="petir"||Math.random()<.12){
             const b=bolts[i*2];b.material.color.setHex(color);
             v2.copy(v1).add(new T.Vector3(fx.rnd(2.4),fx.rnd(2),fx.rnd(1)));zap(b,v1,v2,.5);
           }
@@ -280,15 +282,16 @@ export function skyStage(renderer) {
       });
 
       if(attack){
-        const color=gesture?SPELLS[spellKind].color:hue[focus];
+        const color=spell.color;
         cue("impact",t>=at,()=>{
           sfx.impact(side===2?1.2:1);
-          if(kindNow==="storm")sfx.zap();
+          if(spell.element==="petir")sfx.zap();
           const shape=gesture?gesture.getSpacedPoints(90).map(p=>p.clone().multiplyScalar(.8).applyQuaternion(camera.quaternion))
             :Array.from({length:60},(_,i)=>new T.Vector3(Math.cos(i*.105),Math.sin(i*.105),0).multiplyScalar(1.4).applyQuaternion(camera.quaternion));
-          fx.burst(v2.set(contact,1.35,.5),shape,kindNow,color,dir,camDir);
-          if(side===2)fx.burst(v2,shape,"nova",hue[1],-dir,camDir);
-          rocks.forEach((r,k)=>{r.position.set(contact+fx.rnd(1.4),.2,fx.rnd(1.2));r.userData.v.set(fx.rnd(7),3+Math.random()*6,fx.rnd(5));r.rotation.set(k,k*2,0);});
+          fx.burst(v2.set(contact,1.35,.5),shape,spell,dir,camDir);
+          if(side===2)fx.burst(v2,shape,{kind:"nova",element:"cahaya",color:hue[1],accent:0xffffff,power:.8,spin:1},-dir,camDir);
+          const ice=spell.element==="kristal",rockColor=ice?0xdff4ff:spell.element==="meteor"?0xe6ff9a:null;
+          rocks.forEach((r,k)=>{if(rockColor)r.material.color.setHex(k%2?rockColor:0xffffff);else r.material.color.setHex(k%2?0xc9d8f2:0x6d86bf);r.scale.setScalar(ice?1.6:1);r.position.set(contact+fx.rnd(1.4),.2,fx.rnd(1.2));r.userData.v.set(fx.rnd(7),3+Math.random()*6,fx.rnd(5));r.rotation.set(k,k*2,0);});
           impactFrame();
         });
         if(t>=at){
@@ -299,12 +302,13 @@ export function skyStage(renderer) {
             fx.burstCircle.position.set(contact,1.35,.55);fx.burstCircle.quaternion.copy(camera.quaternion);fx.burstCircle.rotateZ(blast*2);
             fx.burstCircle.scale.setScalar(1.2+smooth(blast)*7);fx.burstCircle.material.opacity=1-blast;
           }
-          shock.visible=wave<1;shock.position.set(contact,.06,0);shock.scale.setScalar(.5+smooth(wave)*9);shock.material.opacity=(1-wave)*.9;shock.material.color.setHex(color);
+          shock.visible=wave<1;shock.position.set(contact,.06,0);shock.scale.setScalar(.5+smooth(wave)*9);shock.material.opacity=(1-wave)*.9;shock.material.color.setHex(spell.accent);shock2.material.color.setHex(spell.color);
           shock2.visible=wave<1;shock2.position.set(contact,1.35,.5);shock2.quaternion.copy(camera.quaternion);shock2.scale.setScalar(.6+smooth(wave)*6);shock2.material.opacity=(1-wave)*.8;
-          const zapTime=kindNow==="storm"?.22:.1;
+          const zapTime=spell.element==="petir"?.24:.1;
           if(t<at+zapTime)bolts.forEach((b,k)=>{
-            b.material.color.setHex(k%3?color:0xffffff);
-            const a=k*.785+Math.random()*.4,r=2.4+Math.random()*1.8;
+            if(k>=spell.bolts)return;
+            b.material.color.setHex(k%3?spell.accent:0xffffff);
+            const a=k*.449+Math.random()*.4,r=2.4+Math.random()*1.8;
             v1.set(contact,1.35,.5);v2.set(contact+Math.cos(a)*r,1.35+Math.sin(a)*r*.8,.5+fx.rnd(1.5));zap(b,v1,v2,.7);
           });
           rocks.forEach(r=>{

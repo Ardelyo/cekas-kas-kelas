@@ -1,4 +1,4 @@
-import {readSpell, SPELLS} from "./spell-shape.mjs";
+import {spellDNA, ELEMENTS} from "./spell-shape.mjs";
 import {sfx} from "./duel-sfx.mjs";
 
 const presets = [
@@ -19,15 +19,15 @@ const hexA = (hex,a) => hex + Math.round(a*255).toString(16).padStart(2,"0");
 
 export function drawSpell(panel,round,cast,name="") {
   panel.innerHTML=`<p class="eyebrow">Jurus langit · Babak ${round+1}</p><h2>${name?name+", ukir jurusmu":"Ukir jurusmu"}</h2>
-    <p>Tarik satu goresan. Bentuk gambarmu menentukan jurus yang keluar.</p>
-    <div class="rune-pad"><canvas aria-label="Bidang gambar jurus"></canvas><span aria-hidden="true">Mulai goresan di sini</span><strong class="spell-stamp" hidden></strong></div>
-    <ul class="spell-legend" aria-label="Daftar jurus">${Object.values(SPELLS).map(s=>`<li style="--c:${s.css}"><b>${s.hint}</b>${s.name}</li>`).join("")}</ul>
+    <p>Tarik satu goresan. Bentuk, arah, ukuran, dan kecepatan goresanmu menentukan nama dan wujud jurus.</p>
+    <div class="rune-pad"><canvas aria-label="Bidang gambar jurus"></canvas><span aria-hidden="true">Mulai goresan di sini</span><strong class="spell-stamp" hidden></strong><em class="spell-element" hidden></em></div>
+    <ul class="spell-legend" aria-label="Petunjuk elemen"><li style="--c:${ELEMENTS.petir.css}"><b>Zigzag</b>Petir</li><li style="--c:${ELEMENTS.cahaya.css}"><b>Lingkaran</b>Cahaya</li><li style="--c:${ELEMENTS.angin.css}"><b>Spiral</b>Angin</li><li style="--c:${ELEMENTS.ombak.css}"><b>Gelombang</b>Ombak</li><li style="--c:${ELEMENTS.meteor.css}"><b>Tarik ke bawah</b>Meteor</li><li style="--c:${ELEMENTS.kristal.css}"><b>Garis tegas</b>Kristal</li></ul>
     <div class="actions"><button class="button quiet" data-dwell data-rune>Gunakan jurus bawaan</button></div>`;
   const canvas=panel.querySelector("canvas"), ctx=canvas.getContext("2d");
   const pad=panel.querySelector(".rune-pad"), hint=pad.querySelector("span"), stamp=pad.querySelector(".spell-stamp");
   const fallback=panel.querySelector("[data-rune]");
   const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let pointer=null, points=[], finished=false, spell=null, released=0, w=0, h=0, last=performance.now(), spin=0;
+  let pointer=null, points=[], finished=false, spell=null, began=0, released=0, w=0, h=0, last=performance.now(), spin=0;
   const sparks=[];
 
   function fit(){
@@ -42,7 +42,7 @@ export function drawSpell(panel,round,cast,name="") {
   }
   function circle(now){
     const R=Math.min(w,h)*.43, cx=w/2, cy=h/2;
-    const color=spell?SPELLS[spell].css:"#d6ff3f";
+    const color=spell?spell.css:"#d6ff3f";
     const glow=spell?Math.max(.35,1-(now-released)/900):pointer!==null?.42:.2;
     ctx.save();ctx.translate(cx,cy);
     ctx.strokeStyle=hexA(color,glow);ctx.fillStyle=hexA(color,glow);ctx.shadowColor=color;ctx.shadowBlur=spell?18:6;
@@ -53,7 +53,7 @@ export function drawSpell(panel,round,cast,name="") {
     ctx.lineWidth=1;ctx.beginPath();ctx.arc(0,0,R*.9,0,7);ctx.stroke();
     ctx.save();ctx.rotate(spin);
     for(let i=0;i<36;i++){ctx.rotate(Math.PI/18);ctx.fillRect(-.8,-R,1.6,i%3?4:9);}
-    const n=spell?(SPELLS[spell].sides||6):6, step=n===5?2:1;
+    const n=spell?(spell.sides||6):6, step=n===5?2:1;
     ctx.lineWidth=1.4;ctx.beginPath();
     for(let i=0;i<=n;i++){const a=i*step*2*Math.PI/n-Math.PI/2;const x=Math.cos(a)*R*.9,y=Math.sin(a)*R*.9;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
     ctx.stroke();
@@ -63,7 +63,7 @@ export function drawSpell(panel,round,cast,name="") {
   }
   function trail(now){
     if(points.length<2)return;
-    const color=spell?SPELLS[spell].css:"#c5ff53";
+    const color=spell?spell.css:"#c5ff53";
     const flash=spell?Math.max(0,1-(now-released)/350):0;
     ctx.save();ctx.lineCap=ctx.lineJoin="round";ctx.globalCompositeOperation="lighter";
     const n=points.length;
@@ -99,16 +99,18 @@ export function drawSpell(panel,round,cast,name="") {
   }
   fit();requestAnimationFrame(frame);
 
-  function release(path){
+  function release(path,ms=0){
     if(finished)return;
     finished=true;fallback.disabled=true;
-    spell=readSpell(path);released=performance.now();
-    const info=SPELLS[spell];
+    spell=spellDNA(path,{pad:Math.hypot(w,h)||0,ms});released=performance.now();
+    const info=spell;
     document.body.dataset.spell=info.name;
     hint.hidden=true;stamp.hidden=false;stamp.textContent=info.name;stamp.style.setProperty("--c",info.css);
+    const tag=pad.querySelector(".spell-element");tag.hidden=false;tag.textContent=`Elemen ${ELEMENTS[info.element].word} · Kekuatan ${Math.round(info.power*60)}`;tag.style.setProperty("--c",info.css);
     pad.classList.add("cast");sfx.cast();pad.style.setProperty("--c",info.css);
     for(let i=0;i<path.length;i+=Math.max(1,Math.floor(path.length/70)))spark(path[i][0],path[i][1],160,i%3?info.css:"#ffffff",.8);
-    setTimeout(()=>cast(centered(path)),calm?120:720);
+    const out=centered(path);out.dna=spell;
+    setTimeout(()=>cast(out),calm?120:900);
   }
   fallback.onclick=()=>{
     fit();
@@ -129,13 +131,13 @@ export function drawSpell(panel,round,cast,name="") {
   }
   canvas.onpointerdown=e=>{
     if(finished||pointer!==null||e.button!==0)return;
-    fit();pointer=e.pointerId;points=[];canvas.setPointerCapture(pointer);hint.hidden=true;pad.classList.add("drawing");append(e);
+    fit();pointer=e.pointerId;points=[];began=performance.now();canvas.setPointerCapture(pointer);hint.hidden=true;pad.classList.add("drawing");append(e);
   };
   canvas.onpointermove=e=>{if(pointer===e.pointerId)append(e)};
   canvas.onpointerup=e=>{
     if(pointer!==e.pointerId)return;
     append(e);pointer=null;pad.classList.remove("drawing");
-    if(points.some(([x,y])=>Math.hypot(x-points[0][0],y-points[0][1])>=14))release(points);
+    if(points.some(([x,y])=>Math.hypot(x-points[0][0],y-points[0][1])>=14))release(points,performance.now()-began);
     else{hint.hidden=false;hint.textContent="Tarik sedikit lebih panjang";}
   };
   canvas.onpointercancel=()=>{pointer=null;pad.classList.remove("drawing");hint.hidden=false;};

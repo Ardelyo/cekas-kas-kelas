@@ -61,20 +61,24 @@ export function spellFx(scene) {
   const rnd=s=>(Math.random()-.5)*s;
   const tmp=new T.Vector3(), tan=new T.Vector3(), axis=new T.Vector3();
 
-  // The impact explodes in the silhouette of what the player drew.
-  function burst(center,shape,kind,color,dir,view){
+  // The impact explodes in the silhouette of what the player drew, styled by the spell's element.
+  function burst(center,shape,dna,dir,view){
     axis.copy(view).normalize();
-    for(let i=0;i<420;i++){
+    const el=dna.element, n=Math.round(420*dna.power);
+    for(let i=0;i<n;i++){
       const p=shape[(Math.random()*shape.length)|0];
       tmp.copy(p);
       const r=tmp.length()||1;
-      let speed=kind==="nova"?4.2:2+Math.random()*3.4;
-      const out=tmp.clone().multiplyScalar(speed/r);
-      if(kind==="spiral"){tan.crossVectors(tmp,axis).normalize().multiplyScalar(4.5);out.add(tan);}
-      if(kind==="lance"){out.multiplyScalar(.45);out.x+=dir*(3+Math.random()*5);}
-      if(kind==="arc"){out.y+=2.2;out.x+=dir*2;}
-      if(kind==="storm"){out.x+=rnd(6);out.y+=rnd(6);}
-      emit(center.x+p.x*.9,center.y+p.y*.9,center.z+p.z*.9,out.x,out.y,out.z+rnd(1.5),color,.7+Math.random()*.8,.09+Math.random()*.16,.9,Math.random()*.5);
+      const out=tmp.clone().multiplyScalar((2+Math.random()*3.4)*dna.power/r);
+      let life=.7+Math.random()*.8, size=.09+Math.random()*.16, drag=.9, color=Math.random()<.3?dna.accent:dna.color;
+      if(el==="cahaya")out.setLength(4.4*dna.power);
+      if(el==="angin"){tan.crossVectors(tmp,axis).normalize().multiplyScalar(5*dna.spin);out.add(tan);}
+      if(el==="kristal"){out.multiplyScalar(.6);size*=1.5;drag=.95;life*=1.4;}
+      if(el==="petir"){out.x+=rnd(7);out.y+=rnd(7);life*=.6;}
+      if(el==="ombak"){out.x*=2.2;out.y=Math.abs(out.y)*.5+1.5;drag=.93;}
+      if(el==="meteor"){out.multiplyScalar(.5);out.x+=dir*(3+Math.random()*5);out.y-=2+Math.random()*3;}
+      if(dna.kind==="lance")out.x+=dir*2.5;
+      emit(center.x+p.x*.9,center.y+p.y*.9,center.z+p.z*.9,out.x,out.y,out.z+rnd(1.5),color,life,size,drag,Math.random()*.4);
     }
     for(let i=0;i<160;i++){
       const a=Math.random()*Math.PI*2,b=rnd(2),v=6+Math.random()*9;
