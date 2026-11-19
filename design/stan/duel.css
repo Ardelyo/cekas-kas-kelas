@@ -84,3 +84,27 @@
 .vs .vs-half{flex-direction:column;justify-content:center;align-items:flex-start;padding:0 9%}
 .vs .p2{align-items:flex-end;justify-content:center}
 .vs .p2 img{order:-1}
+/* ===== Pembuat tokoh ===== */
+.pick.add .avatar{display:grid;place-items:center;background:#0b244e;border:2px dashed var(--lime);color:var(--lime);font-size:1.4rem;font-weight:800}
+.linkish{background:none;border:0;color:#cfe6fb;text-decoration:underline;font-size:.82rem;padding:.4rem 0;cursor:pointer}
+.maker{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:1rem;align-items:start}
+.maker-face{position:relative;display:grid;gap:.5rem}
+.maker-face canvas{width:100%;aspect-ratio:1;border-radius:18px;border:3px solid var(--lime);box-shadow:0 0 30px -8px var(--lime);touch-action:none;cursor:grab;background:#0b244e}
+.maker-empty{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);color:#9fb7d9;font-size:.85rem;pointer-events:none}
+.maker-upload{text-align:center;cursor:pointer}
+.maker-fields{display:grid;gap:.7rem}
+.maker-fields label{display:grid;gap:.3rem;font-weight:700;font-size:.88rem}
+.maker-fields input[type=text],.maker-fields #maker-name{padding:.6rem .7rem;border-radius:10px;border:1px solid #769ddb;background:#0b244e;color:#fff;font:inherit}
+.maker-fields input[type=range]{accent-color:var(--lime)}
+.maker-fields fieldset{border:0;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.4rem}
+.maker-fields legend{font-weight:700;font-size:.88rem;margin-bottom:.3rem}
+.chip{display:inline-flex!important;align-items:center;padding:.4rem .75rem;border-radius:999px;border:1px solid #769ddb;cursor:pointer}
+.chip:has(input:checked){background:var(--lime);color:#1b2400;border-color:var(--lime)}
+.chip input,.swatch input{position:absolute;opacity:0;pointer-events:none}
+.swatch{display:inline-block!important;cursor:pointer}
+.swatch span{display:block;width:34px;height:34px;border-radius:50%;background:var(--s);border:3px solid #0b244e;box-shadow:0 0 0 2px #769ddb}
+.swatch:has(input:checked) span{box-shadow:0 0 0 3px var(--lime)}
+.chip:has(input:focus-visible),.swatch:has(input:focus-visible) span{outline:2px solid #fff;outline-offset:2px}
+.maker-note{font-size:.82rem;color:#bcd0ec}
+.maker-error{color:#ffb4b4;font-weight:700;min-height:1.2em;margin:.2rem 0}
+@media(max-width:640px){.maker{grid-template-columns:1fr}.maker-face{max-width:240px;margin:auto;width:100%}}
