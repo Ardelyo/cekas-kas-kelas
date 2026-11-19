@@ -91,4 +91,9 @@ const T = window.THREE;
     return root;
   }
 
-export { mkChar };
+// Tokoh buatan pemain: wajah dari foto, warna kulit/rambut diambil dari foto itu.
+function registerChar(k, o) {
+  SPEC[k] = { skin: o.skin, hair: o.hair, top: o.top, bot: o.bot || 0x34405e, style: o.style, collar: o.top === 0xf2f5fb ? 0xffffff : undefined, faceTex: load(o.face) };
+}
+
+export { mkChar, registerChar };

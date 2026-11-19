@@ -3,11 +3,19 @@ import {drawSpell} from "./draw-spell.mjs";
 import {classroom} from "./room.mjs";
 import {connectCamera} from "./camera.mjs";
 import {auditCase} from "./rounds.mjs";
+import {sfx} from "./duel-sfx.mjs";
+import {openSettings} from "./settings.mjs";
+import {arLayer} from "./ar-layer.mjs";
+import {loadCustom,openMaker,removeCustom} from "./character-maker.mjs";
+import {versus,cutIn,victory,clearCine} from "./cinema-ui.mjs";
 
 const $=id=>document.getElementById(id), panel=$("panel");
-const names=["Cinta","Rafa","Jahfal","Nabila","Revalina","Tarina","Ardellio"];
+const baseNames=["Cinta","Rafa","Jahfal","Nabila","Revalina","Tarina","Ardellio"];
+let custom=loadCustom(), names=[...baseNames,...custom.map(c=>c.name)];
+const customBy=n=>custom.find(c=>c.name===n);
+const key=n=>customBy(n)?.id??n.toLowerCase();
 const money=n=>"Rp"+n.toLocaleString("id-ID");
-const photo=n=>`../assets/team/face-${n.toLowerCase()}.webp`;
+const photo=n=>customBy(n)?.face??`../assets/team/face-${n.toLowerCase()}.webp`;
 const greetings=["“Berapa uang yang sudah masuk?”","“Coba cocokkan bukti dengan buku kas.”","“Bel sudah bunyi. Siap tanding?”"];
 let player="Cinta", rival="Rafa", phase="hub", venue=-1, room;
 let questions=[], index=0, scores, times, began, opponentTime, opponentChoice, answerTime, picked, timer, run=0;
@@ -20,13 +28,25 @@ function header(){
 function film(kind,side,done){
  if(!room || questions.length===1 || matchMedia("(prefers-reduced-motion: reduce)").matches){done();return;}
  phase="film";
+ const drawn=document.body.dataset.spell;
  document.body.classList.add("cinema");
  document.body.dataset.shot=kind;
  const fighter=side===0?player:rival;
  $("take").textContent=kind==="intro"?"ARENA LANGIT / XI-F2":kind==="outro"?"HASIL DUEL":"BABAK "+(index+1);
- $("beat").textContent=kind==="intro"?player+" vs "+rival:kind==="outro"?(side===2?"Seri":fighter+" menang"):side===3?"Keduanya bertahan":side===2?"Benturan ganda":fighter+" / "+["Luncur kilat","Tebasan bukti","Segel langit"][index];
+ $("beat").textContent=kind==="intro"?player+" vs "+rival:kind==="outro"?(side===2?"Seri":fighter+" menang"):side===3?"Keduanya bertahan":side===2?"Benturan ganda":fighter+" / "+(document.body.dataset.spell||["Luncur kilat","Tebasan bukti","Segel langit"][index]);
+ delete document.body.dataset.spell;
  $("skip-film").focus({preventScroll:true});
+ clearCine();
+ const meta=i=>({name:i?rival:player,photo:photo(i?rival:player)});
+ if(kind==="intro"){versus(meta(0),meta(1));sfx.sting();}
+ else if(kind==="outro"){victory(fighter,photo(fighter),side===2);sfx.fanfare(side!==2);}
+ else if(side<3){
+   const owner=side===2?0:side;
+   const list=(side===2?[0,1]:[side]).map(i=>({...meta(i),side:i,color:i?"#65dfff":"#d6ff3f",spell:i===owner&&drawn?drawn:["Luncur Kilat","Tebasan Bukti","Segel Langit"][index]}));
+   setTimeout(()=>{if(phase==="film")cutIn(list)},120);
+ }
  room.cut(kind,side,index,()=>{
+   clearCine();
    document.body.classList.remove("cinema");delete document.body.dataset.shot;
    done();panel.focus({preventScroll:true});
  });
@@ -40,13 +60,13 @@ function hub(){
  document.querySelectorAll("[data-place]").forEach(b=>b.disabled=false);
  header();
  panel.innerHTML=`<p class="eyebrow">PERSIAPAN PENTAS</p><h2>Pilih tokohmu</h2>
- <div class="players">${names.map(n=>`<button class="pick" data-dwell data-player="${n}" aria-pressed="${n===player}"><img class="avatar" alt="" src="${photo(n)}">${n}</button>`).join("")}</div>
+ <div class="players">${names.map(n=>`<button class="pick" data-dwell data-player="${n}" aria-pressed="${n===player}"><img class="avatar" alt="" src="${photo(n)}">${n}</button>`).join("")}<button class="pick add" data-dwell data-maker><span class="avatar">+</span>Tokoh baru</button></div>${customBy(player)?`<button class="linkish" data-remove>Hapus tokoh ${player}</button>`:""}
  <p class="evidence-line">${venue<0?"Bu Wali · “Besok kelas mau pentas. Kas kita cukup?”":greetings[venue]}</p>
  <p>${venue===0?"Latihan menghitung iuran di papan tulis.":venue===1?"Latihan memeriksa transaksi di meja kas.":"Tiga babak melawan "+rival+". Jawaban benar mendapat satu poin. Jika seri, waktu jawaban benar menentukan pemenang."}</p><div class="actions">${venue===0||venue===1?pickButton("Coba latihan","train"):""}${pickButton("Mulai duel","duel")}</div>
  <div class="local-entry"><label>Pemain 2 <select id="guest">${names.filter(n=>n!==player).map(n=>`<option ${n===rival?"selected":""}>${n}</option>`).join("")}</select></label>${pickButton("Duel dua pemain","local")}<small>Satu layar · P1 tekan 1/2/3, P2 tekan J/K/L, atau sentuh jawaban.</small></div>`;
 }
 try{room=classroom($("world"),i=>{if(phase==="hub"){venue=i;hub()}})}catch(e){console.warn(e);$("guide").textContent="Pilih lokasi dengan tombol di bawah gambar kelas."}
-function characters(){room?.characters(player.toLowerCase(),rival.toLowerCase());}
+function characters(){room?.characters(key(player),key(rival));}
 characters();hub();
 document.querySelectorAll("[data-place]").forEach(b=>{b.setAttribute("data-dwell","");b.onclick=()=>{const i=Number(b.dataset.place);if(room)room.visit(i);else{venue=i;hub()}}});
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr;}
@@ -69,7 +89,7 @@ async function start(training){
  guestQuestions=local?secondDeck(money):[];
  [...questions,...guestQuestions].forEach(q=>{q.answers=shuffle(q.options.map((label,i)=>({label,right:i===q.correct})))});
  index=0;scores=[0,0];times=[0,0];
- if(!training && room){room.enterSky(player.toLowerCase(),rival.toLowerCase());document.body.classList.add("sky-duel");}
+ if(!training && room){room.enterSky(key(player),key(rival));document.body.classList.add("sky-duel");}
  film("intro",2,question);
  }catch(e){console.error(e);phase="error";panel.innerHTML='<p>Buka arena lewat localhost agar buku kas bisa diperiksa.</p>'+pickButton("Kembali","hub");}
 }
@@ -159,7 +179,9 @@ function finish(){
 }
 panel.onclick=e=>{
  const b=e.target.closest("button");if(!b)return;
- if(b.dataset.player){player=b.dataset.player;rival=player==="Rafa"?"Cinta":"Rafa";characters();venue=-1;hub();}
+ if(b.hasAttribute("data-maker")&&phase==="hub"){openMaker(panel,names,c=>{custom.push(c);names.push(c.name);player=c.name;rival="Rafa";characters();venue=-1;hub();},hub);}
+ else if(b.hasAttribute("data-remove")&&phase==="hub"){const c=customBy(player);if(c&&confirm(`Hapus tokoh ${c.name}?`)){removeCustom(c.id);custom=custom.filter(x=>x!==c);names=names.filter(n=>n!==c.name);player="Cinta";rival="Rafa";characters();hub();}}
+ else if(b.dataset.player){player=b.dataset.player;rival=player==="Rafa"?"Cinta":"Rafa";characters();venue=-1;hub();}
  else if(b.hasAttribute("data-seat"))localAnswer(Number(b.dataset.seat),Number(b.dataset.choice));
  else if(b.dataset.act==="local"&&phase==="hub"){local=true;rival=$("guest").value;characters();header();start(false)}
  else if(b.hasAttribute("data-answer"))answer(Number(b.dataset.answer));
@@ -171,4 +193,22 @@ addEventListener("keydown",e=>{if(e.repeat||e.ctrlKey||e.altKey||e.metaKey)retur
  const key=e.key.toLowerCase();
  if(phase==="split"){const n="123jkl".indexOf(key);if(key.length===1&&n>=0){e.preventDefault();localAnswer(Math.floor(n/3),n%3)}}
  else if(/^[1-3]$/.test(key))answer(Number(key)-1)});
+sfx.bindToggle($("sound"));
+$("settings-open").onclick=openSettings;
+// Layar penuh: API asli bila ada, jika tidak (mis. iOS) pakai mode penuh berbasis CSS.
+function setFull(on){
+  document.body.classList.toggle("is-full",on);
+  $("fullscreen").setAttribute("aria-pressed",String(on));$("fullscreen").textContent=on?"Keluar layar penuh":"Layar penuh";
+  dispatchEvent(new Event("resize"));
+}
+$("fullscreen").onclick=async()=>{
+  const on=!document.body.classList.contains("is-full");
+  if(document.fullscreenEnabled){
+    try{on?await document.documentElement.requestFullscreen({navigationUI:"hide"}):await document.exitFullscreen();return;}catch{}
+  }
+  setFull(on);
+};
+document.addEventListener("fullscreenchange",()=>setFull(!!document.fullscreenElement));
+addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("is-full")&&!document.fullscreenElement)setFull(false);});
+arLayer({video:$("camera-feed"),room:document.querySelector(".room"),onAR:on=>room?.setAR(on)});
 connectCamera({button:$("camera"),video:$("camera-feed"),cursor:$("hand-cursor"),status:$("camera-status"),canSelect:()=>true});

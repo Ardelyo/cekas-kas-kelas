@@ -16,9 +16,10 @@
       home: '<path d="M3 11l9-7 9 7M5 10v10h14V10"/>', spark: '<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',
       route: '<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H14a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5.5"/>',
       users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c2 .6 3.2 2.3 3.5 5.2"/>',
+      sword: '<path d="M14.5 3H21v6.5L10 20.5 3.5 14z"/><path d="M6 17l-3 3M8.5 12.5l3 3"/>',
       chat: '<path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-6l-5 4v-4a3 3 0 0 1-2-3z"/>'
     };
-    var tabs = [['index.html', 'Beranda', 'home'], ['fitur.html', 'Fitur', 'spark'], ['cara.html', 'Cara', 'route'], ['tentang.html', 'Tentang', 'users'], ['tanya.html', 'Tanya', 'chat']];
+    var tabs = [['index.html', 'Beranda', 'home'], ['fitur.html', 'Fitur', 'spark'], ['stan/duel.html', 'Arena', 'sword'], ['cara.html', 'Cara', 'route'], ['tentang.html', 'Tentang', 'users'], ['tanya.html', 'Tanya', 'chat']];
     var ai = Math.max(0, tabs.findIndex(function (t) { return t[0] === page; }));
     var bar = document.createElement('nav'); bar.className = 'mtabs'; bar.setAttribute('aria-label', 'Navigasi utama');
     bar.innerHTML = '<span class="mtabs__pill" aria-hidden="true" style="--i:' + ai + '"></span>' + tabs.map(function (t, i) { return '<a href="' + t[0] + '"' + (i === ai ? ' class="on" aria-current="page"' : '') + '><svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + IC[t[2]] + '</svg><span>' + t[1] + '</span></a>'; }).join('');
