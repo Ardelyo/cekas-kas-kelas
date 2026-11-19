@@ -24,7 +24,8 @@ function film(kind,side,done){
  document.body.dataset.shot=kind;
  const fighter=side===0?player:rival;
  $("take").textContent=kind==="intro"?"ARENA LANGIT / XI-F2":kind==="outro"?"HASIL DUEL":"BABAK "+(index+1);
- $("beat").textContent=kind==="intro"?player+" vs "+rival:kind==="outro"?(side===2?"Seri":fighter+" menang"):side===3?"Keduanya bertahan":side===2?"Benturan ganda":fighter+" / "+["Luncur kilat","Tebasan bukti","Segel langit"][index];
+ $("beat").textContent=kind==="intro"?player+" vs "+rival:kind==="outro"?(side===2?"Seri":fighter+" menang"):side===3?"Keduanya bertahan":side===2?"Benturan ganda":fighter+" / "+(document.body.dataset.spell||["Luncur kilat","Tebasan bukti","Segel langit"][index]);
+ delete document.body.dataset.spell;
  $("skip-film").focus({preventScroll:true});
  room.cut(kind,side,index,()=>{
    document.body.classList.remove("cinema");delete document.body.dataset.shot;

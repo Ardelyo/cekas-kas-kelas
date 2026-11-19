@@ -10,7 +10,7 @@
 .cine-caption small{width:fit-content;background:#102a53;color:var(--lime);font:800 .8rem var(--sans);letter-spacing:.14em;padding:.25rem .55rem}
 .cine-caption strong{font-size:clamp(1.7rem,4.5vw,4rem);line-height:1.15;letter-spacing:-.045em;animation:shot-in .32s ease-out}
 .cinema #skip-film{display:block;position:absolute;right:3%;top:9%;font-size:.86rem;z-index:3}
-.cinema[data-shot="clash"] .cine-lines{display:block;position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 17deg at 50% 48%,transparent 0deg 7deg,#fbffffa6 7.1deg 7.45deg,transparent 7.7deg 13deg);mask-image:radial-gradient(ellipse,transparent 28%,black 94%);animation:rush-lines 2.85s both}
+.cinema[data-shot="clash"] .cine-lines{display:block;position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(from 17deg at 50% 48%,transparent 0deg 7deg,#fbffffa6 7.1deg 7.45deg,transparent 7.7deg 13deg);mask-image:radial-gradient(ellipse,transparent 28%,black 94%);animation:rush-lines 3.2s both}
 @keyframes rush-lines{0%,26%,94%,100%{opacity:0}50%,64%{opacity:.93}81%{opacity:.4}}
 @keyframes shot-in{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
 @media(max-width:740px){body.sky-duel:not(.cinema) .room{min-height:195px}.cinema .room{height:56svh}}
@@ -18,3 +18,28 @@
 .rune-pad canvas{display:block;width:100%;height:clamp(145px,23vh,230px);touch-action:none;cursor:crosshair}
 .rune-pad span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;text-align:center;font-size:.92rem}
 .local-entry{margin-top:1.3rem;padding-top:1rem;border-top:1px solid #86a4ce66;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}.local-entry small{flex-basis:100%}.local-entry select{padding:.48rem;border-radius:8px}.split-round .desk{display:block}.split-round .room{display:none}.split-cards{display:grid;gap:1.2rem;grid-template-columns:1fr 1fr}.duelist{border-top:3px solid var(--lime);padding-top:.8rem}.duelist:nth-child(2){border-color:#65dfff}.duelist .options .chosen{border-color:var(--lime)}.duelist kbd{font-weight:bold}.duelist .lock{display:block;min-height:1.25em;margin-top:.45rem}@media(max-width:640px){.split-cards{grid-template-columns:1fr;gap:.5rem}.duelist h2{font-size:1.2rem!important}}
+/* ===== Anime FX layer ===== */
+.anime-fx{position:absolute;inset:-20%;pointer-events:none;z-index:1;opacity:0;transition:opacity .15s}
+.fx-charge .anime-fx{opacity:1;background:radial-gradient(ellipse at 50% 55%,transparent 30%,#06173fd9 78%),repeating-conic-gradient(from 0deg at 50% 55%,transparent 0 3.2deg,#d6ff3f38 3.4deg 3.8deg,transparent 4deg 7deg);animation:charge-lines .18s steps(2) infinite}
+@keyframes charge-lines{50%{transform:rotate(2.5deg) scale(1.04)}}
+.fx-impact .room canvas{animation:impact-frame .42s steps(1) both}
+@keyframes impact-frame{0%{filter:invert(1) grayscale(1) contrast(4)}10%{filter:grayscale(1) contrast(6) brightness(1.5)}20%{filter:invert(1) contrast(3) sepia(1) hue-rotate(40deg)}30%{filter:brightness(2.2) saturate(2)}45%,100%{filter:none}}
+.fx-impact .anime-fx{opacity:1;background:radial-gradient(circle at 50% 50%,#fff 0 6%,#f6ffd0cc 14%,transparent 42%);animation:impact-flash .46s ease-out both}
+@keyframes impact-flash{from{transform:scale(.4);opacity:1}to{transform:scale(1.9);opacity:0}}
+.fx-impact .room{animation:impact-shake .38s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes impact-shake{10%,90%{translate:-2px 1px}20%,80%{translate:5px -3px}30%,50%,70%{translate:-8px 4px}40%,60%{translate:8px -2px}}
+.cinema .cine-caption strong{font-style:italic;transform:skewX(-9deg);-webkit-text-stroke:1.5px #06173f;paint-order:stroke fill;text-shadow:4px 4px 0 #06173f,0 0 24px #d6ff3f66;animation:anime-title .5s cubic-bezier(.2,1.6,.4,1) both}
+.cinema .cine-caption small{transform:skewX(-12deg);box-shadow:4px 4px 0 var(--lime)}
+@keyframes anime-title{0%{opacity:0;transform:skewX(-9deg) translateX(-60px) scale(1.25);filter:blur(6px)}60%{opacity:1;filter:none}100%{transform:skewX(-9deg)}}
+/* ===== Rune pad ===== */
+.rune-pad{--c:#d6ff3f;background-color:#071a3a;background-image:radial-gradient(ellipse at center,#1e6fe830,transparent 70%),radial-gradient(#a6c5cc33 1px,transparent 1px);border-color:#2f5d93;box-shadow:inset 0 0 40px #000a,0 0 0 0 var(--c);transition:box-shadow .3s,border-color .3s}
+.rune-pad.drawing{border-color:var(--c);box-shadow:inset 0 0 40px #000a,0 0 22px -6px var(--c)}
+.rune-pad.cast{border-color:var(--c);animation:pad-cast .6s ease-out}
+@keyframes pad-cast{0%{box-shadow:inset 0 0 80px var(--c),0 0 40px var(--c)}100%{box-shadow:inset 0 0 40px #000a,0 0 18px -6px var(--c)}}
+.rune-pad canvas{height:clamp(170px,30vh,280px)}
+.spell-stamp{position:absolute;left:50%;top:50%;pointer-events:none;font:800 clamp(1.5rem,4vw,2.4rem)/1 var(--mark);font-style:italic;color:#fff;-webkit-text-stroke:1.5px #06173f;paint-order:stroke fill;text-shadow:3px 3px 0 #06173f,0 0 22px var(--c);white-space:nowrap;animation:stamp .7s cubic-bezier(.2,1.7,.4,1) both}
+@keyframes stamp{0%{opacity:0;transform:translate(-50%,-50%) skewX(-10deg) scale(2.6) rotate(-6deg)}40%{opacity:1}100%{transform:translate(-50%,-50%) skewX(-10deg) scale(1)}}
+.spell-legend{list-style:none;padding:0;margin:.2rem 0 .8rem;display:flex;flex-wrap:wrap;gap:.35rem}
+.spell-legend li{font-size:.78rem;border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:999px;padding:.22rem .6rem;color:#dbe8f7}
+.spell-legend b{color:var(--c);margin-right:.35rem}
+@media (prefers-reduced-motion:reduce){.fx-impact .room,.fx-impact .room canvas,.fx-charge .anime-fx,.spell-stamp{animation:none}}

@@ -1,9 +1,13 @@
 import { flight, skyEffects } from "./sky-effects.mjs";
 import { mkChar } from "./actors.mjs";
+import { spellFx } from "./spell-fx.mjs";
+import { readSpell, SPELLS } from "./spell-shape.mjs";
 const T = window.THREE;
 const clamp = x => Math.max(0, Math.min(1, x));
 const smooth = x => {x=clamp(x); return x*x*(3-2*x);};
 const mix = (a,b,x) => a+(b-a)*x;
+// Hit-stop: time crawls around the moment of contact, then snaps back.
+const warp = r => r<.47 ? r*.52/.47 : r<.67 ? .52+(r-.47)*.25 : .57+(r-.67)*.43/.33;
 
 export function skyStage(renderer) {
   const scene=new T.Scene();
@@ -51,6 +55,14 @@ export function skyStage(renderer) {
     ray.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),ray.userData.dir);
   }
   const animateEffects=skyEffects(scene,hue);
+  const fx=spellFx(scene);
+  let spellKind="nova", lastNow=0, fxTimer=0, charging=false;
+  const v1=new T.Vector3(), v2=new T.Vector3(), camDir=new T.Vector3();
+  function impactFrame(){
+    const b=document.body;b.classList.remove("fx-impact");void b.offsetWidth;b.classList.add("fx-impact");
+    clearTimeout(fxTimer);fxTimer=setTimeout(()=>b.classList.remove("fx-impact"),460);
+  }
+  function setCharge(on){if(on!==charging){charging=on;document.body.classList.toggle("fx-charge",on);}}
   const sigil=new T.Group();
   scene.add(sigil);
   const ink=new T.MeshBasicMaterial({color:0xbfff56,transparent:true,depthWrite:false});
@@ -58,7 +70,7 @@ export function skyStage(renderer) {
   let gesture=null, caster=0;
   const pen=new T.Vector3();
   function clearSpell(){
-    gesture=null;
+    gesture=null;spellKind="nova";
     while(sigil.children.length){
       const line=sigil.children[0];sigil.remove(line);line.geometry.dispose();
     }
@@ -68,6 +80,8 @@ export function skyStage(renderer) {
     clearSpell();
     const curve=new T.CatmullRomCurve3(path.map(([x,y])=>new T.Vector3(x*2.5,y*2.5,0)));
     gesture=curve;
+    spellKind=readSpell(path);
+    ink.color.setHex(SPELLS[spellKind].color);
     const segments=Math.min(240,Math.max(40,path.length*2));
     for(const [radius,material] of [[.065,ink],[.024,core]]){
       const stroke=new T.Mesh(new T.TubeGeometry(curve,segments,radius,6,false),material);
@@ -82,16 +96,20 @@ export function skyStage(renderer) {
     pair=[a,b].map(k=>{if(!sprites.has(k))sprites.set(k,mkChar(k,false));const c=sprites.get(k);scene.add(c);return c;});
     visible=true;
   }
-  function skip(){if(shot){const done=shot.done;shot=null;clearSpell();done();}}
-  function cut(kind,side,bab,done){shot={kind,side,bab,start:performance.now(),done};}
+  function skip(){setCharge(false);if(shot){const done=shot.done;shot=null;clearSpell();done();}}
+  function cut(kind,side,bab,done){
+    shot={kind,side,bab,start:performance.now(),done,burst:false};
+    fx.setSigil(gesture?SPELLS[spellKind].sides:0,gesture?SPELLS[spellKind].color:hue[side===1?1:0]);
+  }
   function draw(now){
     if(!visible)return false;
     const width=renderer.domElement.clientWidth,height=renderer.domElement.clientHeight;
     if(width&&height&&aspect!==width/height){aspect=width/height;camera.aspect=aspect;camera.updateProjectionMatrix();}
     const kind=shot?.kind,side=shot?.side??0,bab=shot?.bab??0;
-    const length=kind==="intro"?4.4:kind==="outro"?3.3:2.85;
-    const t=shot?clamp((now-shot.start)/(1000*length)):0;
+    const length=kind==="intro"?4.4:kind==="outro"?3.3:3.2;
+    const raw=shot?clamp((now-shot.start)/(1000*length)):0;
     const hit=kind==="clash", at=.54;
+    const t=hit?warp(raw):raw;
     const impact=hit?clamp((t-at)/.35):0;
     const burst=side!==3&&hit&&t>=at&&t<.89;
     const focus=side===1?1:0, dir=focus===0?1:-1;
@@ -164,7 +182,7 @@ export function skyStage(renderer) {
         tx=contact*(1-pull);ty=1.38;
         cx=tx+dir*mix(.6,1.6,pull);cy=mix(1.45,2.6,pull);
         cz=mix(bab===2?6.6:5.25,9.2,pull);
-        cx+=Math.sin(impact*35)*.09*(1-impact);
+        cx+=Math.sin(impact*41)*.28*(1-impact)**2;cy+=Math.cos(impact*37)*.18*(1-impact)**2;
       }
     }else if(kind==="outro"){tx=side===2?0:dir*-2.6;cx=tx+mix(2,.6,smooth(t));cy=1.35+t*.65;cz=side===2?9:mix(7,4.2,smooth(t));}
     camera.position.set(cx,cy,cz*Math.max(1,1.45/aspect));camera.lookAt(tx,ty,0);
@@ -182,9 +200,65 @@ export function skyStage(renderer) {
         line.geometry.setDrawRange(0,Math.floor(count*reveal/3)*3);
       }
     }
+    const dt=Math.min(.05,(now-(lastNow||now))/1000);lastNow=now;
+    const fxOn=hit&&side!==3&&!!shot;
+    setCharge(fxOn&&t<.3);
+    if(fxOn){
+      const attacker=side===1?1:0, hero=pair[attacker];
+      const color=gesture?SPELLS[spellKind].color:hue[attacker], kindNow=gesture?spellKind:"nova";
+      camera.getWorldDirection(camDir);
+      const charge=smooth(t/.1)*(1-smooth((t-.3)/.1));
+      fx.ground.visible=charge>.01;
+      if(fx.ground.visible){
+        fx.ground.position.set(hero.position.x,.03,hero.position.z);fx.ground.rotation.set(-Math.PI/2,0,now*.0021);
+        fx.ground.scale.setScalar(3.8*charge*(1+.04*Math.sin(now*.03)));fx.ground.material.opacity=charge;
+      }
+      const ring=smooth(t/.18)*(1-smooth((t-.5)/.12));
+      fx.front.visible=ring>.01;
+      if(fx.front.visible){
+        if(sigil.visible)fx.front.position.copy(sigil.position).addScaledVector(camDir,.35);
+        else fx.front.position.set(hero.position.x,1.3,hero.position.z+.5);
+        fx.front.quaternion.copy(camera.quaternion);fx.front.rotateZ(-now*.0032);
+        fx.front.scale.setScalar(2.9*ring);fx.front.material.opacity=.9*ring;
+      }
+      if(t<.27)for(let i=0;i<5;i++){
+        v1.set(fx.rnd(2),fx.rnd(2),fx.rnd(2)).normalize().multiplyScalar(2+Math.random());
+        fx.emit(hero.position.x+v1.x,hero.position.y+1.2+v1.y,hero.position.z+v1.z,-v1.x*5,-v1.y*5,-v1.z*5,color,.38,.07+Math.random()*.05,.97,.3);
+      }
+      if(gesture&&sigil.visible){
+        sigil.updateMatrixWorld(true);
+        if(t<.28){
+          gesture.getPointAt(smooth(t/.26),v1);sigil.localToWorld(v1);
+          for(let i=0;i<4;i++)fx.emit(v1.x,v1.y,v1.z,fx.rnd(1.6),fx.rnd(1.6)+.4,fx.rnd(1.6),color,.5+Math.random()*.4,.08+Math.random()*.08,.9,i?0:.7);
+        }else if(t<.56){
+          for(let i=0;i<10;i++){
+            gesture.getPointAt(Math.random(),v1);sigil.localToWorld(v1);
+            fx.emit(v1.x,v1.y,v1.z,-dir*(1+Math.random()*2.5),fx.rnd(1),fx.rnd(1),color,.45+Math.random()*.4,.06+Math.random()*.1,.9,Math.random()*.4);
+          }
+        }
+      }else if(t>.3&&t<.56){
+        for(const [i,c] of pair.entries())if(side===2||i===side)for(let k=0;k<6;k++)
+          fx.emit(c.position.x+fx.rnd(.5),c.position.y+1.1+fx.rnd(.6),c.position.z+fx.rnd(.5),-(i?-1:1)*2,fx.rnd(1),fx.rnd(1),hue[i],.4,.08+Math.random()*.06,.9,.2);
+      }
+      if(!shot.burst&&t>=at){
+        shot.burst=true;
+        const shape=gesture?gesture.getSpacedPoints(90).map(p=>p.clone().multiplyScalar(.8).applyQuaternion(camera.quaternion))
+          :Array.from({length:60},(_,i)=>new T.Vector3(Math.cos(i*.105),Math.sin(i*.105),0).multiplyScalar(1.4).applyQuaternion(camera.quaternion));
+        fx.burst(v2.set(contact,1.35,.5),shape,kindNow,color,dir,camDir);
+        if(side===2)fx.burst(v2,shape,"nova",hue[1],-dir,camDir);
+        impactFrame();
+      }
+      const blast=clamp((t-at)/.12);
+      fx.burstCircle.visible=t>=at&&blast<1;
+      if(fx.burstCircle.visible){
+        fx.burstCircle.position.set(contact,1.35,.55);fx.burstCircle.quaternion.copy(camera.quaternion);fx.burstCircle.rotateZ(blast*2);
+        fx.burstCircle.scale.setScalar(1.2+smooth(blast)*7);fx.burstCircle.material.opacity=1-blast;
+      }
+    }else{fx.ground.visible=fx.front.visible=fx.burstCircle.visible=false;}
+    fx.step(dt);
     clouds.rotation.y=now*.000014;renderer.render(scene,camera);
-    if(shot&&t>=1)skip();
+    if(shot&&raw>=1)skip();
     return true;
   }
-  return {enter,draw,cut,skip,prepareSpell,leave(){clearSpell();visible=false;shot=null;}};
+  return {enter,draw,cut,skip,prepareSpell,leave(){clearSpell();fx.clear();setCharge(false);visible=false;shot=null;}};
 }
