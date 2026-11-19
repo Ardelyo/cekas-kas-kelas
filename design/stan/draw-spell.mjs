@@ -1,4 +1,5 @@
 import {readSpell, SPELLS} from "./spell-shape.mjs";
+import {sfx} from "./duel-sfx.mjs";
 
 const presets = [
   [[.18,.66],[.52,.22],[.46,.52],[.82,.34]],
@@ -105,7 +106,7 @@ export function drawSpell(panel,round,cast,name="") {
     const info=SPELLS[spell];
     document.body.dataset.spell=info.name;
     hint.hidden=true;stamp.hidden=false;stamp.textContent=info.name;stamp.style.setProperty("--c",info.css);
-    pad.classList.add("cast");pad.style.setProperty("--c",info.css);
+    pad.classList.add("cast");sfx.cast();pad.style.setProperty("--c",info.css);
     for(let i=0;i<path.length;i+=Math.max(1,Math.floor(path.length/70)))spark(path[i][0],path[i][1],160,i%3?info.css:"#ffffff",.8);
     setTimeout(()=>cast(centered(path)),calm?120:720);
   }
@@ -123,7 +124,7 @@ export function drawSpell(panel,round,cast,name="") {
     const prev=points.at(-1);
     if(prev&&Math.hypot(prev[0]-x,prev[1]-y)<2)return;
     if(points.length>=500)points=points.filter((_,i)=>i%2===0);
-    points.push([x,y]);
+    points.push([x,y]);sfx.scratch();
     for(let i=0;i<2;i++)spark(x,y,90,i?"#ffffff":"#d6ff3f",.45);
   }
   canvas.onpointerdown=e=>{

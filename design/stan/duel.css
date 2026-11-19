@@ -43,3 +43,44 @@
 .spell-legend li{font-size:.78rem;border:1px solid color-mix(in srgb,var(--c) 55%,transparent);border-radius:999px;padding:.22rem .6rem;color:#dbe8f7}
 .spell-legend b{color:var(--c);margin-right:.35rem}
 @media (prefers-reduced-motion:reduce){.fx-impact .room,.fx-impact .room canvas,.fx-charge .anime-fx,.spell-stamp{animation:none}}
+/* ===== Sinematik: VS, cut-in, kemenangan ===== */
+#sound{margin-left:auto;font-size:.85rem}
+.cine-ui{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.cine-ui img{display:block}
+.vs .vs-half{position:absolute;inset:0;display:flex;align-items:center;gap:clamp(.6rem,2vw,1.4rem);padding:0 7%;background:linear-gradient(115deg,#d6ff3f 0%,#3d7a1f 22%,#06173f 58%)}
+.vs .p1{clip-path:polygon(0 0,57% 0,43% 100%,0 100%);animation:vs-l .55s cubic-bezier(.2,1,.3,1) both,vs-out .35s 2.3s both}
+.vs .p2{clip-path:polygon(57% 0,100% 0,100% 100%,43% 100%);justify-content:flex-end;background:linear-gradient(295deg,#65dfff 0%,#1e6fe8 22%,#06173f 58%);animation:vs-r .55s .07s cubic-bezier(.2,1,.3,1) both,vs-out .35s 2.3s both}
+.vs img{width:clamp(78px,20vw,210px);aspect-ratio:1;object-fit:cover;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 6px #06173f,0 0 46px #fff8;animation:vs-face 2.6s linear both}
+.vs b{font:800 italic clamp(1.4rem,5vw,3.6rem)/1 var(--mark);color:#fff;-webkit-text-stroke:2px #06173f;paint-order:stroke fill;transform:skewX(-10deg);text-shadow:5px 5px 0 #06173f;letter-spacing:-.03em}
+.vs-slash{position:absolute;left:50%;top:-10%;width:6px;height:120%;background:#fff;box-shadow:0 0 24px #fff,0 0 60px #d6ff3f;transform:translateX(-50%) rotate(15deg);animation:vs-slash .5s .4s both,vs-out .35s 2.3s both}
+.vs-mark{position:absolute;left:50%;top:50%;font:900 italic clamp(3rem,11vw,7.5rem)/1 var(--mark);color:#d6ff3f;-webkit-text-stroke:3px #06173f;paint-order:stroke fill;text-shadow:6px 6px 0 #06173f,0 0 40px #d6ff3f;transform:translate(-50%,-50%) rotate(-8deg);animation:vs-stamp .5s .5s cubic-bezier(.2,1.9,.4,1) both,vs-out .35s 2.3s both}
+@keyframes vs-l{from{transform:translateX(-105%)}}
+@keyframes vs-r{from{transform:translateX(105%)}}
+@keyframes vs-face{from{scale:1.12}to{scale:1}}
+@keyframes vs-slash{from{height:0;opacity:0}to{height:120%;opacity:1}}
+@keyframes vs-stamp{0%{opacity:0;transform:translate(-50%,-50%) rotate(-20deg) scale(4)}100%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}}
+@keyframes vs-out{to{opacity:0}}
+.cinema[data-shot=intro] .cine-caption{animation:vs-in .4s 2.5s both}
+.cinema[data-shot=outro] .cine-caption{display:none}
+@keyframes vs-in{from{opacity:0}}
+.cutin .cut{position:absolute;left:-6%;right:-6%;top:calc(50% - 16% * var(--n) + var(--i) * 33%);height:31%;display:flex;align-items:center;gap:4%;padding:0 13%;overflow:hidden;background:linear-gradient(90deg,#06173f 5%,color-mix(in srgb,var(--c) 55%,#06173f) 50%,#06173f 95%);border-block:4px solid var(--c);box-shadow:0 0 34px var(--c);transform:skewY(-5deg);animation:cut-in 1.05s cubic-bezier(.2,1,.3,1) both}
+.cut.right{flex-direction:row-reverse;text-align:right}
+.cut img{height:160%;aspect-ratio:1;object-fit:cover;object-position:50% 32%;filter:contrast(1.35) saturate(1.25);-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);animation:cut-face 1.05s linear both;position:relative}
+.cut-lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 38px,#ffffff2e 38px 41px,transparent 41px 90px);animation:cut-lines .2s linear infinite}
+.cut-text{position:relative}
+.cut-text small{display:block;font:800 clamp(.7rem,1.6vw,.95rem) var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--c)}
+.cut-text b{display:block;font:900 italic clamp(1.3rem,4.6vw,3.3rem)/1 var(--mark);color:#fff;-webkit-text-stroke:2px #06173f;paint-order:stroke fill;text-shadow:4px 4px 0 #06173f,0 0 26px var(--c);letter-spacing:-.03em}
+@keyframes cut-in{0%{clip-path:inset(50% 0 50% 0);filter:brightness(3)}14%{clip-path:inset(0);filter:none}82%{clip-path:inset(0);opacity:1}100%{clip-path:inset(0 0 0 100%);opacity:.6}}
+@keyframes cut-face{from{transform:translateX(-26px) scale(1.06)}to{transform:translateX(26px) scale(1.14)}}
+@keyframes cut-lines{to{background-position:90px 0}}
+.win{display:grid;place-items:center;align-content:center;gap:.5rem;background:radial-gradient(circle,#06173f40,#06173fd9 75%);animation:vs-in .3s both}
+.win-rays{position:absolute;inset:-60%;background:repeating-conic-gradient(#d6ff3f 0 5deg,transparent 5deg 15deg);opacity:.16;animation:win-spin 9s linear infinite}
+.win img{position:relative;width:clamp(76px,15vw,150px);aspect-ratio:1;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 0 0 6px #d6ff3f,0 0 60px #d6ff3f;animation:win-pop .55s .1s cubic-bezier(.2,1.9,.4,1) both}
+.win strong{position:relative;font:900 italic clamp(2.6rem,9vw,6rem)/1 var(--mark);color:#d6ff3f;-webkit-text-stroke:3px #06173f;paint-order:stroke fill;text-shadow:6px 6px 0 #06173f,0 0 40px #d6ff3f88;transform:skewX(-10deg);animation:win-pop .55s .25s cubic-bezier(.2,1.9,.4,1) both}
+.win small{position:relative;font:800 clamp(1rem,2.4vw,1.5rem) var(--sans);color:#fff;letter-spacing:.12em;text-transform:uppercase;animation:vs-in .4s .6s both}
+@keyframes win-pop{from{opacity:0;scale:2.4}}
+@keyframes win-spin{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){.cine-ui *{animation-duration:.01s!important}}
+.vs .vs-half{flex-direction:column;justify-content:center;align-items:flex-start;padding:0 9%}
+.vs .p2{align-items:flex-end;justify-content:center}
+.vs .p2 img{order:-1}

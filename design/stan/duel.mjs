@@ -3,6 +3,8 @@ import {drawSpell} from "./draw-spell.mjs";
 import {classroom} from "./room.mjs";
 import {connectCamera} from "./camera.mjs";
 import {auditCase} from "./rounds.mjs";
+import {sfx} from "./duel-sfx.mjs";
+import {versus,cutIn,victory,clearCine} from "./cinema-ui.mjs";
 
 const $=id=>document.getElementById(id), panel=$("panel");
 const names=["Cinta","Rafa","Jahfal","Nabila","Revalina","Tarina","Ardellio"];
@@ -20,6 +22,7 @@ function header(){
 function film(kind,side,done){
  if(!room || questions.length===1 || matchMedia("(prefers-reduced-motion: reduce)").matches){done();return;}
  phase="film";
+ const drawn=document.body.dataset.spell;
  document.body.classList.add("cinema");
  document.body.dataset.shot=kind;
  const fighter=side===0?player:rival;
@@ -27,7 +30,17 @@ function film(kind,side,done){
  $("beat").textContent=kind==="intro"?player+" vs "+rival:kind==="outro"?(side===2?"Seri":fighter+" menang"):side===3?"Keduanya bertahan":side===2?"Benturan ganda":fighter+" / "+(document.body.dataset.spell||["Luncur kilat","Tebasan bukti","Segel langit"][index]);
  delete document.body.dataset.spell;
  $("skip-film").focus({preventScroll:true});
+ clearCine();
+ const meta=i=>({name:i?rival:player,photo:photo(i?rival:player)});
+ if(kind==="intro"){versus(meta(0),meta(1));sfx.sting();}
+ else if(kind==="outro"){victory(fighter,photo(fighter),side===2);sfx.fanfare(side!==2);}
+ else if(side<3){
+   const owner=side===2?0:side;
+   const list=(side===2?[0,1]:[side]).map(i=>({...meta(i),side:i,color:i?"#65dfff":"#d6ff3f",spell:i===owner&&drawn?drawn:["Luncur Kilat","Tebasan Bukti","Segel Langit"][index]}));
+   setTimeout(()=>{if(phase==="film")cutIn(list)},120);
+ }
  room.cut(kind,side,index,()=>{
+   clearCine();
    document.body.classList.remove("cinema");delete document.body.dataset.shot;
    done();panel.focus({preventScroll:true});
  });
@@ -172,4 +185,5 @@ addEventListener("keydown",e=>{if(e.repeat||e.ctrlKey||e.altKey||e.metaKey)retur
  const key=e.key.toLowerCase();
  if(phase==="split"){const n="123jkl".indexOf(key);if(key.length===1&&n>=0){e.preventDefault();localAnswer(Math.floor(n/3),n%3)}}
  else if(/^[1-3]$/.test(key))answer(Number(key)-1)});
+sfx.bindToggle($("sound"));
 connectCamera({button:$("camera"),video:$("camera-feed"),cursor:$("hand-cursor"),status:$("camera-status"),canSelect:()=>true});
