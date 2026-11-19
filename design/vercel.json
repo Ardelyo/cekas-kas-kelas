@@ -4,6 +4,10 @@
   "headers": [
     { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }
   ],
+  "redirects": [
+    { "source": "/stan", "destination": "/stan/duel", "permanent": false },
+    { "source": "/arena", "destination": "/stan/duel", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/laporan", "destination": "https://cekas-pgku264xda-uc.a.run.app/laporan" },
     { "source": "/api/:path*", "destination": "https://cekas-pgku264xda-uc.a.run.app/api/:path*" },

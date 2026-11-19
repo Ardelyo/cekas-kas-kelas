@@ -94,7 +94,9 @@ export function connectCamera({button,video,cursor,status,canSelect}){
       console.warn("Gagal memulai kamera.",e);stopVision();
       message(e.name==="NotAllowedError"?"Izin kamera belum diberikan. Izinkan di browser atau lanjut pakai mouse."
         :e.name==="Insecure"?"Kamera hanya bisa dipakai dari localhost atau HTTPS."
-        :"Kamera belum bisa dipakai. Cek webcam dan jalankan setup-camera.py jika aset kamera belum terpasang.");
+        :e.name==="NotReadableError"?"Kamera sedang dipakai aplikasi atau tab lain. Tutup dulu, lalu coba lagi."
+        :e.name==="NotFoundError"||e.name==="OverconstrainedError"?"Kamera yang dipilih tidak ditemukan. Pilih kamera lain di Pengaturan."
+        :`Pelacak kamera gagal dimuat (${String(e.message||e.name).slice(0,80)}). Cek koneksi internet lalu coba lagi.`);
     }finally{button.disabled=false;paint();}
   });
   addEventListener("pagehide",stopVision);
