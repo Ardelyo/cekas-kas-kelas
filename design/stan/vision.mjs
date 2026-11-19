@@ -6,10 +6,25 @@ const listeners=new Set();
 export const onVision=f=>{listeners.add(f);return()=>listeners.delete(f);};
 
 let stream=null, handTask=null, poseTask=null, tasks=null, raf=0, lastVideoTime=-1, flip=0, frames=0, fpsAt=0;
-const asset=name=>new URL("./vendor/"+name,import.meta.url).href;
+// File lokal (folder vendor) dipakai bila ada; jika tidak (mis. di Vercel) dimuat dari CDN resmi dengan versi terkunci.
+const CDN="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21";
+const MODELS={
+  "hand_landmarker.task":"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+  "pose_landmarker_lite.task":"https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task"
+};
+let remote=false;
+const asset=name=>remote?(name==="wasm"?CDN+"/wasm":MODELS[name]):new URL("./vendor/"+name,import.meta.url).href;
 
 function loadTasks(){
-  tasks??=import("./vendor/vision_bundle.mjs").then(async m=>({m,runtime:await m.FilesetResolver.forVisionTasks(asset("wasm"))}));
+  tasks??=(async()=>{
+    let m;
+    try{
+      const head=await fetch(new URL("./vendor/hand_landmarker.task",import.meta.url),{method:"HEAD"});
+      if(!head.ok)throw new Error("tidak ada file lokal");
+      m=await import("./vendor/vision_bundle.mjs");
+    }catch{remote=true;m=await import(CDN+"/vision_bundle.mjs");}
+    return {m,runtime:await m.FilesetResolver.forVisionTasks(asset("wasm"))};
+  })().catch(e=>{tasks=null;throw e;});
   return tasks;
 }
 async function create(kind,options){
